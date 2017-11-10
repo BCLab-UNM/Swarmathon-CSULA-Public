@@ -95,7 +95,7 @@ ros::Timer publish_heartbeat_timer;
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void modeHandler(const std_msgs::UInt8::ConstPtr& message);
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv){
     
     gethostname(host, sizeof (host));
     string hostname(host);

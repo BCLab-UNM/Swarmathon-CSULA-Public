@@ -1,0 +1,10 @@
+<launch>
+  <!-- Launch the grid map simple demo node -->
+  <node pkg="grid_map_swarm" type="grid_swarm" name="grid_swarm" output="screen" />
+  <!-- Launch the grid map visualizer -->
+  <node pkg="grid_map_visualization" type="grid_map_visualization" name="grid_map_visualization" output="screen">
+    <rosparam command="load" file="$(find grid_map_demos)/config/grid_map_swarm.yaml" />
+  </node>
+  <!-- Launch RViz with the demo configuration -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find grid_map_swarm)/rviz/grid_map_demo.rviz" />
+</launch>
