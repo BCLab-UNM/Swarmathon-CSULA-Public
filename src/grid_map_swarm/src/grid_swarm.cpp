@@ -5,6 +5,11 @@
 #include <cmath>
 #include <std_msgs/String.h>
 
+//Publisher
+ros::Publisher gridswarmPublisher;
+
+//Subscriber
+
 
 //Global
 sensor_msgs::Range sonarLeft;
@@ -19,11 +24,9 @@ std::string publishedName;
 
 int main(int argc, char **argv){
 
-  gethostname(host, sizeof (host));
-  std::string hostname(host);
-  ros::init(argc, argv, (hostname + "_grid_map"));
-  ros::NodeHandle nh("~");
-  ros::Publisher publisher = nh.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
+  ros::init(argc, argv, ("gridmapswarm"));
+  ros::NodeHandle mNH("~");
+  gridswarmPublisher = mNH.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
 
 // Create grid map.
   GridMap map({"elevation"});
@@ -35,7 +38,7 @@ int main(int argc, char **argv){
    
     
   ros::Rate rate(30.0);
-  while (nh.ok()) {
+  while (mNH.ok()) {
 
     // Add data to grid map.
     ros::Time time = ros::Time::now();
@@ -49,7 +52,7 @@ int main(int argc, char **argv){
     map.setTimestamp(time.toNSec());
     grid_map_msgs::GridMap message;
     GridMapRosConverter::toMessage(map, message);
-    publisher.publish(message);
+    gridswarmPublisher.publish(message);
     ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
 
     // Wait for next cycle.

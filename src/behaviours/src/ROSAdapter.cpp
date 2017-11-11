@@ -22,6 +22,7 @@
 #include <apriltags_ros/AprilTagDetectionArray.h>
 #include <std_msgs/Float32MultiArray.h>
 #include "swarmie_msgs/Waypoint.h"
+#include <grid_map_msgs/GridMap.h>
 
 // Include Controllers
 #include "LogicController.h"
@@ -130,6 +131,7 @@ ros::Publisher infoLogPublisher;
 ros::Publisher driveControlPublish;
 ros::Publisher heartbeatPublisher;
 ros::Publisher waypointFeedbackPublisher;
+ros::Publisher gridswarmPublisher;
 
 // Subscribers
 ros::Subscriber joySubscriber;
@@ -139,6 +141,7 @@ ros::Subscriber odometrySubscriber;
 ros::Subscriber mapSubscriber;
 ros::Subscriber virtualFenceSubscriber;
 ros::Subscriber manualWaypointSubscriber;
+ros::Subscriber gridswarmSubscriber;
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -171,6 +174,7 @@ void behaviourStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
+void gridswarmHandler(const grid_map_msgs::GridMap grid); 
 
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
@@ -206,6 +210,7 @@ int main(int argc, char **argv) {
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
+//  gridswarmSubscriber = mNH.subscribe<grid_map_msgs::GridMap>((publishedName + "/grid_Swarm"), 0, gridswarmHandler);
   
   status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);
   stateMachinePublish = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);
@@ -215,6 +220,7 @@ int main(int argc, char **argv) {
   driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
+  gridswarmPublisher = mNH.advertise<grid_map_msgs::GridMap>((publishedName + "/gridSwarm"), 0, true);
 
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   stateMachineTimer = mNH.createTimer(ros::Duration(behaviourLoopTimeStep), behaviourStateMachine);
@@ -621,6 +627,11 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&) {
   msg.data = "";
   heartbeatPublisher.publish(msg);
 }
+
+//void gridswarmHandler(const grid_map_msgs::Grid) {
+// 
+// gridswarmPublisher.publish(event);
+//}
 
 long int getROSTimeInMilliSecs()
 {
