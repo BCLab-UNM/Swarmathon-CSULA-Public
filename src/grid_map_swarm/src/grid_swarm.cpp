@@ -25,8 +25,8 @@ std::string publishedName;
 int main(int argc, char **argv){
 
   ros::init(argc, argv, ("gridmapswarm"));
-  ros::NodeHandle mNH("~");
-  gridswarmPublisher = mNH.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
+  ros::NodeHandle gNH("~");
+  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
 
 // Create grid map.
   GridMap map({"elevation"});
@@ -38,7 +38,7 @@ int main(int argc, char **argv){
    
     
   ros::Rate rate(30.0);
-  while (mNH.ok()) {
+  while (gNH.ok()) {
 
     // Add data to grid map.
     ros::Time time = ros::Time::now();
