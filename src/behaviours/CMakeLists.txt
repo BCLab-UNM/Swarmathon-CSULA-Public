@@ -12,12 +12,10 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   apriltags_ros
   swarmie_msgs
-  grid_map_msgs
   )
 
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs swarmie_msgs roscpp sensor_msgs std_msgs random_numbers tf apriltags_ros grid_map_msgs
-)
+  CATKIN_DEPENDS geometry_msgs swarmie_msgs roscpp sensor_msgs std_msgs random_numbers tf apriltags_ros swarmie_msgs)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
