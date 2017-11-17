@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     
     if (argc >= 2) {
         publishedName = argv[1];
-        cout << "Welcome to the world of tomorrow " << publishedName << "!  ABridge module started." << endl;
+        cout << "Welcome to the world of tomorrow " << publishedName << "!  SBridge module started." << endl;
     } else {
         publishedName = hostname;
         cout << "No Name Selected. Default is: " << publishedName << endl;
