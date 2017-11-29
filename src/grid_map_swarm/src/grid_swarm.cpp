@@ -7,6 +7,7 @@
 
 //Publisher
 ros::Publisher gridswarmPublisher;
+ros::Publisher test;
 
 //Subscriber
 
@@ -26,37 +27,48 @@ int main(int argc, char **argv){
 
   ros::init(argc, argv, ("gridmapswarm"));
   ros::NodeHandle gNH("~");
-  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("grid_map", 1, true);
+  test = gNH.advertise<std_msgs::String>("gridtest", 1);
+//  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("grid_map", 1);
 
 // Create grid map.
-  GridMap map({"elevation"});
-  map.setFrameId("map");
-  map.setGeometry(Length(3.0, 3.0), 0.05);
-  ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
-    map.getLength().x(), map.getLength().y(),
-    map.getSize()(0), map.getSize()(1));  
+//GridMap map({"elevation"});
+//map.setFrameId("map");
+//map.setGeometry(Length(3.0, 3.0), 0.05);
+//ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
+//  map.getLength().x(), map.getLength().y(),
+//  map.getSize()(0), map.getSize()(1));  
    
     
-  ros::Rate rate(30.0);
-  while (gNH.ok()) {
+  ros::Rate loop_rate(30.0);
+  int count = 0;
+  while (ros::ok()) {
+	std_msgs::String msg;
+	std::string stream ss;
+	ss << "hello world" << count;
+	msg.data = ss.str();
 
-    // Add data to grid map.
-    ros::Time time = ros::Time::now();
-    for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
-      Position position;
-      map.getPosition(*it, position);
-      map.at("elevation", *it) = -0.04 + 0.2 * std::sin(3.0 * time.toSec() + 5.0 * position.y()) * position.x();
-    }
-
-    // Publish grid map.
-    map.setTimestamp(time.toNSec());
-    grid_map_msgs::GridMap message;
-    GridMapRosConverter::toMessage(map, message);
-    gridswarmPublisher.publish(message);
-    ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
+	ROS_INFO("%s", msg.data.c_str());
+	chatter_pub.publish(msg);
+	ros::spinOnce();
+	loop_rate.sleep();
+	++count;
+//  // Add data to grid map.
+//  ros::Time time = ros::Time::now();
+//  for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
+//    Position position;
+//    map.getPosition(*it, position);
+//    map.at("elevation", *it) = -0.04 + 0.2 * std::sin(3.0 * time.toSec() + 5.0 * position.y()) * position.x();
+//  }
+//
+//  // Publish grid map.
+//  map.setTimestamp(time.toNSec());
+//  grid_map_msgs::GridMap message;
+//  GridMapRosConverter::toMessage(map, message);
+//  gridswarmPublisher.publish(message);
+//  ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
 
     // Wait for next cycle.
-    rate.sleep();
+//  rate.sleep();
   }
 
 return 0;
