@@ -423,7 +423,11 @@ void sendDriveCommand(double left, double right)
 
 void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& message) {
   
-  if (message->detections.size() > 0) {
+// Replaced this if statement to make testing in simulation easier.
+// The home base april tags no longer interfere.
+//  if (message->detections.size() > 0) {
+
+    if (false) {
     vector<Tag> tags;
 
     for (int i = 0; i < message->detections.size(); i++) {

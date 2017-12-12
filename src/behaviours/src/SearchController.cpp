@@ -21,42 +21,43 @@ void SearchController::Reset() {
 }
 
 /**
- * This code implements a basic random walk search.
+ * This code implements a 5 meter square loop starting at the center location.
  */
 Result SearchController::DoWork() {
 
-double dist= 3;
+    double dist= 5;
 
-       result.type = waypoint;
-       Point searchLocation;
-       if (attemptCount==0)
-       {
-           searchLocation.theta = 0;
-           searchLocation.x = currentLocation.x + (dist);
-           searchLocation.y = currentLocation.y + (0);
-           attemptCount++;
-           std::cout<< "initial \n";
-       }
-       else if (attemptCount==1)
-       {
-           searchLocation.theta = M_PI/2;
-           searchLocation.x = currentLocation.x + (0);
-           searchLocation.y = currentLocation.y + (dist);
-           attemptCount++;
-       }
-       else if (attemptCount==2)
-       {
-           searchLocation.theta = M_PI;
-           searchLocation.x = currentLocation.x + (dist * -1);
-           searchLocation.y = currentLocation.y + (0);
-           attemptCount++;
-       }
-       else{
-           searchLocation.theta = 3/2 *M_PI;
-           searchLocation.x = currentLocation.x +(0);
-           searchLocation.y = currentLocation.y + (dist * -1);
-           attemptCount=0;
-       }
+           result.type = waypoint;
+           Point searchLocation;
+           if (attemptCount==0)
+           {
+               searchLocation.theta = 0;
+               searchLocation.x = centerLocation.x + (dist);
+               searchLocation.y = centerLocation.y + (0);
+               attemptCount++;
+               std::cout<< "initial \n";
+           }
+           else if (attemptCount==1)
+           {
+               searchLocation.theta = M_PI/2;
+               searchLocation.x = centerLocation.x + (dist);
+               searchLocation.y = centerLocation.y + (dist);
+               attemptCount++;
+           }
+           else if (attemptCount==2)
+           {
+               searchLocation.theta = M_PI;
+               searchLocation.x = centerLocation.x + (0);
+               searchLocation.y = centerLocation.y + (dist);
+               attemptCount++;
+           }
+           else{
+               searchLocation.theta = 3/2 *M_PI;
+               searchLocation.x = centerLocation.x +(0);
+               searchLocation.y = centerLocation.y + (0);
+               attemptCount=0;
+           }
+
 
 
 
