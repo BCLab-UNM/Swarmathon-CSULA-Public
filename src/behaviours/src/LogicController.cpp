@@ -1,7 +1,6 @@
 #include "LogicController.h"
 
 LogicController::LogicController() {
-
   logicState = LOGIC_STATE_INTERRUPT;
   processState = PROCCESS_STATE_SEARCHING;
 

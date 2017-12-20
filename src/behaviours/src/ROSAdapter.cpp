@@ -140,7 +140,7 @@ ros::Subscriber odometrySubscriber;
 ros::Subscriber mapSubscriber;
 ros::Subscriber virtualFenceSubscriber;
 ros::Subscriber manualWaypointSubscriber;
-ros::Subscriber gridswarmSubscriber;
+//ros::Subscriber gridswarmSubscriber;
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -173,13 +173,12 @@ void behaviourStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
-void gridswarmHandler(const grid_map_msgs::GridMap message); 
+//void gridswarmHandler(const grid_map_msgs::GridMap message); 
 
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
 
 int main(int argc, char **argv) {
-  
   gethostname(host, sizeof (host));
   string hostname(host);
   
@@ -209,7 +208,7 @@ int main(int argc, char **argv) {
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
-  gridswarmSubscriber = mNH.subscribe<grid_map_msgs::GridMap>((publishedName + "/grid_Swarm"), 0, gridswarmHandler);
+//  gridswarmSubscriber = mNH.subscribe<grid_map_msgs::GridMap>((publishedName + "/grid_Swarm"), 0, gridswarmHandler);
   
   status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);
   stateMachinePublish = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);
@@ -626,9 +625,9 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&) {
   heartbeatPublisher.publish(msg);
 }
 
-void gridswarmHandler(const grid_map_msgs::GridMap message) {
+//void gridswarmHandler(const grid_map_msgs::GridMap message) {
 	
-}
+//}
 
 long int getROSTimeInMilliSecs()
 {
