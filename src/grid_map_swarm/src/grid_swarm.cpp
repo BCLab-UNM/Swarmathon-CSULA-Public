@@ -4,6 +4,7 @@
 #include <sensor_msgs/Range.h>
 #include <cmath>
 #include <std_msgs/String.h>
+#include <sstream>
 
 //Publisher
 ros::Publisher gridswarmPublisher;
@@ -24,10 +25,22 @@ using namespace grid_map;
 std::string publishedName;
 
 int main(int argc, char **argv){
-
-  ros::init(argc, argv, ("gridmapswarm"));
+	cout << "GRIDMAP" << endl;
+  gethostname(host, sizeof (host));
+  string hostname(host);
+  
+  if (argc >= 2) {
+    publishedName = argv[1];
+    cout << "Welcome to the world of tomorrow " << publishedName
+         << "!  Behaviour turnDirectionule started." << endl;
+  } else {
+    publishedName = hostname;
+    cout << "No Name Selected. Default is: " << publishedName << endl;
+  }
+  
+  ros::init(argc, argv, (hostname + "_GRIDSWARM"));
   ros::NodeHandle gNH("~");
-  test = gNH.advertise<std_msgs::String>("gridtest", 1);
+  test = gNH.advertise<std_msgs::String>(hostname + "gridtest", 10);
 //  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("grid_map", 1);
 
 // Create grid map.
@@ -43,12 +56,12 @@ int main(int argc, char **argv){
   int count = 0;
   while (ros::ok()) {
 	std_msgs::String msg;
-	std::string stream ss;
+	std::stringstream ss;
 	ss << "hello world" << count;
 	msg.data = ss.str();
 
 	ROS_INFO("%s", msg.data.c_str());
-	chatter_pub.publish(msg);
+	test.publish(msg);
 	ros::spinOnce();
 	loop_rate.sleep();
 	++count;
@@ -72,4 +85,9 @@ int main(int argc, char **argv){
   }
 
 return 0;
+}
+
+int gridtester(){
+cout << "1" << endl;
+return 1;
 }

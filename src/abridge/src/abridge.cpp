@@ -16,6 +16,7 @@
 
 //Package include
 #include <usbSerial.h>
+//#include <gridmap.h>
 
 using namespace std;
 
@@ -37,6 +38,7 @@ sensor_msgs::Range sonarLeft;
 sensor_msgs::Range sonarCenter;
 sensor_msgs::Range sonarRight;
 USBSerial usb;
+//gridmap gmap;
 const int baud = 115200;
 char dataCmd[] = "d\n";
 char moveCmd[16];
@@ -105,7 +107,6 @@ int main(int argc, char **argv){
     string devicePath;
     param.param("device", devicePath, string("/dev/ttyUSB0"));
     usb.openUSBPort(devicePath, baud);
-
     
     sleep(5);
     
