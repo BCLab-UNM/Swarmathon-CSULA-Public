@@ -25,18 +25,8 @@ using namespace grid_map;
 std::string publishedName;
 
 int main(int argc, char **argv){
-	cout << "GRIDMAP" << endl;
   gethostname(host, sizeof (host));
   string hostname(host);
-  
-  if (argc >= 2) {
-    publishedName = argv[1];
-    cout << "Welcome to the world of tomorrow " << publishedName
-         << "!  Behaviour turnDirectionule started." << endl;
-  } else {
-    publishedName = hostname;
-    cout << "No Name Selected. Default is: " << publishedName << endl;
-  }
   
   ros::init(argc, argv, (hostname + "_GRIDSWARM"));
   ros::NodeHandle gNH("~");
@@ -59,7 +49,7 @@ int main(int argc, char **argv){
 	std::stringstream ss;
 	ss << "hello world" << count;
 	msg.data = ss.str();
-
+	
 	ROS_INFO("%s", msg.data.c_str());
 	test.publish(msg);
 	ros::spinOnce();
