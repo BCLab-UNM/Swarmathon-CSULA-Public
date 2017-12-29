@@ -6,32 +6,53 @@
 #include <std_msgs/String.h>
 #include <sstream>
 
+
+float heartbeat_publish_interval = 2;
+
 //Publisher
 ros::Publisher gridswarmPublisher;
 ros::Publisher test;
-
+ros::Publisher heartbeatPublisher;
 //Subscriber
 
+
+//Timer
+ros::Timer publish_heartbeat_timer;
 
 //Global
 sensor_msgs::Range sonarLeft;
 sensor_msgs::Range sonarCenter;
 sensor_msgs::Range sonarRight;
-
+std::string publishedName;
 char host[128];
 using namespace std;
 using namespace grid_map;
 
-std::string publishedName;
+void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 
 int main(int argc, char **argv){
   gethostname(host, sizeof (host));
   string hostname(host);
   
-  ros::init(argc, argv, (hostname + "_GRIDSWARM"));
+  if (argc >= 2) {
+    publishedName = argv[1];
+    cout << "Welcome to the world of tomorrow " << publishedName
+         << "!  GridMapSwarm turnDirectionule started." << endl;
+  } else {
+    publishedName = hostname;
+    cout << "No Name Selected. Default is: " << publishedName << endl;
+  }
+  
+  // NoSignalHandler so we can catch SIGINT ourselves and shutdown the node
+  ros::init(argc, argv, (hostname + "_GRIDSWARM"), ros::init_options::NoSigintHandler);
   ros::NodeHandle gNH("~");
-  test = gNH.advertise<std_msgs::String>(hostname + "gridtest", 10);
+
+  test = gNH.advertise<std_msgs::String>(publishedName + "/gridtest", 10);
+  heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
+  publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
 //  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("grid_map", 1);
+
+
 
 // Create grid map.
 //GridMap map({"elevation"});
@@ -55,7 +76,7 @@ int main(int argc, char **argv){
 	ros::spinOnce();
 	loop_rate.sleep();
 	++count;
-//  // Add data to grid map.
+//  Add data to grid map.
 //  ros::Time time = ros::Time::now();
 //  for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 //    Position position;
@@ -77,7 +98,8 @@ int main(int argc, char **argv){
 return 0;
 }
 
-int gridtester(){
-cout << "1" << endl;
-return 1;
+void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
+	std_msgs::String msg;
+	msg.data = "";
+	heartbeatPublisher.publish(msg);
 }
