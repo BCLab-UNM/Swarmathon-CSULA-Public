@@ -45,7 +45,7 @@ int main(int argc, char **argv){
   
   // NoSignalHandler so we can catch SIGINT ourselves and shutdown the node
   ros::init(argc, argv, (hostname + "_GRIDSWARM"), ros::init_options::NoSigintHandler);
-  ros::NodeHandle gNH("~");
+  ros::NodeHandle gNH;
 
   test = gNH.advertise<std_msgs::String>(publishedName + "/gridtest", 10);
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
