@@ -47,7 +47,7 @@ int main(int argc, char **argv){
   ros::init(argc, argv, (hostname + "_GRIDSWARM"), ros::init_options::NoSigintHandler);
   ros::NodeHandle gNH;
 
-  test = gNH.advertise<std_msgs::String>(publishedName + "/gridtest", 10);
+//  test = gNH.advertise<std_msgs::String>(publishedName + "/gridtest", 10);
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
@@ -67,7 +67,7 @@ int main(int argc, char **argv){
 //        rate.sleep();
 //        ++count;
 //  }
- // Create grid map.
+  // Create grid map.
   GridMap map({"elevation"});
   map.setFrameId("map");
   map.setGeometry(Length(3.0, 3.0), 0.05);
@@ -77,23 +77,24 @@ int main(int argc, char **argv){
    
     
   while (ros::ok()) {
- // Add data to grid map.
-    ros::Time time = ros::Time::now();
-    for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
-      Position position;
-      map.getPosition(*it, position);
-      map.at("elevation", *it) = -0.04 + 0.2 * std::sin(3.0 * time.toSec() + 5.0 * position.y()) * position.x();
-    }
-  
-    // Publish grid map.
-    map.setTimestamp(time.toNSec());
-    grid_map_msgs::GridMap message;
-    GridMapRosConverter::toMessage(map, message);
-    gridswarmPublisher.publish(message);
-    ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
-  
-    // Wait for next cycle.
-    rate.sleep();
+	// Add data to grid map.
+	ros::Time time = ros::Time::now();
+	for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
+		Position position;
+		map.getPosition(*it, position);
+		map.at("elevation", *it) = -0.04 + 0.2 * std::sin(3.0 * time.toSec() + 5.0 * position.y()) * position.x();
+	}
+	
+	// Publish grid map.
+	map.setTimestamp(time.toNSec());
+	grid_map_msgs::GridMap message;
+	GridMapRosConverter::toMessage(map, message);
+	gridswarmPublisher.publish(message);
+	ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
+	
+	// Wait for next cycle.
+	ros::spinOnce();
+	rate.sleep();
   }
 
 return 0;
