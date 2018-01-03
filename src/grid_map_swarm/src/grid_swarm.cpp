@@ -34,14 +34,14 @@ int main(int argc, char **argv){
   gethostname(host, sizeof (host));
   string hostname(host);
   
-  if (argc >= 2) {
-    publishedName = argv[1];
-    cout << "Welcome to the world of tomorrow " << publishedName
-         << "!  GridMapSwarm turnDirectionule started." << endl;
-  } else {
-    publishedName = hostname;
-    cout << "No Name Selected. Default is: " << publishedName << endl;
-  }
+ if (argc >= 2) {
+   publishedName = argv[1];
+   cout << "Welcome to the world of tomorrow " << publishedName
+        << "!  GridMapSwarm turnDirectionule started." << endl;
+ } else {
+   publishedName = hostname;
+   cout << "No Name Selected. Default is: " << publishedName << endl;
+ }
   
   // NoSignalHandler so we can catch SIGINT ourselves and shutdown the node
   ros::init(argc, argv, (hostname + "_GRIDSWARM"), ros::init_options::NoSigintHandler);
@@ -50,49 +50,50 @@ int main(int argc, char **argv){
   test = gNH.advertise<std_msgs::String>(publishedName + "/gridtest", 10);
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-//  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("grid_map", 1);
+  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
 
 
-
-// Create grid map.
-//GridMap map({"elevation"});
-//map.setFrameId("map");
-//map.setGeometry(Length(3.0, 3.0), 0.05);
-//ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
-//  map.getLength().x(), map.getLength().y(),
-//  map.getSize()(0), map.getSize()(1));  
+  ros::Rate rate(30.0);
+  int count = 0;
+//  while (ros::ok()) {
+//        std_msgs::String msg;
+//        std::stringstream ss;
+//        ss << "hello world" << count;
+//        msg.data = ss.str();
+//        
+//        ROS_INFO("%s", msg.data.c_str());
+//        test.publish(msg);
+//        ros::spinOnce();
+//        rate.sleep();
+//        ++count;
+//  }
+ // Create grid map.
+  GridMap map({"elevation"});
+  map.setFrameId("map");
+  map.setGeometry(Length(3.0, 3.0), 0.05);
+  ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
+    map.getLength().x(), map.getLength().y(),
+    map.getSize()(0), map.getSize()(1));  
    
     
-  ros::Rate loop_rate(30.0);
-  int count = 0;
   while (ros::ok()) {
-	std_msgs::String msg;
-	std::stringstream ss;
-	ss << "hello world" << count;
-	msg.data = ss.str();
-	
-	ROS_INFO("%s", msg.data.c_str());
-	test.publish(msg);
-	ros::spinOnce();
-	loop_rate.sleep();
-	++count;
-//  Add data to grid map.
-//  ros::Time time = ros::Time::now();
-//  for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
-//    Position position;
-//    map.getPosition(*it, position);
-//    map.at("elevation", *it) = -0.04 + 0.2 * std::sin(3.0 * time.toSec() + 5.0 * position.y()) * position.x();
-//  }
-//
-//  // Publish grid map.
-//  map.setTimestamp(time.toNSec());
-//  grid_map_msgs::GridMap message;
-//  GridMapRosConverter::toMessage(map, message);
-//  gridswarmPublisher.publish(message);
-//  ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
-
+ // Add data to grid map.
+    ros::Time time = ros::Time::now();
+    for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
+      Position position;
+      map.getPosition(*it, position);
+      map.at("elevation", *it) = -0.04 + 0.2 * std::sin(3.0 * time.toSec() + 5.0 * position.y()) * position.x();
+    }
+  
+    // Publish grid map.
+    map.setTimestamp(time.toNSec());
+    grid_map_msgs::GridMap message;
+    GridMapRosConverter::toMessage(map, message);
+    gridswarmPublisher.publish(message);
+    ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
+  
     // Wait for next cycle.
-//  rate.sleep();
+    rate.sleep();
   }
 
 return 0;
