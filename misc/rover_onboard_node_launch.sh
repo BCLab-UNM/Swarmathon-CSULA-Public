@@ -68,6 +68,8 @@ echo "rosrun obstacle_detection"
 nohup rosrun obstacle_detection obstacle &
 echo "rosrun diagnostics"
 nohup > logs/$HOSTNAME"_diagnostics_log.txt" rosrun diagnostics diagnostics &
+echo "rosrun grid"
+nohup > logs/$HOSTNAME"_grid_map_log.txt" rosrun grid_map_swarm grid_map_swarm  &
 
 rosparam set /$HOSTNAME\_TARGET/sensor_frame_id /$HOSTNAME/camera_link
 rosparam set /$HOSTNAME\_TARGET/tag_family 36h11
@@ -159,6 +161,7 @@ while true; do
 	rosnode kill $HOSTNAME\_DIAGNOSTICS
 	rosnode kill $HOSTNAME\_BASE2CAM
 	rosnode kill $HOSTNAME\_UBLOX
+	rosnode kill $HOSTNAME\_GRID
 
 	exit 1
     fi
