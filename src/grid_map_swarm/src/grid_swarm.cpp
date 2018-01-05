@@ -5,6 +5,9 @@
 #include <cmath>
 #include <std_msgs/String.h>
 #include <sstream>
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
 
 
 float heartbeat_publish_interval = 2;
@@ -14,15 +17,18 @@ ros::Publisher gridswarmPublisher;
 ros::Publisher test;
 ros::Publisher heartbeatPublisher;
 //Subscriber
+ros::Subscriber sonarLeftSubscriber;
+ros::Subscriber sonarCenterSubscriber;
+ros::Subscriber sonarRightSubscriber;
 
-
+void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
 //Timer
 ros::Timer publish_heartbeat_timer;
 
 //Global
-sensor_msgs::Range sonarLeft;
-sensor_msgs::Range sonarCenter;
-sensor_msgs::Range sonarRight;
+float sleft = 0;
+float scenter = 0;
+float sright = 0;
 std::string publishedName;
 char host[128];
 using namespace std;
@@ -52,6 +58,14 @@ int main(int argc, char **argv){
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
 
+  message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (publishedName + "/sonarLeft"), 10);
+  message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (publishedName + "/sonarCenter"), 10);
+  message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(gNH, (publishedName + "/sonarRight"), 10);
+
+  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, sensor_msgs::Range, sensor_msgs::Range> sonarSyncPolicy;
+  
+  message_filters::Synchronizer<sonarSyncPolicy> sonarSync(sonarSyncPolicy(10), sonarLeftSubscriber, sonarCenterSubscriber, sonarRightSubscriber);
+  sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
 
   ros::Rate rate(30.0);
   int count = 0;
@@ -82,7 +96,8 @@ int main(int argc, char **argv){
 	for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 		Position position;
 		map.getPosition(*it, position);
-		map.at("elevation", *it) = -0.04 + 0.2 * std::sin(3.0 * time.toSec() + 5.0 * position.y()) * position.x();
+		map.at("elevation", *it) = 0;
+
 	}
 	
 	// Publish grid map.
@@ -104,4 +119,12 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 	std_msgs::String msg;
 	msg.data = "";
 	heartbeatPublisher.publish(msg);
+}
+
+void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight) {
+  
+	sleft = sonarLeft->range;
+	scenter = sonarCenter->range;
+	sright = sonarRight->range;
+  
 }
