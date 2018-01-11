@@ -9,6 +9,7 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <Eigen/Dense>
+#include <nav_msgs/Odometry.h>
 
 float heartbeat_publish_interval = 2;
 
@@ -20,22 +21,26 @@ ros::Publisher heartbeatPublisher;
 ros::Subscriber sonarLeftSubscriber;
 ros::Subscriber sonarCenterSubscriber;
 ros::Subscriber sonarRightSubscriber;
+ros::Subscriber odometrySubscriber;
 
-void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
 //Timer
 ros::Timer publish_heartbeat_timer;
 
+std::string publishedName;
 //Global
+const double pi = std::acos(-1);
 float sleft = 0;
 float scenter = 0;
 float sright = 0;
-std::string publishedName;
 char host[128];
+float orntn = 0;
 using namespace std;
 using namespace grid_map;
 using namespace Eigen;
 
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
+void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
+void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
 
 int main(int argc, char **argv){
   gethostname(host, sizeof (host));
@@ -59,6 +64,7 @@ int main(int argc, char **argv){
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
 
+  odometrySubscriber = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(gNH, (publishedName + "/sonarRight"), 10);
@@ -85,7 +91,7 @@ int main(int argc, char **argv){
   // Create grid map.
   GridMap map({"elevation"});
   map.setFrameId("map");
-  map.setGeometry(Length(3.0, 0.5), 0.1);
+  map.setGeometry(Length(6.15, 6.15), 0.05);
   ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
@@ -98,11 +104,20 @@ int main(int argc, char **argv){
 		Position position;
 		map.getPosition(*it, position);
 		map.at("elevation", *it) = 0;
-		Vector2d l(scenter,0);
-		map.atPosition("elevation", l) = 0.5;
-		Vector2d c(sright,0.2);
+		//CENTER
+		float cy = sin(orntn) * scenter;
+		float cx = cos(orntn) * scenter;
+		Vector2d c(cx,cy);
 		map.atPosition("elevation", c) = 0.5;
-		Vector2d r(sleft,-0.2);
+		//LEFT
+		float ly = sin((pi/6)+orntn) * sleft;
+		float lx = cos((pi/6)+orntn) * sleft;
+		Vector2d l(lx,ly);
+		map.atPosition("elevation", l) = 0.5;
+		//RIGHT
+		float ry = sin(-1*(pi/6)+orntn) * sright;
+		float rx = cos(-1*(pi/6)+orntn) * sright;
+		Vector2d r(rx,ry);
 		map.atPosition("elevation", r) = 0.5;
 	}
 
@@ -129,11 +144,12 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight) {
   
-	sleft  = (float(int(10 * sonarLeft->range)))/10;
-	sleft -= 1.5;
-	scenter= (float(int(10 * sonarCenter->range)))/10;
-	scenter -= 1.5;
-	sright = (float(int(10 * sonarRight->range)))/10;
-	sright -= 1.5;
+	sleft  = ((float(int(10 * sonarLeft->range)))/10);
+	scenter= ((float(int(10 * sonarCenter->range)))/10);
+	sright = ((float(int(10 * sonarRight->range)))/10);
   
+}
+
+void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
+	orntn = message->pose.pose.orientation.z;
 }
