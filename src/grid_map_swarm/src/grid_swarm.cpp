@@ -29,13 +29,15 @@ ros::Timer publish_heartbeat_timer;
 
 std::string publishedName;
 //Global
-const double pi = std::acos(-1);
-float sleft = 0;
-float scenter = 0;
-float sright = 0;
-char host[128];
-float orntn = 0;
-bool firstgo = true;
+  const double pi = std::acos(-1);
+  float sleft = 0;
+  float scenter = 0;
+  float sright = 0;
+  float orntn = 0;
+  float xpos = 0;
+  float ypos = 0;
+  char host[128];
+  bool firstgo = true;
 //bool largeMapMade = false;
 using namespace std;
 using namespace grid_map;
@@ -95,7 +97,7 @@ int main(int argc, char **argv){
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
-  map.setGeometry(Length(6.15, 6.15), 0.05);
+  map.setGeometry(Length(16.5, 16.5), 0.25);
   ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
@@ -116,27 +118,32 @@ int main(int argc, char **argv){
 	for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 		Position position;
 		map.getPosition(*it, position);
-		if (map.at("elevation", *it) == -0.5 || firstgo == true){
+		if (map.at("elevation", *it) == -0.5 || map.at("elevation", *it) == 0  || firstgo == true){
 			map.at("elevation", *it) = -0.5;
 		}
+		//ROVER
+		float qx = xpos;
+		float qy = ypos;
+		Vector2d q(qx,qy);
+		map.atPosition("elevation", q) = 0;
 		//CENTER
 		if (scenter <= 2.7){
-			float cy = sin(orntn) * scenter;
-			float cx = cos(orntn) * scenter;
+			float cx = (cos(orntn) * scenter) + xpos;
+			float cy = (sin(orntn) * scenter) + ypos;
 			Vector2d c(cx,cy);
 			map.atPosition("elevation", c) = 0.5;
 		}
 		//LEFT
 		if (sleft <= 2.7){
-			float ly = sin((pi/6)+orntn) * sleft;
-			float lx = cos((pi/6)+orntn) * sleft;
+			float lx = (cos((pi/6)+orntn) * sleft) + xpos;
+			float ly = (sin((pi/6)+orntn) * sleft) + ypos;
 			Vector2d l(lx,ly);
 			map.atPosition("elevation", l) = 0.5;
 		}
 		//RIGHT
 		if (sright <= 2.7){
-			float ry = sin(-1*(pi/6)+orntn) * sright;
-			float rx = cos(-1*(pi/6)+orntn) * sright;
+			float rx = (cos(-1*(pi/6)+orntn) * sright) + xpos;
+			float ry = (sin(-1*(pi/6)+orntn) * sright) + ypos;
 			Vector2d r(rx,ry);
 			map.atPosition("elevation", r) = 0.5;
 		}
@@ -188,5 +195,7 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	orntn = message->pose.pose.orientation.z;
+	xpos = message->pose.pose.position.x;
+	ypos = message->pose.pose.position.y;
 	orntn = pi * orntn;
 }
