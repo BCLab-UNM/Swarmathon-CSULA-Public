@@ -1,6 +1,0 @@
--0.5: Cell not seen by camera or sonar
-0: Cell seen by camera. Area explored. 
-0.5: Cell seen by sonar. Obstacle Detected
-
-if LargeCELL = -0.5 then LargeCELL = RoverCELL
-other wise LargeCell stays the same.

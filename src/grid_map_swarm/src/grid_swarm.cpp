@@ -69,6 +69,7 @@ int main(int argc, char **argv){
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
 //  mainGridPublisher = gNH.advertise<grid_map_msgs::GridMap>("/MAIN_GRID", 1);
+
 //SUBSCRIBER
   odometrySubscriber = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (publishedName + "/sonarLeft"), 10);
@@ -82,22 +83,10 @@ int main(int argc, char **argv){
 
   ros::Rate rate(30.0);
   int count = 0;
-//  while (ros::ok()) {
-//        std_msgs::String msg;
-//        std::stringstream ss;
-//        ss << "hello world" << count;
-//        msg.data = ss.str();
-//        
-//        ROS_INFO("%s", msg.data.c_str());
-//        test.publish(msg);
-//        ros::spinOnce();
-//        rate.sleep();
-//        ++count;
-//  }
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
-  map.setGeometry(Length(16.5, 16.5), 0.25);
+  map.setGeometry(Length(16.5, 16.5), 0.10);
   ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
@@ -127,21 +116,21 @@ int main(int argc, char **argv){
 		Vector2d q(qx,qy);
 		map.atPosition("elevation", q) = 0;
 		//CENTER
-		if (scenter <= 2.7){
+		if (scenter <= 2.8){
 			float cx = (cos(orntn) * scenter) + xpos;
 			float cy = (sin(orntn) * scenter) + ypos;
 			Vector2d c(cx,cy);
 			map.atPosition("elevation", c) = 0.5;
 		}
 		//LEFT
-		if (sleft <= 2.7){
+		if (sleft <= 2.8){
 			float lx = (cos((pi/6)+orntn) * sleft) + xpos;
 			float ly = (sin((pi/6)+orntn) * sleft) + ypos;
 			Vector2d l(lx,ly);
 			map.atPosition("elevation", l) = 0.5;
 		}
 		//RIGHT
-		if (sright <= 2.7){
+		if (sright <= 2.8){
 			float rx = (cos(-1*(pi/6)+orntn) * sright) + xpos;
 			float ry = (sin(-1*(pi/6)+orntn) * sright) + ypos;
 			Vector2d r(rx,ry);
