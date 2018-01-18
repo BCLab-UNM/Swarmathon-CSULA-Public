@@ -25,6 +25,7 @@ void SearchController::Reset() {
  */
 Result SearchController::DoWork() {
 
+    double rotations = 0;
     double dist= 5;
 
            result.type = waypoint;
@@ -32,30 +33,35 @@ Result SearchController::DoWork() {
            if (attemptCount==0)
            {
                searchLocation.theta = 0;
-               searchLocation.x = centerLocation.x + (dist);
-               searchLocation.y = centerLocation.y + (0);
+               searchLocation.x = currentLocation.x + (dist);
+               searchLocation.y = currentLocation.y + (0);
                attemptCount++;
-               std::cout<< "initial \n";
+               std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations";
+
            }
            else if (attemptCount==1)
            {
                searchLocation.theta = M_PI/2;
-               searchLocation.x = centerLocation.x + (dist);
-               searchLocation.y = centerLocation.y + (dist);
+               searchLocation.x = currentLocation.x + (0);
+               searchLocation.y = currentLocation.y + (dist);
                attemptCount++;
+               std::cout<< "Traveling to 2nd waypoint";
            }
            else if (attemptCount==2)
            {
                searchLocation.theta = M_PI;
-               searchLocation.x = centerLocation.x + (0);
-               searchLocation.y = centerLocation.y + (dist);
+               searchLocation.x = currentLocation.x + (-dist);
+               searchLocation.y = currentLocation.y + (0);
                attemptCount++;
+               std::cout<< "Traveling to 3rd waypoint";
            }
            else{
                searchLocation.theta = 3/2 *M_PI;
-               searchLocation.x = centerLocation.x +(0);
-               searchLocation.y = centerLocation.y + (0);
+               searchLocation.x = currentLocation.x +(0);
+               searchLocation.y = currentLocation.y + (-dist);
                attemptCount=0;
+               std::cout<< "Traveling to 4th waypoint";
+               rotations++;
            }
 
 
