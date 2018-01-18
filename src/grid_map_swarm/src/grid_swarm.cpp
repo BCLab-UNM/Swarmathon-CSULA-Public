@@ -86,7 +86,7 @@ int main(int argc, char **argv){
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
-  map.setGeometry(Length(16.5, 16.5), 0.10);
+  map.setGeometry(Length(16.5, 16.5), 0.25);
   ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
