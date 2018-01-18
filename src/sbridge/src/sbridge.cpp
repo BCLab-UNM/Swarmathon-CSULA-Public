@@ -6,10 +6,13 @@ sbridge::sbridge(std::string publishedName) {
 
 
     driveControlSubscriber = sNH.subscribe((publishedName + "/driveControl"), 10, &sbridge::cmdHandler, this);
+//    driveControlSubscriber = sNH.subscribe("/roverName", 10, &sbridge::roverNameCheck, this);
 
     heartbeatPublisher = sNH.advertise<std_msgs::String>((publishedName + "/sbridge/heartbeat"), 1, false);
     skidsteerPublish = sNH.advertise<geometry_msgs::Twist>((publishedName + "/skidsteer"), 10);
     infoLogPublisher = sNH.advertise<std_msgs::String>("/infoLog", 1, true);
+
+//    publishNamePublisher = sNH.advertise<std_msgs::String>("/roverName",1);
 
     float heartbeat_publish_interval = 2;
     publish_heartbeat_timer = sNH.createTimer(ros::Duration(heartbeat_publish_interval), &sbridge::publishHeartBeatTimerEventHandler, this);
@@ -18,7 +21,21 @@ sbridge::sbridge(std::string publishedName) {
      ROS_INFO("constructor");
 
 }
-
+/*
+void sbridge::roverNameCheck(const std_msgs::String message) {
+	if (message == NULL || message.length() == 0){
+		//First Pass Publisher
+		//publish first hostname
+	}
+	else{
+		//Publish(message + "," + publishedName);
+	}
+	// Make sure this method only occurs once per rover
+	// By cancel subscriber or boolean skip.	
+	
+	
+}
+*/
 void sbridge::cmdHandler(const geometry_msgs::Twist::ConstPtr& message) {
     double left = (message->linear.x);
     double right = (message->angular.z);
