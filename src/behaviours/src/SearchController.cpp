@@ -73,6 +73,7 @@ Result SearchController::DoWork() {
 
        return result;
  
+
 }
 
 void SearchController::SetCenterLocation(Point centerLocation) {
