@@ -13,6 +13,10 @@
 
 float heartbeat_publish_interval = 2;
 
+/*----------------MAKE SURE TO TURN FALSE ON WHEN NOT USING SIMULATION----------------*/
+	bool SIMMODE = false;
+/*----------------MAKE SURE TO TURN FALSE ON WHEN NOT USING SIMULATION----------------*/
+
 //Publisher
 ros::Publisher gridswarmPublisher;
 //ros::Publisher mainGridPublisher;
@@ -91,62 +95,47 @@ int main(int argc, char **argv){
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
 
-  // Create the larger overall map
-//  if(largeMapMade == false){
-//        GridMap largeMap({"large"});
-//        largeMap.setFrameId("largeMap");
-//        largeMap.setGeometry(Length(6.15, 6.15), 0.05);
-//        ROS_INFO("Created Large Map with size %f x %f m (%i x %i cells).",
-//          largeMap.getLength().x(), largeMap.getLength().y(),
-//          largeMap.getSize()(0), largeMap.getSize()(1));  
-//  }    
-
   while (ros::ok()) {
 	// Add data to Rover Specific Grid Map.
 	ros::Time time = ros::Time::now();
 	for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 		Position position;
 		map.getPosition(*it, position);
-		if (map.at("elevation", *it) == -0.5 || map.at("elevation", *it) == 0  || firstgo == true){
+	//	if (map.at("elevation", *it) == -0.5 || map.at("elevation", *it) == 0  || firstgo == true){
 			map.at("elevation", *it) = -0.5;
-		}
+	//	}
+		//ORIGIN
+//	Vector2d o(0,0);
+//	map.atPosition("elevation", o) = 0;
 		//ROVER
 		float qx = xpos;
 		float qy = ypos;
 		Vector2d q(qx,qy);
 		map.atPosition("elevation", q) = 0;
 		//CENTER
-		if (scenter <= 2.8){
+	//	if (scenter <= 2.8){
 			float cx = (cos(orntn) * scenter) + xpos;
 			float cy = (sin(orntn) * scenter) + ypos;
 			Vector2d c(cx,cy);
 			map.atPosition("elevation", c) = 0.5;
-		}
+	//	}
 		//LEFT
-		if (sleft <= 2.8){
+	//	if (sleft <= 2.8){
 			float lx = (cos((pi/6)+orntn) * sleft) + xpos;
 			float ly = (sin((pi/6)+orntn) * sleft) + ypos;
 			Vector2d l(lx,ly);
 			map.atPosition("elevation", l) = 0.5;
-		}
+	//	}
 		//RIGHT
-		if (sright <= 2.8){
+	//	if (sright <= 2.8){
 			float rx = (cos(-1*(pi/6)+orntn) * sright) + xpos;
 			float ry = (sin(-1*(pi/6)+orntn) * sright) + ypos;
 			Vector2d r(rx,ry);
 			map.atPosition("elevation", r) = 0.5;
-		}
+	//	}
 
 	}
 	firstgo = false;
-//	if(largeMapMade == false){
-//		// Add data to Larger Area Grid Map.
-//		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
-//			Position position;
-//			largeMap.getPosition(*it, position);
-//			largeMap.at("large", *it) = -0.5;
-//		}
-//	}
 
 	// Publish grid map.
 	map.setTimestamp(time.toNSec());
@@ -154,10 +143,6 @@ int main(int argc, char **argv){
 	//PUBLISH Rover Specific Grid Map
 	GridMapRosConverter::toMessage(map, message);
 	gridswarmPublisher.publish(message);
-//	if(largeMapMade == false)}
-//		GridMapRosConverter::toMessage(largemap, message);
-//		mainGridPublisher.publish(message);
-//	}
 	ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
 	
 	// Wait for next cycle.
@@ -175,10 +160,16 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 }
 
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight) {
-  
-	sleft  = ((float(int(10 * sonarLeft->range)))/10);
+	float simoffsetLeft = 0;
+	float simoffsetRight = 0;
+	if(SIMMODE == true){
+		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
+		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
+	}
+	
+	sleft  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
 	scenter= ((float(int(10 * sonarCenter->range)))/10);
-	sright = ((float(int(10 * sonarRight->range)))/10);
+	sright = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
   
 }
 
