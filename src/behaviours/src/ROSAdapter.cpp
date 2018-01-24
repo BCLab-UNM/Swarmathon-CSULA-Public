@@ -24,6 +24,8 @@
 #include "swarmie_msgs/Waypoint.h"
 
 // Include Controllers
+
+
 #include "LogicController.h"
 #include <vector>
 
@@ -114,7 +116,7 @@ float drift_tolerance = 0.5; // meters
 Result result;
 
 std_msgs::String msg;
-
+std_msgs::String names;
 
 geometry_msgs::Twist velocity;
 char host[128];
@@ -127,6 +129,8 @@ ros::Publisher status_publisher;
 ros::Publisher fingerAnglePublish;
 ros::Publisher wristAnglePublish;
 ros::Publisher infoLogPublisher;
+ros::Publisher roverNamePublisher;
+ros::Publisher allRoversPublisher;
 ros::Publisher driveControlPublish;
 ros::Publisher heartbeatPublisher;
 // Publishes swarmie_msgs::Waypoint messages on "/<robot>/waypooints"
@@ -143,6 +147,7 @@ ros::Subscriber virtualFenceSubscriber;
 // manualWaypointSubscriber listens on "/<robot>/waypoints/cmd" for
 // swarmie_msgs::Waypoint messages.
 ros::Subscriber manualWaypointSubscriber;
+ros::Subscriber roverNameSubscriber;
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -175,6 +180,7 @@ void behaviourStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
+void nameHandler(const std_msgs::String& message);
 
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
@@ -210,12 +216,16 @@ int main(int argc, char **argv) {
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
+
+  roverNameSubscriber = mNH.subscribe(("/roverNames"), 1, nameHandler);
   
   status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);
   stateMachinePublish = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);
   fingerAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/fingerAngle/cmd"), 1, true);
   wristAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/wristAngle/cmd"), 1, true);
   infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
+  roverNamePublisher = mNH.advertise<std_msgs::String>("/roverNames", 1, true);
+  allRoversPublisher = mNH.advertise<std_msgs::String>("/allRovers", 1, true);
   driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
@@ -236,9 +246,14 @@ int main(int argc, char **argv) {
   infoLogPublisher.publish(msg);
   
   stringstream ss;
-  ss << "Rover start delay set to " << startDelayInSeconds << " seconds";
+  ss << publishedName << " Rover start delay set to " << startDelayInSeconds << " seconds";
   msg.data = ss.str();
   infoLogPublisher.publish(msg);
+
+
+  std_msgs::String nameMsg;
+  nameMsg.data=publishedName;
+  roverNamePublisher.publish(nameMsg);
 
   if(currentMode != 2 && currentMode != 3)
   {
@@ -738,3 +753,22 @@ void humanTime() {
   
   //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
 }
+
+void nameHandler(const std_msgs::String& message){
+
+  if(!message.data.empty()){
+    if(!(message.data.find(publishedName) != std::string::npos )){
+       std_msgs::String nameMsg;
+       stringstream ss;
+       ss << message.data << "," << publishedName;
+       nameMsg.data = ss.str();
+       roverNamePublisher.publish(nameMsg);
+    }else{
+    allRoversPublisher.publish(message);
+    //roverNamePublisher.shutdown();
+    }
+  }else{
+  }
+
+}
+
