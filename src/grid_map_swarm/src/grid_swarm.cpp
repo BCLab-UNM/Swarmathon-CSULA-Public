@@ -3,8 +3,8 @@
 #include <grid_map_msgs/GridMap.h>
 #include <sensor_msgs/Range.h>
 #include <cmath>
-#include <std_msgs/String.h>
 #include <sstream>
+#include <std_msgs/String.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -27,6 +27,7 @@ ros::Subscriber sonarLeftSubscriber;
 ros::Subscriber sonarCenterSubscriber;
 ros::Subscriber sonarRightSubscriber;
 ros::Subscriber odometrySubscriber;
+ros::Subscriber roverNameSubscriber;
 
 //Timer
 ros::Timer publish_heartbeat_timer;
@@ -50,6 +51,8 @@ using namespace Eigen;
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
+void roverNameHandler(const std_msgs::String& message);
+
 
 int main(int argc, char **argv){
   gethostname(host, sizeof (host));
@@ -75,15 +78,26 @@ int main(int argc, char **argv){
 //  mainGridPublisher = gNH.advertise<grid_map_msgs::GridMap>("/MAIN_GRID", 1);
 
 //SUBSCRIBER
+  roverNameSubscriber = gNH.subscribe(("/allRovers"), 10, roverNameHandler);
+
+
+
+
+//for loop here
   odometrySubscriber = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(gNH, (publishedName + "/sonarRight"), 10);
-
+//the published names above will be the name of the rovers
+  //it will grab the info fo eavch rover
   typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, sensor_msgs::Range, sensor_msgs::Range> sonarSyncPolicy;
   
   message_filters::Synchronizer<sonarSyncPolicy> sonarSync(sonarSyncPolicy(10), sonarLeftSubscriber, sonarCenterSubscriber, sonarRightSubscriber);
   sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
+
+
+
+//to here
 
   ros::Rate rate(30.0);
   int count = 0;
@@ -178,4 +192,27 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	xpos = message->pose.pose.position.x;
 	ypos = message->pose.pose.position.y;
 	orntn = pi * orntn;
+}
+
+void roverNameHandler(const std_msgs::String& message) 
+{
+	string returnedNames[8];
+	int counter = 0;
+	for (int i = 0; i<message.data.length(); i++)
+	{
+    	if (message.data[i] == ',')
+    	{
+        	counter++;
+    	}
+    	else
+    	{
+       		returnedNames[counter] += message.data[i];
+    	}
+	}
+
+
+	for(string names : returnedNames)
+	{
+	std::cout<< names << endl; 
+	}
 }
