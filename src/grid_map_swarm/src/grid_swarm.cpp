@@ -10,12 +10,19 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <Eigen/Dense>
 #include <nav_msgs/Odometry.h>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
 
 float heartbeat_publish_interval = 2;
+const float CELLDIVISION = 0.05;
+const float WALL = 1;
+const float FOG = -0.5;
+const float ROVER = 0.5;
+const float DISCOVER = 0.0;
 
-/*----------------MAKE SURE TO TURN FALSE ON WHEN NOT USING SIMULATION----------------*/
-	bool SIMMODE = false;
-/*----------------MAKE SURE TO TURN FALSE ON WHEN NOT USING SIMULATION----------------*/
+/*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
+/*->->->->->->->->->*/	bool SIMMODE = true;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
+/*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 
 //Publisher
 ros::Publisher gridswarmPublisher;
@@ -90,7 +97,7 @@ int main(int argc, char **argv){
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
-  map.setGeometry(Length(16.5, 16.5), 0.25);
+  map.setGeometry(Length(18, 18), CELLDIVISION);
   ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
@@ -101,9 +108,9 @@ int main(int argc, char **argv){
 	for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 		Position position;
 		map.getPosition(*it, position);
-	//	if (map.at("elevation", *it) == -0.5 || map.at("elevation", *it) == 0  || firstgo == true){
-			map.at("elevation", *it) = -0.5;
-	//	}
+		if (map.at("elevation", *it) == FOG/* || map.at("elevation", *it) == ROVER */ || firstgo == true){
+			map.at("elevation", *it) = FOG;
+		}
 		//ORIGIN
 //	Vector2d o(0,0);
 //	map.atPosition("elevation", o) = 0;
@@ -111,28 +118,40 @@ int main(int argc, char **argv){
 		float qx = xpos;
 		float qy = ypos;
 		Vector2d q(qx,qy);
-		map.atPosition("elevation", q) = 0;
+		map.atPosition("elevation", q) = ROVER;
+		//CAMERA 0.3m
+		for (float length = CELLDIVISION; length <= 0.3;){
+			for(float width = -0.15; width <= 0.15;){
+				float Cax = (cos(orntn) * length) + (xpos + (sin(orntn) * width));
+				float Cay = (sin(orntn) * length) + (ypos + (cos(orntn) * width));
+				Vector2d Ca(Cax,Cay);
+				map.atPosition("elevation", Ca) = DISCOVER;
+				width += CELLDIVISION;
+			}
+			length += CELLDIVISION;
+		}
 		//CENTER
-	//	if (scenter <= 2.8){
+		//THEORY: MAKE SURE PING HITS MULTIPLE TIMES IN A SECOND BEFORE SAVING.
+		if (scenter <= 2.8){
 			float cx = (cos(orntn) * scenter) + xpos;
 			float cy = (sin(orntn) * scenter) + ypos;
 			Vector2d c(cx,cy);
-			map.atPosition("elevation", c) = 0.5;
-	//	}
+			map.atPosition("elevation", c) = WALL;
+		}
 		//LEFT
-	//	if (sleft <= 2.8){
+		if (sleft <= 2.8){
 			float lx = (cos((pi/6)+orntn) * sleft) + xpos;
 			float ly = (sin((pi/6)+orntn) * sleft) + ypos;
 			Vector2d l(lx,ly);
-			map.atPosition("elevation", l) = 0.5;
-	//	}
+			map.atPosition("elevation", l) = WALL;
+		}
 		//RIGHT
-	//	if (sright <= 2.8){
+		if (sright <= 2.8){
 			float rx = (cos(-1*(pi/6)+orntn) * sright) + xpos;
 			float ry = (sin(-1*(pi/6)+orntn) * sright) + ypos;
 			Vector2d r(rx,ry);
-			map.atPosition("elevation", r) = 0.5;
-	//	}
+			map.atPosition("elevation", r) = WALL;
+		}
 
 	}
 	firstgo = false;
@@ -170,12 +189,14 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 	sleft  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
 	scenter= ((float(int(10 * sonarCenter->range)))/10);
 	sright = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
-  
 }
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
-	orntn = message->pose.pose.orientation.z;
+	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
+	tf::Matrix3x3 m(q);
+	double roll, pitch, yaw;
+	m.getRPY(roll, pitch, yaw);
+	orntn = yaw;
 	xpos = message->pose.pose.position.x;
 	ypos = message->pose.pose.position.y;
-	orntn = pi * orntn;
 }
