@@ -84,6 +84,9 @@ Point updateCenterLocation();
 void transformMapCentertoOdom();
 
 
+const int namesArrSize=6;
+string namesArr[namesArrSize];
+
 // Numeric Variables for rover positioning
 geometry_msgs::Pose2D currentLocation;
 geometry_msgs::Pose2D currentLocationMap;
@@ -760,19 +763,25 @@ void humanTime() {
 
 void nameHandler(const std_msgs::String& message){
 
-  if(!message.data.empty()){
-    if(!(message.data.find(publishedName) != std::string::npos )){
-       std_msgs::String nameMsg;
-       stringstream ss;
-       ss << message.data << "," << publishedName;
-       nameMsg.data = ss.str();
-       roverNamePublisher.publish(nameMsg);
-    }else{
-    allRoversPublisher.publish(message);
-    //roverNamePublisher.shutdown();
-    }
+  if(true){
+    for(int i=0;i<namesArrSize; i++){
+      if(namesArr[i].empty()){
+        namesArr[i] = message.data;
+        cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
+        i=7;
+      }
+      else if(namesArr[i].compare(message.data)==0){
+      i=7;
+      }
+      else{
+      
+      }
+    } 
+    //cout << "names array:" << namesArr[0] << endl;   
+    // allRoversPublisher.publish(message);
   }else{
   }
 
 }
+
 
