@@ -49,7 +49,6 @@ std::string publishedName;
   float ypos = 0;
   char host[128];
   bool firstgo = true;
-//bool largeMapMade = false;
 using namespace std;
 using namespace grid_map;
 using namespace Eigen;
@@ -97,7 +96,7 @@ int main(int argc, char **argv){
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
-  map.setGeometry(Length(18, 18), CELLDIVISION);
+  map.setGeometry(Length(15.5, 15.5), CELLDIVISION);
   ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
@@ -118,14 +117,18 @@ int main(int argc, char **argv){
 		float qx = xpos;
 		float qy = ypos;
 		Vector2d q(qx,qy);
-		map.atPosition("elevation", q) = ROVER;
+		if (map.isInside(q)){
+			map.atPosition("elevation", q) = ROVER;
+		}
 		//CAMERA 0.3m
 		for (float length = CELLDIVISION; length <= 0.3;){
 			for(float width = -0.15; width <= 0.15;){
 				float Cax = (cos(orntn) * length) + (xpos + (sin(orntn) * width));
 				float Cay = (sin(orntn) * length) + (ypos + (cos(orntn) * width));
-				Vector2d Ca(Cax,Cay);
-				map.atPosition("elevation", Ca) = DISCOVER;
+				Vector2d cam(Cax,Cay);
+				if (map.isInside(cam)){
+					map.atPosition("elevation", cam) = DISCOVER;
+				}
 				width += CELLDIVISION;
 			}
 			length += CELLDIVISION;
@@ -136,21 +139,27 @@ int main(int argc, char **argv){
 			float cx = (cos(orntn) * scenter) + xpos;
 			float cy = (sin(orntn) * scenter) + ypos;
 			Vector2d c(cx,cy);
-			map.atPosition("elevation", c) = WALL;
+			if (map.isInside(c)){
+				map.atPosition("elevation", c) = WALL;
+			}
 		}
 		//LEFT
 		if (sleft <= 2.8){
 			float lx = (cos((pi/6)+orntn) * sleft) + xpos;
 			float ly = (sin((pi/6)+orntn) * sleft) + ypos;
 			Vector2d l(lx,ly);
-			map.atPosition("elevation", l) = WALL;
+			if (map.isInside(l)){
+				map.atPosition("elevation", l) = WALL;
+			}
 		}
 		//RIGHT
 		if (sright <= 2.8){
 			float rx = (cos(-1*(pi/6)+orntn) * sright) + xpos;
 			float ry = (sin(-1*(pi/6)+orntn) * sright) + ypos;
 			Vector2d r(rx,ry);
-			map.atPosition("elevation", r) = WALL;
+			if (map.isInside(r)){
+				map.atPosition("elevation", r) = WALL;
+			}
 		}
 
 	}
