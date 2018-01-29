@@ -7,6 +7,7 @@ SearchController::SearchController() {
   currentLocation.y = 0;
   currentLocation.theta = 0;
 
+
   centerLocation.x = 0;
   centerLocation.y = 0;
   centerLocation.theta = 0;
@@ -25,42 +26,62 @@ void SearchController::Reset() {
  */
 Result SearchController::DoWork() {
 
-    double rotations = 0;
-    double dist= 5;
 
+ double rotations = 0;
            result.type = waypoint;
            Point searchLocation;
            if (attemptCount==0)
            {
                searchLocation.theta = 0;
-               searchLocation.x =(dist);
-               searchLocation.y =(0);
+               searchLocation.x =(x); // x = 0
+               searchLocation.y =(y); // y = 0
                attemptCount++;
-               std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations";
-
+               x=x+d;                 // d = 1
+               std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
            }
            else if (attemptCount==1)
            {
                searchLocation.theta = M_PI/2;
-               searchLocation.x = (dist);
-               searchLocation.y = (dist);
+               searchLocation.x = (x); // x = 1
+               searchLocation.y = (y); // y = 0
                attemptCount++;
+               y=y+d;
+               d=(-d)-1;               // d = -2
                std::cout<< "Traveling to 2nd waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+                std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
            }
            else if (attemptCount==2)
            {
                searchLocation.theta = M_PI;
-               searchLocation.x = (0);
-               searchLocation.y = (dist);
+               searchLocation.x = (x); // x = 1
+               searchLocation.y = (y); // y = 1
                attemptCount++;
+               x=x+d;
                std::cout<< "Traveling to 3rd waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+           }
+           else if (attemptCount==3){
+               searchLocation.theta = 3/2 *M_PI;
+               searchLocation.x = (x); // x = -1
+               searchLocation.y = (y); // y = 1
+               attemptCount++;
+               y=y+d;
+               d=(-d)+1;               // d = 3
+               std::cout<< "Traveling to 4th waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+
            }
            else{
-               searchLocation.theta = 3/2 *M_PI;
-               searchLocation.x = (0);
-               searchLocation.y = (0);
-               attemptCount=0;
-               std::cout<< "Traveling to 4th waypoint";
+               searchLocation.theta = 0;
+               searchLocation.x = (x); // x = -1
+               searchLocation.y = (y); // y = -1
+               attemptCount=1;
+               x=x+d;
+
+               std::cout<< "Traveling to 5th waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
                rotations++;
            }
 
