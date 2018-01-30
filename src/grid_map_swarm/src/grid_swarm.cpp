@@ -44,20 +44,15 @@ ros::Timer publish_heartbeat_timer;
 std::string publishedName;
 //Global
   const double pi = std::acos(-1);
-  int sizeOfNames = 0;
-  //string returnedNames[amount];
-
-
-	const int namesArrSize=6;
-	string namesArr[namesArrSize] = {"achilles","aeneas","ajax","test","test","test"};
-
-
-  float sleft = 0;
-  float scenter = 0;
-  float sright = 0;
-  float orntn = 0;
-  float xpos = 0;
-  float ypos = 0;
+  const int namesArrSize=6;
+  string namesArr[namesArrSize] = {"achilles","test","test","test","test","test"};
+  int arrCount = 0;
+  float sleft[namesArrSize];
+  float scenter[namesArrSize];
+  float sright[namesArrSize];
+  float orntn[namesArrSize];
+  float xpos[namesArrSize];
+  float ypos[namesArrSize];
   char host[128];
   bool firstgo = true;
 using namespace std;
@@ -96,16 +91,13 @@ int main(int argc, char **argv){
 //SUBSCRIBER
   roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
 
-
-
-
-
 //for loop here
   //for(int i = 0; i<message.data.length(); i++)
   for(int i = 0; i < namesArrSize; i++)
   {
 	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop";
 	if (namesArr[i] != "test"){
+		arrCount = i;
 		cout << " + Entered Subscriber loop";
 		odometrySubscriber = gNH.subscribe((namesArr[i] + "/odom/filtered"), 10, odometryHandler);
 		message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (namesArr[i] + "/sonarLeft"), 10);
@@ -135,66 +127,70 @@ int main(int argc, char **argv){
     map.getSize()(0), map.getSize()(1));  
 
   while (ros::ok()) {
+	cout << "Enter ROS OK"<<endl;
 	// Add data to Rover Specific Grid Map.
 	ros::Time time = ros::Time::now();
 	for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 		Position position;
 		map.getPosition(*it, position);
-		if (map.at("elevation", *it) == FOG/* || map.at("elevation", *it) == ROVER */ || firstgo == true){
+		if (map.at("elevation", *it) == FOG || map.at("elevation", *it) == ROVER || firstgo == true){
 			map.at("elevation", *it) = FOG;
 		}
 		//ORIGIN
 //	Vector2d o(0,0);
 //	map.atPosition("elevation", o) = 0;
-		//ROVER
-		float qx = xpos;
-		float qy = ypos;
-		Vector2d q(qx,qy);
-		if (map.isInside(q)){
-			map.atPosition("elevation", q) = ROVER;
-		}
-		//CAMERA 0.3m
-		for (float length = CELLDIVISION; length <= 0.3;){
-			for(float width = -0.15; width <= 0.15;){
-				float Cax = (cos(orntn) * length) + (xpos + (sin(orntn) * width));
-				float Cay = (sin(orntn) * length) + (ypos + (cos(orntn) * width));
-				Vector2d cam(Cax,Cay);
-				if (map.isInside(cam)){
-					map.atPosition("elevation", cam) = DISCOVER;
+		cout << "Entering Grid-Map Data";
+		for(count = arrCount; count >= 0; arrCount--){
+			cout << "!!Entered Grid-Map Data"<<endl;
+			//ROVER
+			float qx = xpos[count];
+			float qy = ypos[count];
+			Vector2d q(qx,qy);
+			if (map.isInside(q)){
+				map.atPosition("elevation", q) = ROVER;
+			}
+			//CAMERA 0.3m
+			for (float length = CELLDIVISION; length <= 0.3;){
+				for(float width = -0.15; width <= 0.15;){
+					float Cax = (cos(orntn[count]) * length) + (xpos[count] + (sin(orntn[count]) * width));
+					float Cay = (sin(orntn[count]) * length) + (ypos[count] + (cos(orntn[count]) * width));
+					Vector2d cam(Cax,Cay);
+					if (map.isInside(cam)){
+						map.atPosition("elevation", cam) = DISCOVER;
+					}
+					width += CELLDIVISION;
 				}
-				width += CELLDIVISION;
+				length += CELLDIVISION;
 			}
-			length += CELLDIVISION;
-		}
-		//CENTER
-		//THEORY: MAKE SURE PING HITS MULTIPLE TIMES IN A SECOND BEFORE SAVING.
-		if (scenter <= 2.8){
-			float cx = (cos(orntn) * scenter) + xpos;
-			float cy = (sin(orntn) * scenter) + ypos;
-			Vector2d c(cx,cy);
-			if (map.isInside(c)){
-				map.atPosition("elevation", c) = WALL;
+			//CENTER
+			//THEORY: MAKE SURE PING HITS MULTIPLE TIMES IN A SECOND BEFORE SAVING.
+			if (scenter[count] <= 2.8){
+				float cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
+				float cy = (sin(orntn[count]) * scenter[count]) + ypos[count];
+				Vector2d c(cx,cy);
+				if (map.isInside(c)){
+					map.atPosition("elevation", c) = WALL;
+				}
+			}
+			//LEFT
+			if (sleft[count] <= 2.8){
+				float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
+				float ly = (sin((pi/6)+orntn[count]) * sleft[count]) + ypos[count];
+				Vector2d l(lx,ly);
+				if (map.isInside(l)){
+					map.atPosition("elevation", l) = WALL;
+				}
+			}
+			//RIGHT
+			if (sright[count] <= 2.8){
+				float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
+				float ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + ypos[count];
+				Vector2d r(rx,ry);
+				if (map.isInside(r)){
+					map.atPosition("elevation", r) = WALL;
+				}
 			}
 		}
-		//LEFT
-		if (sleft <= 2.8){
-			float lx = (cos((pi/6)+orntn) * sleft) + xpos;
-			float ly = (sin((pi/6)+orntn) * sleft) + ypos;
-			Vector2d l(lx,ly);
-			if (map.isInside(l)){
-				map.atPosition("elevation", l) = WALL;
-			}
-		}
-		//RIGHT
-		if (sright <= 2.8){
-			float rx = (cos(-1*(pi/6)+orntn) * sright) + xpos;
-			float ry = (sin(-1*(pi/6)+orntn) * sright) + ypos;
-			Vector2d r(rx,ry);
-			if (map.isInside(r)){
-				map.atPosition("elevation", r) = WALL;
-			}
-		}
-
 	}
 	firstgo = false;
 
@@ -221,6 +217,7 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 }
 
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight) {
+	cout << "Enter Sonar Subscriver" << endl;
 	float simoffsetLeft = 0;
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
@@ -228,19 +225,20 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
 	
-	sleft  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
-	scenter= ((float(int(10 * sonarCenter->range)))/10);
-	sright = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+	sleft[arrCount]  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+	scenter[arrCount]= ((float(int(10 * sonarCenter->range)))/10);
+	sright[arrCount] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
 }
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
+	cout << "Enter odom Subscriver" << endl;
 	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
 	tf::Matrix3x3 m(q);
 	double roll, pitch, yaw;
 	m.getRPY(roll, pitch, yaw);
-	orntn = yaw;
-	xpos = message->pose.pose.position.x;
-	ypos = message->pose.pose.position.y;
+	orntn[arrCount] = yaw;
+	xpos[arrCount] = message->pose.pose.position.x;
+	ypos[arrCount] = message->pose.pose.position.y;
 }
 
 void roverNameHandler(const std_msgs::String& message){
