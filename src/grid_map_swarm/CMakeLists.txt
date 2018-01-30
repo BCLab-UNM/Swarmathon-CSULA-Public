@@ -19,10 +19,11 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   octomap_msgs
   filters
+  tf
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp grid_map_core grid_map_ros grid_map_cv grid_map_filters grid_map_loader grid_map_msgs grid_map_octomap grid_map_rviz_plugin grid_map_visualization geometry_msgs sensor_msgs cv_bridge octomap_msgs filters
+  CATKIN_DEPENDS roscpp grid_map_core grid_map_ros grid_map_cv grid_map_filters grid_map_loader grid_map_msgs grid_map_octomap grid_map_rviz_plugin grid_map_visualization geometry_msgs sensor_msgs cv_bridge octomap_msgs filters tf
 )
 
 include_directories(
