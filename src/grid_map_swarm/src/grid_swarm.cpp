@@ -42,7 +42,7 @@ std::string publishedName;
 
 
 	const int namesArrSize=6;
-	string namesArr[namesArrSize];
+	string namesArr[namesArrSize] = {"test","test","test","test","test","test"};
 
 
   float sleft = 0;
@@ -88,7 +88,7 @@ int main(int argc, char **argv){
 //  mainGridPublisher = gNH.advertise<grid_map_msgs::GridMap>("/MAIN_GRID", 1);
 
 //SUBSCRIBER
-  roverNameSubscriber = gNH.subscribe(("/allRovers"), 10, roverNameHandler);
+  roverNameSubscriber = gNH.subscribe(("/roverNames"), 10, roverNameHandler);
 
 
 
@@ -98,13 +98,15 @@ int main(int argc, char **argv){
   //for(int i = 0; i<message.data.length(); i++)
   for(int i = 0; i < namesArrSize; i++)
   {
-  	odometrySubscriber = gNH.subscribe((namesArr[i] + "/odom/filtered"), 10, odometryHandler);
-  	message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (namesArr[i] + "/sonarLeft"), 10);
-  	message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (namesArr[i] + "/sonarCenter"), 10);
-  	message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(gNH, (namesArr[i] + "/sonarRight"), 10);
-  	typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, sensor_msgs::Range, sensor_msgs::Range> sonarSyncPolicy;
-  	message_filters::Synchronizer<sonarSyncPolicy> sonarSync(sonarSyncPolicy(10), sonarLeftSubscriber, sonarCenterSubscriber, sonarRightSubscriber);
-  	sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
+	if (namesArr[i] != "test"){
+		odometrySubscriber = gNH.subscribe((namesArr[i] + "/odom/filtered"), 10, odometryHandler);
+		message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (namesArr[i] + "/sonarLeft"), 10);
+		message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (namesArr[i] + "/sonarCenter"), 10);
+		message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(gNH, (namesArr[i] + "/sonarRight"), 10);
+		typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, sensor_msgs::Range, sensor_msgs::Range> sonarSyncPolicy;
+		message_filters::Synchronizer<sonarSyncPolicy> sonarSync(sonarSyncPolicy(10), sonarLeftSubscriber, sonarCenterSubscriber, sonarRightSubscriber);
+		sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
+	}
   }
 //the published names above will be the name of the rovers
 //it will grab the info fo eavch rover  	
@@ -210,62 +212,20 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 
 void roverNameHandler(const std_msgs::String& message) 
 {
-	
-	/*int amount = 1;
-	for (int i = 0; i<message.data.length(); i++)
-	{
-    	if (message.data[i] == ',')
-    	{
-        	amount++;
-    	}
-    	else
-    	{
-       	}
-	}
-	string returnedNames[amount];
-	int counter = 0;
-	for (int i = 0; i<message.data.length(); i++)
-	{
-    	if (message.data[i] == ',')
-    	{
-        	counter++;
-    	}
-    	else
-    	{
-       		returnedNames[counter] += message.data[i];
-    	}
-	}
-	sizeOfNames = amount;
-	int arrayCheck = 0;
-	for(string names : returnedNames)
-	{
-	arrayCheck++;
-	std::string s = std::to_string(arrayCheck);
-	std::cout<< names + s << endl; 
-	}*/
-
-  if(true)
-  {
-    for(int i=0;i<namesArrSize; i++)
-    {
-      if(namesArr[i].empty())
-      {
-        namesArr[i] = message.data;
-        cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
-        i=7;
-      }
-      else if(namesArr[i].compare(message.data)==0)
-      {
-      	i=7;
-      }
-      else
-      {
-      }
-    } 
-    //cout << "names array:" << namesArr[0] << endl;   
-    // allRoversPublisher.publish(message);
-  }
-  else
-  {
-  }
+ if(true){
+	for(int i=0;i<namesArrSize; i++){
+		if(namesArr[i].empty()){
+			namesArr[i] = message.data;
+			cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
+			i=7;
+		}
+		else if(namesArr[i].compare(message.data)==0){
+			i=7;
+		}
+		else{}
+	} 
+	//cout << "names array:" << namesArr[0] << endl;   
+	// allRoversPublisher.publish(message);
+ }
+ else{}
 }
