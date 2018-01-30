@@ -7,6 +7,7 @@ SearchController::SearchController() {
   currentLocation.y = 0;
   currentLocation.theta = 0;
 
+
   centerLocation.x = 0;
   centerLocation.y = 0;
   centerLocation.theta = 0;
@@ -20,11 +21,7 @@ void SearchController::Reset() {
   result.reset = false;
 }
 
-/**
- * This code implements a basic random walk search.
- */
 Result SearchController::DoWork() {
-
   if (!result.wpts.waypoints.empty()) {
     if (hypot(result.wpts.waypoints[0].x-currentLocation.x, result.wpts.waypoints[0].y-currentLocation.y) < 0.15) {
       attemptCount = 0;
@@ -56,12 +53,25 @@ Result SearchController::DoWork() {
       searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
     }
     else
-    {
-      //select new heading from Gaussian distribution around current heading
-      searchLocation.theta = rng->gaussian(currentLocation.theta, 0.785398); //45 degrees in radians
-      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
+  {
+    // Search Here
+    if(spiralTurnsCompleted == spiralTurnsGoal){
+      spiralTurnsCompleted = 0;
+      centralSpiralLocation = rs.getRandomPointInZone(zone);
+      s.reset(centralSpiralLocation, North , false , 0.5f);
+      zone++;
+
+      searchLocation = centralSpiralLocation;
+
+      result.wpts.waypoints.clear();
+      result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
+      return result;
+
     }
+
+    searchLocation = s.getNextPoition();
+    spiralTurnsCompleted++;
+  }
 
     result.wpts.waypoints.clear();
     result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
@@ -70,6 +80,9 @@ Result SearchController::DoWork() {
   }
 
 }
+///
+
+
 
 void SearchController::SetCenterLocation(Point centerLocation) {
   

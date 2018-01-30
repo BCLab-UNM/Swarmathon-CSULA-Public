@@ -4,6 +4,9 @@
 #include <random_numbers/random_numbers.h>
 #include "Controller.h"
 
+#include "Spiral.cpp"
+#include "RandomSelector.cpp"
+
 /**
  * This class implements the search control algorithm for the rovers. The code
  * here should be modified and enhanced to improve search performance.
@@ -45,6 +48,18 @@ private:
   // Flag to allow special behaviour for the first waypoint
   bool first_waypoint = true;
   bool succesfullPickup = false;
+
+
+  // JS was Here
+  int zone = 0;
+  int spiralTurnsCompleted = 10; // Yes ten is set on purpose
+  int spiralTurnsGoal = 10;
+
+  Point centralSpiralLocation;
+
+  RandomSelector rs;
+  Spiral s;
+
 };
 
 #endif /* SEARCH_CONTROLLER */
