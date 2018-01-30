@@ -134,7 +134,6 @@ ros::Publisher fingerAnglePublish;
 ros::Publisher wristAnglePublish;
 ros::Publisher infoLogPublisher;
 ros::Publisher roverNamePublisher;
-ros::Publisher allRoversPublisher;
 ros::Publisher driveControlPublish;
 ros::Publisher heartbeatPublisher;
 // Publishes swarmie_msgs::Waypoint messages on "/<robot>/waypooints"
@@ -228,7 +227,6 @@ int main(int argc, char **argv) {
   wristAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/wristAngle/cmd"), 1, true);
   infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
   roverNamePublisher = mNH.advertise<std_msgs::String>("/roverNames", 1, true);
-  allRoversPublisher = mNH.advertise<std_msgs::String>("/allRovers", 1, true);
   driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
@@ -778,7 +776,6 @@ void nameHandler(const std_msgs::String& message){
       }
     } 
     //cout << "names array:" << namesArr[0] << endl;   
-    // allRoversPublisher.publish(message);
   }else{
   }
 

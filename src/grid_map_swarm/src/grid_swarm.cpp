@@ -42,7 +42,7 @@ std::string publishedName;
 
 
 	const int namesArrSize=6;
-	string namesArr[namesArrSize] = {"test","test","test","test","test","test"};
+	string namesArr[namesArrSize] = {"achilles","aeneas","ajax","test","test","test"};
 
 
   float sleft = 0;
@@ -88,7 +88,7 @@ int main(int argc, char **argv){
 //  mainGridPublisher = gNH.advertise<grid_map_msgs::GridMap>("/MAIN_GRID", 1);
 
 //SUBSCRIBER
-  roverNameSubscriber = gNH.subscribe(("/roverNames"), 10, roverNameHandler);
+  roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
 
 
 
@@ -98,7 +98,9 @@ int main(int argc, char **argv){
   //for(int i = 0; i<message.data.length(); i++)
   for(int i = 0; i < namesArrSize; i++)
   {
+	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop";
 	if (namesArr[i] != "test"){
+		cout << " + Entered Subscriber loop";
 		odometrySubscriber = gNH.subscribe((namesArr[i] + "/odom/filtered"), 10, odometryHandler);
 		message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (namesArr[i] + "/sonarLeft"), 10);
 		message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (namesArr[i] + "/sonarCenter"), 10);
@@ -107,6 +109,7 @@ int main(int argc, char **argv){
 		message_filters::Synchronizer<sonarSyncPolicy> sonarSync(sonarSyncPolicy(10), sonarLeftSubscriber, sonarCenterSubscriber, sonarRightSubscriber);
 		sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
 	}
+	cout << endl;
   }
 //the published names above will be the name of the rovers
 //it will grab the info fo eavch rover  	
@@ -200,7 +203,6 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 	sleft  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
 	scenter= ((float(int(10 * sonarCenter->range)))/10);
 	sright = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
-  
 }
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
@@ -210,22 +212,18 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	orntn = pi * orntn;
 }
 
-void roverNameHandler(const std_msgs::String& message) 
-{
- if(true){
+void roverNameHandler(const std_msgs::String& message){
 	for(int i=0;i<namesArrSize; i++){
-		if(namesArr[i].empty()){
+		if(namesArr[i].compare("test") == 0){
 			namesArr[i] = message.data;
-			cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
 			i=7;
 		}
 		else if(namesArr[i].compare(message.data)==0){
 			i=7;
 		}
-		else{}
-	} 
-	//cout << "names array:" << namesArr[0] << endl;   
-	// allRoversPublisher.publish(message);
- }
- else{}
+	}
+	for(int i=0; i<namesArrSize; i++){ 
+		cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
+		// allRoversPublisher.publish(message);
+	}
 }
