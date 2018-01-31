@@ -10,6 +10,7 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <Eigen/Dense>
 #include <nav_msgs/Odometry.h>
+#include <memory>
 
 using namespace std;
 
@@ -43,7 +44,8 @@ std::string publishedName;
 
 	const int namesArrSize=6;
 	string namesArr[namesArrSize];
-
+//string namesArr[arraySize];
+//auto namesArr = std::make_unique<int[]>(namesArrSize);
 
   float sleft = 0;
   float scenter = 0;
@@ -57,6 +59,7 @@ std::string publishedName;
 using namespace std;
 using namespace grid_map;
 using namespace Eigen;
+//using std::string;
 
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
@@ -243,6 +246,22 @@ void roverNameHandler(const std_msgs::String& message)
 	std::string s = std::to_string(arrayCheck);
 	std::cout<< names + s << endl; 
 	}*/
+//int amount = 1;
+//int arraySize = sizeof(message.data)/sizeof(message.data[0]);
+//	namesArrSize = arraySize;
+
+	//for (int i = 0; i<arraySize; i++)
+	//{
+    // 	if (message.data[i] == '')
+    //	{
+    //    	amount++;
+    //	}
+    //	else
+    //	{
+    //   	}
+	//}
+
+
 
   if(true)
   {
@@ -251,7 +270,8 @@ void roverNameHandler(const std_msgs::String& message)
       if(namesArr[i].empty())
       {
         namesArr[i] = message.data;
-        cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
+        //cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
+        cout << "test 1 " << namesArr[i]<< endl; 
         i=7;
       }
       else if(namesArr[i].compare(message.data)==0)
