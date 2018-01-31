@@ -12,6 +12,7 @@
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -44,8 +45,8 @@ ros::Timer publish_heartbeat_timer;
 std::string publishedName;
 //Global
   const double pi = std::acos(-1);
-  const int namesArrSize=6;
-  string namesArr[namesArrSize] = {"achilles","test","test","test","test","test"};
+  const int namesArrSize=1;
+  string namesArr[namesArrSize] = {"test"};//,"test","test","test","test","test"};
   int arrCount = 0;
   float sleft[namesArrSize];
   float scenter[namesArrSize];
@@ -61,7 +62,9 @@ using namespace Eigen;
 
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
-void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
+void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
+void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
+void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight);
 void roverNameHandler(const std_msgs::String& message);
 
 
@@ -82,7 +85,6 @@ int main(int argc, char **argv){
   ros::init(argc, argv, (hostname + "_GRIDSWARM"), ros::init_options::NoSigintHandler);
   ros::NodeHandle gNH;
 //PUBLISH
-//  test = gNH.advertise<std_msgs::String>(publishedName + "/gridtest", 10);
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
@@ -90,29 +92,27 @@ int main(int argc, char **argv){
 
 //SUBSCRIBER
   roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
+  sleep(10);
 
-//for loop here
-  //for(int i = 0; i<message.data.length(); i++)
-  for(int i = 0; i < namesArrSize; i++)
-  {
+  for(int i = 0; i < namesArrSize; i++){
 	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop";
 	if (namesArr[i] != "test"){
 		arrCount = i;
-		cout << " + Entered Subscriber loop";
-		odometrySubscriber = gNH.subscribe((namesArr[i] + "/odom/filtered"), 10, odometryHandler);
-		message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (namesArr[i] + "/sonarLeft"), 10);
-		message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (namesArr[i] + "/sonarCenter"), 10);
-		message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(gNH, (namesArr[i] + "/sonarRight"), 10);
-		typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, sensor_msgs::Range, sensor_msgs::Range> sonarSyncPolicy;
-		message_filters::Synchronizer<sonarSyncPolicy> sonarSync(sonarSyncPolicy(10), sonarLeftSubscriber, sonarCenterSubscriber, sonarRightSubscriber);
-		sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
-	}
-	cout << endl;
-  }
-//the published names above will be the name of the rovers
-//it will grab the info fo eavch rover  	
-//to here
-
+		publishedName = namesArr[i];
+		cout << " + Entered Subscriber loop"<< endl;
+		odometrySubscriber = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
+		sonarLeftSubscriber = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft);
+		sonarCenterSubscriber = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter);
+		sonarRightSubscriber = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight);
+	//	message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (publishedName + "/sonarLeft"), 10);
+	//	message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (publishedName + "/sonarCenter"), 10);
+	//	message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(gNH, (publishedName + "/sonarRight"), 10);
+	//	typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, sensor_msgs::Range, sensor_msgs::Range> sonarSyncPolicy;
+	//	message_filters::Synchronizer<sonarSyncPolicy> sonarSync(sonarSyncPolicy(10), sonarLeftSubscriber, sonarCenterSubscriber, sonarRightSubscriber);
+	//	sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
+	}//END OF IF STATEMENT
+  }//END OF FOR LOOP
+  cout << " + Exit Subscriber loop"<< endl;
 
 
 
@@ -139,9 +139,9 @@ int main(int argc, char **argv){
 		//ORIGIN
 //	Vector2d o(0,0);
 //	map.atPosition("elevation", o) = 0;
-		cout << "Entering Grid-Map Data";
-		for(count = arrCount; count >= 0; arrCount--){
-			cout << "!!Entered Grid-Map Data"<<endl;
+//		cout << "Entering Grid-Map Data";
+		for(count = arrCount; count >= 0; count--){
+//			cout << "!!Entered Grid-Map Data: "<< count<< endl;
 			//ROVER
 			float qx = xpos[count];
 			float qy = ypos[count];
@@ -191,7 +191,7 @@ int main(int argc, char **argv){
 				}
 			}
 		}
-	}
+	}//END OF ITERATOR
 	firstgo = false;
 
 	// Publish grid map.
@@ -205,7 +205,7 @@ int main(int argc, char **argv){
 	// Wait for next cycle.
 	ros::spinOnce();
 	rate.sleep();
-  }
+  }//END OF ROS OK
 
 return 0;
 }
@@ -216,20 +216,28 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 	heartbeatPublisher.publish(msg);
 }
 
-void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight) {
-	cout << "Enter Sonar Subscriver" << endl;
+void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft) {
+	cout << "Enter Sonar Subscriver Left" << endl;
 	float simoffsetLeft = 0;
-	float simoffsetRight = 0;
 	if(SIMMODE == true){
 		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
-		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
-	
 	sleft[arrCount]  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
-	scenter[arrCount]= ((float(int(10 * sonarCenter->range)))/10);
-	sright[arrCount] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
 }
 
+void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter) {
+	cout << "Enter Sonar Subscriver Center" << endl;
+	scenter[arrCount]= ((float(int(10 * sonarCenter->range)))/10);
+}
+
+void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
+	cout << "Enter Sonar Subscriver Right" << endl;
+	float simoffsetRight = 0;
+	if(SIMMODE == true){
+		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
+	}
+	sright[arrCount] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+}
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	cout << "Enter odom Subscriver" << endl;
 	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
