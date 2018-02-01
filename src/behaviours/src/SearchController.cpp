@@ -15,6 +15,8 @@ SearchController::SearchController() {
 
   result.fingerAngle = M_PI/2;
   result.wristAngle = M_PI/4;
+
+  
 }
 
 void SearchController::Reset() {
@@ -69,7 +71,9 @@ Result SearchController::DoWork() {
 
     }
 
+
     searchLocation = s.getNextPoition();
+    std::cout<<  "X: " << searchLocation.x << "  Y: " << searchLocation.y << "\n";
     spiralTurnsCompleted++;
   }
 
@@ -80,7 +84,6 @@ Result SearchController::DoWork() {
   }
 
 }
-///
 
 
 
