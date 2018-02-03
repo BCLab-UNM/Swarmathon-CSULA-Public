@@ -45,9 +45,10 @@ ros::Timer publish_heartbeat_timer;
 std::string publishedName;
 //Global
   const double pi = std::acos(-1);
-  const int namesArrSize=1;
-  string namesArr[namesArrSize] = {"test"};//,"test","test","test","test","test"};
+  const int namesArrSize=6;
+  string namesArr[namesArrSize] = {"achilles","aeneas","test","test","test","test"};//"ajax""aeneas"
   int arrCount = 0;
+  int handleCounter = 0;
   float sleft[namesArrSize];
   float scenter[namesArrSize];
   float sright[namesArrSize];
@@ -56,6 +57,7 @@ std::string publishedName;
   float ypos[namesArrSize];
   char host[128];
   bool firstgo = true;
+  bool sHLLock, sHCLock, sHRLock, oHLock = true;
 using namespace std;
 using namespace grid_map;
 using namespace Eigen;
@@ -87,19 +89,26 @@ int main(int argc, char **argv){
 //PUBLISH
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
-//  mainGridPublisher = gNH.advertise<grid_map_msgs::GridMap>("/MAIN_GRID", 1);
+//  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
 
 //SUBSCRIBER
-  roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
-  sleep(10);
+//  roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
+
+  if (publishedName != namesArr[0]){
+	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
+	return 0;
+  }
+
+  cout << publishedName << " Was Listed first listed. Starting Grid-Map" <<endl;
+  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("/grid_map", 1);
 
   for(int i = 0; i < namesArrSize; i++){
-	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop";
+	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop"<<endl;
 	if (namesArr[i] != "test"){
 		arrCount = i;
+		handleCounter = i;
 		publishedName = namesArr[i];
-		cout << " + Entered Subscriber loop"<< endl;
+		cout << "Entered Subscriber loop: "<< publishedName <<"["<<arrCount<<"]"<< " + HC:"<< handleCounter << endl;
 		odometrySubscriber = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
 		sonarLeftSubscriber = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft);
 		sonarCenterSubscriber = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter);
@@ -112,12 +121,11 @@ int main(int argc, char **argv){
 	//	sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
 	}//END OF IF STATEMENT
   }//END OF FOR LOOP
-  cout << " + Exit Subscriber loop"<< endl;
+  cout << " + Exit Subscriber loop -"<< "- arrCount:"<<arrCount<< " + HC:"<< handleCounter << endl;
+  
 
 
-
-  ros::Rate rate(30.0);
-  int count = 0;
+  ros::Rate rate(40.0);
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
@@ -140,7 +148,7 @@ int main(int argc, char **argv){
 //	Vector2d o(0,0);
 //	map.atPosition("elevation", o) = 0;
 //		cout << "Entering Grid-Map Data";
-		for(count = arrCount; count >= 0; count--){
+		for(int count = arrCount; count >= 0; count--){
 //			cout << "!!Entered Grid-Map Data: "<< count<< endl;
 			//ROVER
 			float qx = xpos[count];
@@ -217,36 +225,75 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 }
 
 void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft) {
-	cout << "Enter Sonar Subscriver Left" << endl;
+	cout << namesArr[handleCounter] << handleCounter << " entered Sonar Subscriver Left" << endl;
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
 		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
 	}
-	sleft[arrCount]  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+	sleft[handleCounter]  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+	sHLLock = false;
+	if(sHLLock == false && sHCLock == false && sHRLock == false && oHLock == false){
+		if(handleCounter <= 0){
+			handleCounter = arrCount;
+		}else{
+			handleCounter--;
+		}
+		sHLLock = true;	sHCLock = true;	sHRLock = true; oHLock = true;
+	}
 }
 
 void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter) {
-	cout << "Enter Sonar Subscriver Center" << endl;
-	scenter[arrCount]= ((float(int(10 * sonarCenter->range)))/10);
+	cout << namesArr[handleCounter] << handleCounter <<  " entered sonar Subscriver Center" << endl;
+	scenter[handleCounter]= ((float(int(10 * sonarCenter->range)))/10);
+	sHCLock = false;
+	if(sHLLock == false && sHCLock == false && sHRLock == false && oHLock == false){
+		if(handleCounter <= 0){
+			handleCounter = arrCount;
+		}else{
+			handleCounter--;
+		}
+		sHLLock = true;	sHCLock = true;	sHRLock = true; oHLock = true;
+	}
 }
 
 void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
-	cout << "Enter Sonar Subscriver Right" << endl;
+	cout << namesArr[handleCounter] << handleCounter <<  " entered sonar Subscriver Right" << endl;
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
 		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
-	sright[arrCount] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+	sright[handleCounter] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+	sHRLock = false;
+	if(sHLLock == false && sHCLock == false && sHRLock == false && oHLock == false){
+		if(handleCounter <= 0){
+			handleCounter = arrCount;
+		}else{
+			handleCounter--;
+		}
+		sHLLock = true;	sHCLock = true;	sHRLock = true; oHLock = true;
+	}
 }
+
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
-	cout << "Enter odom Subscriver" << endl;
+	string rover = message->header.frame_id;
+	rover = rover.substr(0,rover.find("/"));
+	cout << rover << handleCounter << " entered odom Subscriver" << endl;
 	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
 	tf::Matrix3x3 m(q);
 	double roll, pitch, yaw;
 	m.getRPY(roll, pitch, yaw);
-	orntn[arrCount] = yaw;
-	xpos[arrCount] = message->pose.pose.position.x;
-	ypos[arrCount] = message->pose.pose.position.y;
+	orntn[handleCounter] = yaw;
+	xpos[handleCounter] = message->pose.pose.position.x;
+	ypos[handleCounter] = message->pose.pose.position.y;
+	oHLock = false;
+	if(sHLLock == false && sHCLock == false && sHRLock == false && oHLock == false){
+		if(handleCounter <= 0){
+			handleCounter = arrCount;
+		}else{
+			handleCounter--;
+		}
+		sHLLock = true;	sHCLock = true;	sHRLock = true; oHLock = true;
+	}
 }
 
 void roverNameHandler(const std_msgs::String& message){
@@ -260,7 +307,7 @@ void roverNameHandler(const std_msgs::String& message){
 		}
 	}
 	for(int i=0; i<namesArrSize; i++){ 
-		cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
+	//	cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
 		// allRoversPublisher.publish(message);
 	}
 }
