@@ -33,10 +33,10 @@ ros::Publisher gridswarmPublisher;
 ros::Publisher test;
 ros::Publisher heartbeatPublisher;
 //Subscriber
-ros::Subscriber sonarLeftSubscriber;
-ros::Subscriber sonarCenterSubscriber;
-ros::Subscriber sonarRightSubscriber;
-ros::Subscriber odometrySubscriber;
+ros::Subscriber sonarLeftSubscriber,sonarLeftSubscriber1;
+ros::Subscriber sonarCenterSubscriber,sonarCenterSubscriber1;
+ros::Subscriber sonarRightSubscriber,sonarRightSubscriber1;
+ros::Subscriber odometrySubscriber,odometrySubscriber1;
 ros::Subscriber roverNameSubscriber;
 
 //Timer
@@ -57,16 +57,21 @@ std::string publishedName;
   float ypos[namesArrSize];
   char host[128];
   bool firstgo = true;
-  bool sHLLock, sHCLock, sHRLock, oHLock = true;
 using namespace std;
 using namespace grid_map;
 using namespace Eigen;
 
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
-void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
-void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
-void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
-void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight);
+
+  void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
+  void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
+  void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
+  void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight);
+  void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message);
+  void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft);
+  void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter);
+  void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight);
+
 void roverNameHandler(const std_msgs::String& message);
 
 
@@ -109,10 +114,17 @@ int main(int argc, char **argv){
 		handleCounter = i;
 		publishedName = namesArr[i];
 		cout << "Entered Subscriber loop: "<< publishedName <<"["<<arrCount<<"]"<< " + HC:"<< handleCounter << endl;
-		odometrySubscriber = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
-		sonarLeftSubscriber = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft);
-		sonarCenterSubscriber = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter);
-		sonarRightSubscriber = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight);
+		if (i == 0){
+			odometrySubscriber = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
+			sonarLeftSubscriber = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft);
+			sonarCenterSubscriber = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter);
+			sonarRightSubscriber = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight);
+		}else if(i == 1){
+			odometrySubscriber1 = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler1);
+			sonarLeftSubscriber1 = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft1);
+			sonarCenterSubscriber1 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter1);
+			sonarRightSubscriber1 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight1);
+		}
 	//	message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (publishedName + "/sonarLeft"), 10);
 	//	message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (publishedName + "/sonarCenter"), 10);
 	//	message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(gNH, (publishedName + "/sonarRight"), 10);
@@ -223,77 +235,67 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 	msg.data = "";
 	heartbeatPublisher.publish(msg);
 }
-
 void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft) {
-	cout << namesArr[handleCounter] << handleCounter << " entered Sonar Subscriver Left" << endl;
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
 		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
 	}
-	sleft[handleCounter]  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
-	sHLLock = false;
-	if(sHLLock == false && sHCLock == false && sHRLock == false && oHLock == false){
-		if(handleCounter <= 0){
-			handleCounter = arrCount;
-		}else{
-			handleCounter--;
-		}
-		sHLLock = true;	sHCLock = true;	sHRLock = true; oHLock = true;
+	sleft[0]  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+}
+
+void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft) {
+	float simoffsetLeft = 0;
+	if(SIMMODE == true){
+		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
 	}
+	sleft[1]  = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
 }
 
 void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter) {
-	cout << namesArr[handleCounter] << handleCounter <<  " entered sonar Subscriver Center" << endl;
-	scenter[handleCounter]= ((float(int(10 * sonarCenter->range)))/10);
-	sHCLock = false;
-	if(sHLLock == false && sHCLock == false && sHRLock == false && oHLock == false){
-		if(handleCounter <= 0){
-			handleCounter = arrCount;
-		}else{
-			handleCounter--;
-		}
-		sHLLock = true;	sHCLock = true;	sHRLock = true; oHLock = true;
-	}
+	scenter[0]= ((float(int(10 * sonarCenter->range)))/10);
+}
+void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter) {
+	scenter[1]= ((float(int(10 * sonarCenter->range)))/10);
 }
 
 void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
-	cout << namesArr[handleCounter] << handleCounter <<  " entered sonar Subscriver Right" << endl;
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
 		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
-	sright[handleCounter] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
-	sHRLock = false;
-	if(sHLLock == false && sHCLock == false && sHRLock == false && oHLock == false){
-		if(handleCounter <= 0){
-			handleCounter = arrCount;
-		}else{
-			handleCounter--;
-		}
-		sHLLock = true;	sHCLock = true;	sHRLock = true; oHLock = true;
+	sright[0] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+}
+void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight) {
+	float simoffsetRight = 0;
+	if(SIMMODE == true){
+		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
+	sright[1] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
 }
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	string rover = message->header.frame_id;
 	rover = rover.substr(0,rover.find("/"));
-	cout << rover << handleCounter << " entered odom Subscriver" << endl;
+	cout << rover << handleCounter << " entered odom Subscriver0" << endl;
 	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
 	tf::Matrix3x3 m(q);
 	double roll, pitch, yaw;
 	m.getRPY(roll, pitch, yaw);
-	orntn[handleCounter] = yaw;
-	xpos[handleCounter] = message->pose.pose.position.x;
-	ypos[handleCounter] = message->pose.pose.position.y;
-	oHLock = false;
-	if(sHLLock == false && sHCLock == false && sHRLock == false && oHLock == false){
-		if(handleCounter <= 0){
-			handleCounter = arrCount;
-		}else{
-			handleCounter--;
-		}
-		sHLLock = true;	sHCLock = true;	sHRLock = true; oHLock = true;
-	}
+	orntn[0] = yaw;
+	xpos[0] = message->pose.pose.position.x;
+	ypos[0] = message->pose.pose.position.y;
+}
+void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
+	string rover = message->header.frame_id;
+	rover = rover.substr(0,rover.find("/"));
+	cout << rover << handleCounter << " entered odom Subscriver1" << endl;
+	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
+	tf::Matrix3x3 m(q);
+	double roll, pitch, yaw;
+	m.getRPY(roll, pitch, yaw);
+	orntn[1] = yaw;
+	xpos[1] = message->pose.pose.position.x;
+	ypos[1] = message->pose.pose.position.y;
 }
 
 void roverNameHandler(const std_msgs::String& message){
