@@ -24,64 +24,40 @@ void SearchController::Reset() {
 }
 
 Result SearchController::DoWork() {
-  if (!result.wpts.waypoints.empty()) {
-    if (hypot(result.wpts.waypoints[0].x-currentLocation.x, result.wpts.waypoints[0].y-currentLocation.y) < 0.15) {
-      attemptCount = 0;
-    }
-  }
-
-  if (attemptCount > 0 && attemptCount < 5) {
-    attemptCount++;
-    if (succesfullPickup) {
-      succesfullPickup = false;
-      attemptCount = 1;
-    }
-    return result;
-  }
-  else if (attemptCount >= 5 || attemptCount == 0) 
-  {
-    attemptCount = 1;
-
-
-    result.type = waypoint;
-    Point  searchLocation;
-
-    //select new position 50 cm from current location
-    if (first_waypoint)
-    {
-      first_waypoint = false;
-      searchLocation.theta = currentLocation.theta + M_PI;
-      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
-    }
-    else
-  {
     // Search Here
-    if(spiralTurnsCompleted == spiralTurnsGoal){
-      spiralTurnsCompleted = 0;
-      centralSpiralLocation = rs.getRandomPointInZone(zone);
-      s.reset(centralSpiralLocation, North , false , 0.5f);
-      zone++;
+      result.type = waypoint;
+      first_waypoint = false;
+      if(spiralTurnsCompleted == spiralTurnsGoal){
+        std::cout<<  "Zone: " << zone << std::endl;
+        spiralTurnsCompleted = 0;
+        centralSpiralLocation = rs.getRandomPointInZone(zone);
+        s.reset(centralSpiralLocation, North , false , 0.5f);
+        zone++;
 
-      searchLocation = centralSpiralLocation;
+        searchLocation = centralSpiralLocation;
 
-      result.wpts.waypoints.clear();
-      result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
-      return result;
+        result.wpts.waypoints.clear();
+        result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
+        return result;
 
-    }
-
-
+      }
     searchLocation = s.getNextPoition();
-    std::cout<<  "X: " << searchLocation.x << "  Y: " << searchLocation.y << "\n";
+    std::cout<<  "X: " << searchLocation.x << "  Y: " << searchLocation.y << std::endl;
     spiralTurnsCompleted++;
-  }
+ 
+
+//	c = (c + 1) % 4;
+//    std::cout<<  c << std::endl;
+//	if(c == 0) { searchLocation.x = 2; searchLocation.y = 2; }
+//	if(c == 1) { searchLocation.x = -2; searchLocation.y = 2; }
+//	if(c == 2) { searchLocation.x = -2; searchLocation.y = -2; }
+//	if(c == 3) { searchLocation.x = 2; searchLocation.y = -2; }
 
     result.wpts.waypoints.clear();
     result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
     
     return result;
-  }
+  
 
 }
 

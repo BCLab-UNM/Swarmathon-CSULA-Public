@@ -52,13 +52,14 @@ private:
 
   // JS was Here
   int zone = 0;
-  int spiralTurnsCompleted = 10; // Yes ten is set on purpose
   int spiralTurnsGoal = 10;
+  int spiralTurnsCompleted = spiralTurnsGoal;
 
   Point centralSpiralLocation;
 
   RandomSelector rs;
   Spiral s;
+  int c = 0;
 
 };
 

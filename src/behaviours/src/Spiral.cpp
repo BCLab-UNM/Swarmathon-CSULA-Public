@@ -1,4 +1,6 @@
 #include <iostream>
+#include <angles/angles.h>
+
 using namespace std;
 
 enum Direction { North, East, South, West };
@@ -37,6 +39,23 @@ class Spiral
 		this->counter = 0;
 		this->distance = 0;
 		this->traveldistance = 1;
+		switch(direction)
+		{
+			case North:
+				position.theta = M_PI/2;
+				break;
+			case East:
+				position.theta = 0;
+				break;
+			case South:
+				position.theta = 2 * M_PI/3;
+				break;
+			case West:
+				position.theta = M_PI;
+				break;
+			default:
+				break;
+		}
 	}
 
 	void reset(Point position, Direction direction, bool clockwise, float traveldistance){
@@ -46,6 +65,23 @@ class Spiral
 		this->counter = 0;
 		this->distance = 0;
 		this->traveldistance = traveldistance;
+		switch(direction)
+		{
+			case North:
+				position.theta = M_PI/2;
+				break;
+			case East:
+				position.theta = 0;
+				break;
+			case South:
+				position.theta = 2 * M_PI/3;
+				break;
+			case West:
+				position.theta = M_PI;
+				break;
+			default:
+				break;
+		}
 	}
 
 	Point getPosition(){
@@ -102,10 +138,25 @@ class Spiral
 				break;
 
 		}
+		switch(direction)
+		{
+			case North:
+				position.theta = M_PI/2;
+				break;
+			case East:
+				position.theta = 0;
+				break;
+			case South:
+				position.theta = 2 * M_PI/3;
+				break;
+			case West:
+				position.theta = M_PI;
+				break;
+			default:
+				break;
+		}
 		counter ++;
 		return position;
 	}
 
 };
-
-

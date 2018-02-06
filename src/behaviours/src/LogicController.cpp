@@ -41,6 +41,8 @@ Result LogicController::DoWork() {
       }
   }
 
+  //std::cout<< logicState << std::endl;
+
   //logic state switch
   switch(logicState) {
 
