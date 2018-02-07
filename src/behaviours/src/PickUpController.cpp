@@ -88,7 +88,7 @@ void PickUpController::SetTagData(vector<Tag> tags)
       blockDistance = epsilon;
     }
 
-    //cout << "blockDistance  TAGDATA:  " << blockDistance << endl;
+    cout << "blockDistance  TAGDATA:  " << blockDistance << endl;
 
     blockYawError = atan((tags[target].getPositionX() + cameraOffsetCorrection)/blockDistance)*1.05; //angle to block from bottom center of chassis on the horizontal.
 
@@ -120,7 +120,7 @@ void PickUpController::ProcessData()
 
   if(!targetFound)
   {
-    //cout << "PICKUP No Target Seen!" << endl;
+    cout << "PICKUP No Target Seen!" << endl;
 
     // Do nothing
     return;
@@ -130,9 +130,9 @@ void PickUpController::ProcessData()
   long int Tdiff = current_time - millTimer;
   float Td = Tdiff/1e3;
 
-  //cout << "PICKUP Target Seen!" << endl;
+  cout << "PICKUP Target Seen!" << endl;
 
-  //cout << "distance : " << blockDistanceFromCamera << " time is : " << Td << endl;
+  cout << "distance : " << blockDistanceFromCamera << " time is : " << Td << endl;
 
   if (blockDistanceFromCamera < 0.14 && Td < 3.9)
   {
@@ -233,7 +233,7 @@ Result PickUpController::DoWork()
     float target_reaquire_begin= 4.2;
     float target_pickup_task_time_limit = 4.8;
 
-    //cout << "blockDistance DOWORK:  " << blockDistance << endl;
+    cout << "blockDistance DOWORK:  " << blockDistance << endl;
 
     //Calculate time difference between last seen tag
     float target_timeout = (current_time - target_timer)/1e3;
