@@ -467,14 +467,14 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       // Pass the position of the AprilTag
       geometry_msgs::PoseStamped tagPose = message->detections[i].pose;
       loc.setPosition( make_tuple( tagPose.pose.position.x,
-				   tagPose.pose.position.y,
-				   tagPose.pose.position.z ) );
+           tagPose.pose.position.y,
+           tagPose.pose.position.z ) );
 
       // Pass the orientation of the AprilTag
       loc.setOrientation( ::boost::math::quaternion<float>( tagPose.pose.orientation.x,
-							    tagPose.pose.orientation.y,
-							    tagPose.pose.orientation.z,
-							    tagPose.pose.orientation.w ) );
+                  tagPose.pose.orientation.y,
+                  tagPose.pose.orientation.z,
+                  tagPose.pose.orientation.w ) );
       tags.push_back(loc);
     }
     
@@ -655,7 +655,7 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&) {
 }
 
 //void gridswarmHandler(const grid_map_msgs::GridMap message) {
-	
+  
 //}
 
 long int getROSTimeInMilliSecs()
@@ -780,5 +780,4 @@ void nameHandler(const std_msgs::String& message){
   }
 
 }
-
 
