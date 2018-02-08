@@ -24,6 +24,7 @@ PickUpController::~PickUpController() { /*Destructor*/  }
 
 void PickUpController::SetTagData(vector<Tag> tags)
 {
+    cout << "----- PickUpController::SetTagData() -----" << endl; //DEBUGGING CODE
 
   if (tags.size() > 0)
   {
@@ -88,7 +89,7 @@ void PickUpController::SetTagData(vector<Tag> tags)
       blockDistance = epsilon;
     }
 
-    cout << "blockDistance  TAGDATA:  " << blockDistance << endl;
+    cout << "blockDistance  TAGDATA:  " << blockDistance << "\t";
 
     blockYawError = atan((tags[target].getPositionX() + cameraOffsetCorrection)/blockDistance)*1.05; //angle to block from bottom center of chassis on the horizontal.
 
@@ -117,6 +118,7 @@ bool PickUpController::SetSonarData(float rangeCenter)
 
 void PickUpController::ProcessData()
 {
+    cout << "----- PickUpController::ProcessData() -----" << endl; //DEBUGGING CODE
 
   if(!targetFound)
   {
@@ -130,9 +132,10 @@ void PickUpController::ProcessData()
   long int Tdiff = current_time - millTimer;
   float Td = Tdiff/1e3;
 
+
   cout << "PICKUP Target Seen!" << endl;
 
-  cout << "distance : " << blockDistanceFromCamera << " time is : " << Td << endl;
+  cout << "distance : " << blockDistanceFromCamera << "\t time is : " << Td << endl;
 
   if (blockDistanceFromCamera < 0.14 && Td < 3.9)
   {
@@ -141,7 +144,7 @@ void PickUpController::ProcessData()
     result.reset = true;
     targetHeld = true;
   }
-  //Lower wrist and open fingures if no locked targt
+  //Lower wrist and open fingures if no locked target
   else if (!lockTarget)
   {
     //set gripper;
@@ -182,6 +185,8 @@ bool PickUpController::ShouldInterrupt(){
 
 Result PickUpController::DoWork()
 {
+
+    cout << "----- PickUpController::DoWork() -----" << endl;
 
   has_control = true;
 

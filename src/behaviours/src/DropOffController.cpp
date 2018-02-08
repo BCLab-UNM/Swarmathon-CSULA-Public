@@ -284,7 +284,7 @@ void DropOffController::Reset() {
   targetHeld = false;
   startWaypoint = false;
   first_center = true;
-  cout << "6" << endl;
+  cout << "----- DropOffController::Reset() -----" << endl;
 
 }
 
