@@ -24,8 +24,6 @@ PickUpController::~PickUpController() { /*Destructor*/  }
 
 void PickUpController::SetTagData(vector<Tag> tags)
 {
-    cout << "----- PickUpController::SetTagData() -----" << endl; //DEBUGGING CODE
-
   if (tags.size() > 0)
   {
 
@@ -65,7 +63,7 @@ void PickUpController::SetTagData(vector<Tag> tags)
 
           if (has_control)
           {
-            cout << "pickup reset return interupt free" << endl;
+            cout << "PICKUP: Pickup reset return interupt free" << endl;
             release_control = true;
           }
 
@@ -89,7 +87,7 @@ void PickUpController::SetTagData(vector<Tag> tags)
       blockDistance = epsilon;
     }
 
-    cout << "blockDistance  TAGDATA:  " << blockDistance << "\t";
+    cout << " PICKUP: blockDistance  TAGDATA:  " << blockDistance << "\t";
 
     blockYawError = atan((tags[target].getPositionX() + cameraOffsetCorrection)/blockDistance)*1.05; //angle to block from bottom center of chassis on the horizontal.
 
@@ -118,11 +116,9 @@ bool PickUpController::SetSonarData(float rangeCenter)
 
 void PickUpController::ProcessData()
 {
-    cout << "----- PickUpController::ProcessData() -----" << endl; //DEBUGGING CODE
-
   if(!targetFound)
   {
-    cout << "PICKUP No Target Seen!" << endl;
+    cout << "PICKUP: No Target Seen!" << endl;
 
     // Do nothing
     return;
@@ -133,9 +129,9 @@ void PickUpController::ProcessData()
   float Td = Tdiff/1e3;
 
 
-  cout << "PICKUP Target Seen!" << endl;
+  cout << "PICKUP: Target Seen!" << endl;
 
-  cout << "distance : " << blockDistanceFromCamera << "\t time is : " << Td << endl;
+  cout << "PICKUP: Block distance CAMERA: " << blockDistanceFromCamera << "\t time is : " << Td << endl;
 
   if (blockDistanceFromCamera < 0.14 && Td < 3.9)
   {
@@ -185,9 +181,6 @@ bool PickUpController::ShouldInterrupt(){
 
 Result PickUpController::DoWork()
 {
-
-    cout << "----- PickUpController::DoWork() -----" << endl;
-
   has_control = true;
 
   if (!targetHeld)
@@ -238,7 +231,7 @@ Result PickUpController::DoWork()
     float target_reaquire_begin= 4.2;
     float target_pickup_task_time_limit = 4.8;
 
-    cout << "blockDistance DOWORK:  " << blockDistance << endl;
+    cout << "PICKUP: BlockDistance DOWORK:  " << blockDistance << endl;
 
     //Calculate time difference between last seen tag
     float target_timeout = (current_time - target_timer)/1e3;
