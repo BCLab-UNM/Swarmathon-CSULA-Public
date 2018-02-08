@@ -167,7 +167,7 @@ int main(int argc, char **argv){
 		if (map.at("elevation", *it) == FOG/* || map.at("elevation", *it) == ROVER*/ || firstgo == true){
 			map.at("elevation", *it) = FOG;
 		}
-		//ORIGIN
+		//Center Mat being Discovered
 		for (float length = -0.50; length <= 0.50; firstgo == true){
 			for(float width = -0.50; width <= 0.50;){
 				Vector2d mat(length,width);
@@ -176,6 +176,7 @@ int main(int argc, char **argv){
 			}
 			length += CELLDIVISION;
 		}
+
 		for(int count = arrCount; count >= 0; count--){
 			//ROVER
 			float qx = xpos[count];
@@ -203,8 +204,10 @@ int main(int argc, char **argv){
 				float cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
 				float cy = (sin(orntn[count]) * scenter[count]) + ypos[count];
 				Vector2d c(cx,cy);
-				if (count == 0 && sonarOverlapCheck(cx, cy, 'C')){
-					overlap = true;
+				if (count == 0){
+					if(sonarOverlapCheck(cx, cy, 'C')){
+						overlap = true;
+					}
 				}
 				if (map.isInside(c) && overlap == false){
 					map.atPosition("elevation", c) = WALL;
@@ -216,8 +219,10 @@ int main(int argc, char **argv){
 				float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
 				float ly = (sin((pi/6)+orntn[count]) * sleft[count]) + ypos[count];
 				Vector2d l(lx,ly);
-				if (count == 0 && sonarOverlapCheck(lx, ly, 'L')){
-					overlap = true;
+				if (count == 0){
+					if(sonarOverlapCheck(lx, ly, 'L')){
+						overlap = true;
+					}
 				}
 				if (map.isInside(l) && overlap == false){
 					map.atPosition("elevation", l) = WALL;
@@ -229,8 +234,10 @@ int main(int argc, char **argv){
 				float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
 				float ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + ypos[count];
 				Vector2d r(rx,ry);
-				if (count == 0 && sonarOverlapCheck(rx, ry, 'R')){
-					overlap = true;
+				if (count == 0){
+					if(sonarOverlapCheck(rx, ry, 'R')){
+						overlap = true;
+					}
 				}
 				if (map.isInside(r) && overlap == false){
 					map.atPosition("elevation", r) = WALL;
@@ -326,10 +333,10 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	orntn[0] = yaw;
 //With orntn, get lenght form center, with this create offset for rover from center
 	if (o0once == true){
-		x0offset = -1 * cos(orntn[0]);
-		y0offset = -1 * sin(orntn[0]);
+		x0offset = -1.3 * cos(orntn[0]);
+		y0offset = -1.3 * sin(orntn[0]);
 		o0once = false;
-		cout << rover << " Orntn: " << orntn[0]<< " x Offset: " << x1offset << " y Offset: "<< y1offset << endl;
+//		cout << rover << " Orntn: " << orntn[0]<< " x Offset: " << x1offset << " y Offset: "<< y1offset << endl;
 	}
 	xpos[0] = message->pose.pose.position.x + x0offset;
 	ypos[0] = message->pose.pose.position.y + y0offset;
@@ -345,10 +352,10 @@ void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[1] = yaw;
 	if (o1once == true){
-		x1offset = -1 * cos(orntn[1]);
-		y1offset = -1 * sin(orntn[1]);
+		x1offset = -1.3 * cos(orntn[1]);
+		y1offset = -1.3 * sin(orntn[1]);
 		o1once = false;
-		cout << rover << " Orntn: " << orntn[1]<< " x Offset: " << x1offset << " y Offset: "<< y1offset << endl;
+//		cout << rover << " Orntn: " << orntn[1]<< " x Offset: " << x1offset << " y Offset: "<< y1offset << endl;
 	}
 	xpos[1] = message->pose.pose.position.x + x1offset;
 	ypos[1] = message->pose.pose.position.y + y1offset;
@@ -364,10 +371,10 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[2] = yaw;
 	if (o2once == true){
-		x2offset = -1 * cos(orntn[2]);
-		y2offset = -1 * sin(orntn[2]);
+		x2offset = -1.3 * cos(orntn[2]);
+		y2offset = -1.3 * sin(orntn[2]);
 		o2once = false;
-		cout << rover << " Orntn: " << orntn[2]<< " x Offset: " << x2offset << " y Offset: "<< y2offset << endl;
+//		cout << rover << " Orntn: " << orntn[2]<< " x Offset: " << x2offset << " y Offset: "<< y2offset << endl;
 	}
 	xpos[2] = message->pose.pose.position.x + x2offset;
 	ypos[2] = message->pose.pose.position.y + y2offset;
@@ -394,15 +401,10 @@ bool sonarOverlapCheck(float x, float y, char l){
 	for(int inner = 1; inner <= arrCount; inner++){
 		float qx = xpos[inner];
 		float qy = ypos[inner];
-		cout << namesAr<<":"<<"("<<qx<<","<<qy<<")"<<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
-		for (float length = -0.10; length <= 0.10;){
-			for(float width = -0.10; width <= 0.10;){
-				if (qx <= (x + length) && qx >= (x - length) && qy <= (y + width) && qy >= (y - width)){
-					cout << "Match found"<<endl;
-					return true;
-				}
-			}
-			length += CELLDIVISION;
+//		cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
+		if (qx <= (x + 2*CELLDIVISION) && qx >= (x - 2*CELLDIVISION) && qy <= (y + 2*CELLDIVISION) && qy >= (y - 2*CELLDIVISION)){
+			cout << "Match found"<<endl;
+			return true;
 		}
 	}
 	return false;
