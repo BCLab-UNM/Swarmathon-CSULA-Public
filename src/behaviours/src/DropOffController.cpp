@@ -148,13 +148,15 @@ Result DropOffController::DoWork() {
 
     if (seenEnoughCenterTags) //if we have seen enough tags
     {
-      if ((countLeft-5) > countRight) //and there are too many on the left
+      if ((countLeft-10) > countRight) //and there are too many on the left
       {
         right = false; //then we say none on the right to cause us to turn right
+//          left = false; //TODO: checking to see if the rover doesn't drop the cube just outside of the collection zone
       }
-      else if ((countRight-5) > countLeft)
+      else if ((countRight-10) > countLeft)
       {
         left = false; //or left in this case
+//          right = false; //TODO: checking to see if the rover doesn't drop the cube just outside of the collection zone
       }
     }
 
