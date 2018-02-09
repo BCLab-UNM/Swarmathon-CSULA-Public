@@ -87,11 +87,11 @@ void PickUpController::SetTagData(vector<Tag> tags)
       blockDistance = epsilon;
     }
 
-    cout << " PICKUP: blockDistance  TAGDATA:  " << blockDistance << "\t";
+    cout << "PICKUP: BlockDistance TAGDATA: " << blockDistance << "\t";
 
     blockYawError = atan((tags[target].getPositionX() + cameraOffsetCorrection)/blockDistance)*1.05; //angle to block from bottom center of chassis on the horizontal.
 
-    cout << "blockYawError TAGDATA:  " << blockYawError << endl;
+    cout << "BlockYawError TAGDATA: " << blockYawError << endl;
 
   }
 
@@ -116,7 +116,7 @@ bool PickUpController::SetSonarData(float rangeCenter)
 
 void PickUpController::ProcessData()
 {
-  if(!targetFound)
+  if(!targetFound && !targetHeld)
   {
     cout << "PICKUP: No Target Seen!" << endl;
 
@@ -128,10 +128,7 @@ void PickUpController::ProcessData()
   long int Tdiff = current_time - millTimer;
   float Td = Tdiff/1e3;
 
-
-  cout << "PICKUP: Target Seen!" << endl;
-
-  cout << "PICKUP: Block distance CAMERA: " << blockDistanceFromCamera << "\t time is : " << Td << endl;
+  cout << "PICKUP: BlockDistance CAMERA: " << blockDistanceFromCamera << "\tTime is : " << Td << endl;
 
   if (blockDistanceFromCamera < 0.14 && Td < 3.9)
   {
@@ -186,7 +183,7 @@ Result PickUpController::DoWork()
   if (!targetHeld)
   {
     //threshold distance to be from the target block before attempting pickup
-    float targetDistance = 0.15; //meters
+    float targetDistance = 0.14; //meters //original value is 0.15
 
     // -----------------------------------------------------------
     // millisecond time = current time if not in a counting state
@@ -231,7 +228,7 @@ Result PickUpController::DoWork()
     float target_reaquire_begin= 4.2;
     float target_pickup_task_time_limit = 4.8;
 
-    cout << "PICKUP: BlockDistance DOWORK:  " << blockDistance << endl;
+    cout << "PICKUP: BlockDistance DOWORK: " << blockDistance << endl;
 
     //Calculate time difference between last seen tag
     float target_timeout = (current_time - target_timer)/1e3;

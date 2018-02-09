@@ -43,7 +43,7 @@ Result DropOffController::DoWork() {
   //to resart our search.
   if(reachedCollectionPoint)
   {
-    cout << "DROP OFF: Reached collection point" << endl;
+    cout << "DROPOFF: Reached collection point" << endl;
     if (timerTimeElapsed >= 5)
     {
       if (finalInterrupt)
@@ -56,7 +56,7 @@ Result DropOffController::DoWork() {
       else
       {
         finalInterrupt = true;
-        cout << "DROP OFF: Final Interrupt" << endl;
+        cout << "DROPOFF: Final Interrupt" << endl;
       }
     }
     else if (timerTimeElapsed >= 0.1)
@@ -133,7 +133,7 @@ Result DropOffController::DoWork() {
   if (count > 0 || seenEnoughCenterTags || prevCount > 0) //if we have a target and the center is located drive towards it.
   {
 
-    cout << "DROP OFF: Center Seen" << endl;
+    cout << "DROPOFF: Center Seen" << endl;
     centerSeen = true;
 
     if (first_center && isPrecisionDriving)
@@ -217,7 +217,7 @@ Result DropOffController::DoWork() {
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
     if (timeSinceSeeingEnoughCenterTags > lostCenterCutoff)
     {
-      cout << "DROP OFF: Going to center base location instead of drop off attempt" << endl;
+      cout << "DROPOFF: Going to center base location instead of drop off attempt" << endl;
       //go back to drive to center base location instead of drop off attempt
       reachedCollectionPoint = false;
       seenEnoughCenterTags = false;
@@ -282,7 +282,7 @@ void DropOffController::Reset() {
   targetHeld = false;
   startWaypoint = false;
   first_center = true;
-  cout << "DROP OFF: Reset" << endl;
+  cout << "DROPOFF: Reset" << endl;
 
 }
 
