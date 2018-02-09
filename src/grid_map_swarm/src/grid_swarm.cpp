@@ -13,8 +13,6 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
 #include <unistd.h>
-#include <mutex>          // std::mutex
-#include <std_msgs/UInt8.h>
 
 using namespace std;
 
@@ -24,8 +22,6 @@ const float WALL = 1;
 const float FOG = -0.5;
 const float ROVER = 0.5;
 const float DISCOVER = 0.0;
-std::mutex mtx;           // mutex for critical section
-
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = true;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
@@ -50,7 +46,7 @@ std::string publishedName;
 //Global
   const double pi = std::acos(-1);
   const int namesArrSize=6;
-  string namesArr[namesArrSize] = {"test","test","test","test","test","test"};//"ajax""aeneas"
+  string namesArr[namesArrSize] = {"achilles","aeneas","ajax","test","test","test"};//"ajax""aeneas"
   int arrCount = 0;
   float sleft[namesArrSize];
   float scenter[namesArrSize];
@@ -82,6 +78,7 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft);
   void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
   void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
+
 void roverNameHandler(const std_msgs::String& message);
 
 
@@ -107,9 +104,9 @@ int main(int argc, char **argv){
 //  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
 
 //SUBSCRIBER
-roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
+  roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
 
-sleep(1000);
+  sleep(1000);
   if (publishedName != namesArr[0]){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
 	return 0;
@@ -118,7 +115,7 @@ sleep(1000);
   cout << publishedName << " Was Listed first listed. Starting Grid-Map" <<endl;
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("/grid_map", 1);
 
-for(int i = 0; i < namesArrSize; i++){
+  for(int i = 0; i < namesArrSize; i++){
 	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop"<<endl;
 	if (namesArr[i] != "test"){
 		arrCount = i;
@@ -148,7 +145,6 @@ for(int i = 0; i < namesArrSize; i++){
 	//	sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
 	}//END OF IF STATEMENT
   }//END OF FOR LOOP
-  
   cout << " + Exit Subscriber loop -"<< "- arrCount:"<<arrCount<< endl;
   
 
@@ -408,7 +404,7 @@ bool sonarOverlapCheck(float x, float y, char l){
 		float qy = ypos[inner];
 //		cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
 		if (qx <= (x + 2*CELLDIVISION) && qx >= (x - 2*CELLDIVISION) && qy <= (y + 2*CELLDIVISION) && qy >= (y - 2*CELLDIVISION)){
-			//cout << "Match found"<<endl;
+			cout << "Match found"<<endl;
 			return true;
 		}
 	}
