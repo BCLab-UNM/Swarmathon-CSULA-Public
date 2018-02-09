@@ -114,7 +114,8 @@ roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
 modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeNumberHandler);
 
 
-
+//mtx.lock();
+sleep(1000);
   if (publishedName != namesArr[0]){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
 	return 0;
