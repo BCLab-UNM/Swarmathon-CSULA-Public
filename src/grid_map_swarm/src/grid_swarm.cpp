@@ -42,7 +42,6 @@ ros::Subscriber sonarCenterSubscriber	,sonarCenterSubscriber1	,sonarCenterSubscr
 ros::Subscriber sonarRightSubscriber	,sonarRightSubscriber1	,sonarRightSubscriber2	;
 ros::Subscriber odometrySubscriber	,odometrySubscriber1	,odometrySubscriber2	;
 ros::Subscriber roverNameSubscriber;
-ros::Subscriber modeSubscriber;
 
 //Timer
 ros::Timer publish_heartbeat_timer;
@@ -83,7 +82,6 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft);
   void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
   void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
-void modeNumberHandler(const std_msgs::UInt8::ConstPtr& message);
 void roverNameHandler(const std_msgs::String& message);
 
 
@@ -110,11 +108,7 @@ int main(int argc, char **argv){
 
 //SUBSCRIBER
 roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
-//mtx.lock();
-modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeNumberHandler);
 
-
-//mtx.lock();
 sleep(1000);
   if (publishedName != namesArr[0]){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
@@ -419,10 +413,4 @@ bool sonarOverlapCheck(float x, float y, char l){
 		}
 	}
 	return false;
-}
-
-
-void modeNumberHandler(const std_msgs::UInt8::ConstPtr& message)
-{
-	cout << "this is working now" << endl;
 }
