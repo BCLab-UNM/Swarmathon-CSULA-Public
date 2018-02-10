@@ -5,6 +5,7 @@
 #include <cmath>
 #include <sstream>
 #include <std_msgs/String.h>
+#include <std_msgs/UInt8.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -38,6 +39,7 @@ ros::Subscriber sonarCenterSubscriber	,sonarCenterSubscriber1	,sonarCenterSubscr
 ros::Subscriber sonarRightSubscriber	,sonarRightSubscriber1	,sonarRightSubscriber2	;
 ros::Subscriber odometrySubscriber	,odometrySubscriber1	,odometrySubscriber2	;
 ros::Subscriber roverNameSubscriber;
+ros::Subscriber modeSubscriber;
 
 //Timer
 ros::Timer publish_heartbeat_timer;
@@ -46,7 +48,9 @@ std::string publishedName;
 //Global
   const double pi = std::acos(-1);
   const int namesArrSize=6;
-  string namesArr[namesArrSize] = {"achilles","aeneas","ajax","test","test","test"};//"ajax""aeneas"
+
+  string namesArr[namesArrSize] = {"test","test","test","test","test","test"};//"ajax""aeneas""achilles"
+  int currentMode = 0;
   int arrCount = 0;
   float sleft[namesArrSize];
   float scenter[namesArrSize];
@@ -56,6 +60,7 @@ std::string publishedName;
   float ypos[namesArrSize];
   char host[128];
   bool firstgo = true;
+  bool gridLock = false;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
@@ -63,7 +68,7 @@ using namespace std;
 using namespace grid_map;
 using namespace Eigen;
 
-bool sonarOverlapCheck(float x, float y, char l);
+bool sonarOverlapCheck(const float x, const float y, const char l);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
@@ -78,9 +83,8 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft);
   void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
   void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
-
 void roverNameHandler(const std_msgs::String& message);
-
+void modeHandler(const std_msgs::UInt8::ConstPtr& message); 
 
 int main(int argc, char **argv){
   gethostname(host, sizeof (host));
@@ -106,7 +110,12 @@ int main(int argc, char **argv){
 //SUBSCRIBER
   roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
 
-  sleep(1000);
+  modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeHandler);
+  
+  cout << "Entering GridLock" << endl;
+  while(currentMode != 2){}
+  cout << "Exiting GridLock" << endl;
+
   if (publishedName != namesArr[0]){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
 	return 0;
@@ -146,9 +155,6 @@ int main(int argc, char **argv){
 	}//END OF IF STATEMENT
   }//END OF FOR LOOP
   cout << " + Exit Subscriber loop -"<< "- arrCount:"<<arrCount<< endl;
-  
-
-
   ros::Rate rate(20.0);
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
@@ -162,14 +168,18 @@ int main(int argc, char **argv){
 	//cout << "Enter ROS OK"<<endl;
 	// Add data to Rover Specific Grid Map.
 	ros::Time time = ros::Time::now();
-	for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
-		Position position;
-		map.getPosition(*it, position);
-		if (map.at("elevation", *it) == FOG/* || map.at("elevation", *it) == ROVER*/ || firstgo == true){
-			map.at("elevation", *it) = FOG;
-		}
-		//Center Mat being Discovered
-		for (float length = -0.50; length <= 0.50; firstgo == true){
+//Center Mat being Discovered
+	if (firstgo == true){
+		cout << "Creating the initial FOG" << endl;
+		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
+			Position position;
+			map.getPosition(*it, position);
+			if (map.at("elevation", *it) == FOG || map.at("elevation", *it) == ROVER || firstgo == true){
+				map.at("elevation", *it) = FOG;
+			}	
+		}//END OF ITERATOR
+		cout << "Creating the Center Mat" << endl;
+		for (float length = -0.50; length <= 0.50;){
 			for(float width = -0.50; width <= 0.50;){
 				Vector2d mat(length,width);
 				map.atPosition("elevation", mat) = DISCOVER;
@@ -177,76 +187,96 @@ int main(int argc, char **argv){
 			}
 			length += CELLDIVISION;
 		}
-
-		for(int count = arrCount; count >= 0; count--){
-			//ROVER
-			float qx = xpos[count];
-			float qy = ypos[count];
-			Vector2d q(qx,qy);
-			if (map.isInside(q)){
-				map.atPosition("elevation", q) = ROVER;
-			}
-			//CAMERA 0.3m
-			for (float length = CELLDIVISION; length <= 0.3;){
-				for(float width = -0.15; width <= 0.15;){
-					float Cax = (cos(orntn[count]) * length) + (xpos[count] + (sin(orntn[count]) * width));
-					float Cay = (sin(orntn[count]) * length) + (ypos[count] + (cos(orntn[count]) * width));
-					Vector2d cam(Cax,Cay);
-					if (map.isInside(cam)){
-						map.atPosition("elevation", cam) = DISCOVER;
-					}
-					width += CELLDIVISION;
+	}
+	for(int count = arrCount; count >= 0; count--){
+		//ROVER
+		float qx = xpos[count];
+		float qy = ypos[count];
+		Vector2d q(qx,qy);
+		if (map.isInside(q)){
+			map.atPosition("elevation", q) = ROVER;
+		}
+		//CAMERA 0.3m
+		for (float length = CELLDIVISION; length <= 0.3;){
+			for(float width = -0.15; width <= 0.15;){
+				float Cax = (cos(orntn[count]) * length) + (xpos[count] + (sin(orntn[count]) * width));
+				float Cay = (sin(orntn[count]) * length) + (ypos[count] + (cos(orntn[count]) * width));
+				Vector2d cam(Cax,Cay);
+				if (map.isInside(cam)){
+					map.atPosition("elevation", cam) = DISCOVER;
 				}
-				length += CELLDIVISION;
+				width += CELLDIVISION;
 			}
-			//CENTER
-			if (scenter[count] <= 2.8){
-				bool overlap = false;
-				float cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
-				float cy = (sin(orntn[count]) * scenter[count]) + ypos[count];
-				Vector2d c(cx,cy);
-				if (count == 0){
-					if(sonarOverlapCheck(cx, cy, 'C')){
+			length += CELLDIVISION;
+		}
+		//CENTER
+		if (scenter[count] <= 2.8){
+			bool overlap = false;
+			float cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
+			float cy = (sin(orntn[count]) * scenter[count]) + ypos[count];
+			Vector2d c(cx,cy);
+			if (count == 0){
+				for(int inner = 1; inner <= arrCount; inner++){
+					float qx = xpos[inner];
+					float qy = ypos[inner];
+					if (qx <= (cx + 2*CELLDIVISION) && qx >= (cx - 2*CELLDIVISION) && qy <= (cy + 2*CELLDIVISION) && qy >= (cy - 2*CELLDIVISION)){
+					//	cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
+					//	cout <<"|| Sonar "<<":"<<"("<<cx<<","<<cy<<")"<<endl;
+					//	cout << "Match found"<<endl;
 						overlap = true;
 					}
 				}
-				if (map.isInside(c) && overlap == false){
-					map.atPosition("elevation", c) = WALL;
-				}
 			}
-			//LEFT
-			if (sleft[count] <= 2.8){
-				bool overlap = false;
-				float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
-				float ly = (sin((pi/6)+orntn[count]) * sleft[count]) + ypos[count];
-				Vector2d l(lx,ly);
-				if (count == 0){
-					if(sonarOverlapCheck(lx, ly, 'L')){
+			if (map.isInside(c) && overlap == false){
+				map.atPosition("elevation", c) = WALL;
+			}
+		}
+		//LEFT
+		if (sleft[count] <= 2.8){
+			bool overlap = false;
+			float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
+			float ly = (sin((pi/6)+orntn[count]) * sleft[count]) + ypos[count];
+			Vector2d l(lx,ly);
+			if (count == 0){
+				for(int inner = 1; inner <= arrCount; inner++){
+					float qx = xpos[inner];
+					float qy = ypos[inner];
+					if (qx <= (lx + 2*CELLDIVISION) && qx >= (lx - 2*CELLDIVISION) && qy <= (ly + 2*CELLDIVISION) && qy >= (ly - 2*CELLDIVISION)){
+					//	cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
+					//	cout <<"|| Sonar "<<":"<<"("<<lx<<","<<ly<<")"<<endl;
+					//	cout << "Match found"<<endl;
 						overlap = true;
 					}
 				}
-				if (map.isInside(l) && overlap == false){
-					map.atPosition("elevation", l) = WALL;
-				}
 			}
-			//RIGHT
-			if (sright[count] <= 2.8){
-				bool overlap = false;
-				float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
-				float ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + ypos[count];
-				Vector2d r(rx,ry);
-				if (count == 0){
-					if(sonarOverlapCheck(rx, ry, 'R')){
+			if (map.isInside(l) && overlap == false){
+				map.atPosition("elevation", l) = WALL;
+			}
+		}
+		//RIGHT
+		if (sright[count] <= 2.8){
+			bool overlap = false;
+			float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
+			float ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + ypos[count];
+			Vector2d r(rx,ry);
+			if (count == 0){
+				for(int inner = 1; inner <= arrCount; inner++){
+					float qx = xpos[inner];
+					float qy = ypos[inner];
+					if (qx <= (rx + 2*CELLDIVISION) && qx >= (rx - 2*CELLDIVISION) && qy <= (ry + 2*CELLDIVISION) && qy >= (ry - 2*CELLDIVISION)){
+					//	cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
+					//	cout <<"|| Sonar "<<":"<<"("<<rx<<","<<ry<<")"<<endl;
+					//	cout << "Match found"<<endl;
 						overlap = true;
 					}
 				}
-				if (map.isInside(r) && overlap == false){
-					map.atPosition("elevation", r) = WALL;
-				}
 			}
-		}//END OF FOR LOOP
-	}//END OF ITERATOR
-	firstgo = false;
+			if (map.isInside(r) && overlap == false){
+				map.atPosition("elevation", r) = WALL;
+			}
+		}
+	}//END OF FOR LOOP
+firstgo = false;
 
 	// Publish grid map.
 	map.setTimestamp(time.toNSec());
@@ -334,8 +364,9 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	orntn[0] = yaw;
 //With orntn, get lenght form center, with this create offset for rover from center
 	if (o0once == true){
-		x0offset = -1.3 * cos(orntn[0]);
-		y0offset = -1.3 * sin(orntn[0]);
+
+		x0offset = -1 * cos(orntn[0]);
+		y0offset = -1 * sin(orntn[0]);
 		o0once = false;
 //		cout << rover << " Orntn: " << orntn[0]<< " x Offset: " << x1offset << " y Offset: "<< y1offset << endl;
 	}
@@ -353,8 +384,9 @@ void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[1] = yaw;
 	if (o1once == true){
-		x1offset = -1.3 * cos(orntn[1]);
-		y1offset = -1.3 * sin(orntn[1]);
+
+		x1offset = -1 * cos(orntn[1]);
+		y1offset = -1 * sin(orntn[1]);
 		o1once = false;
 //		cout << rover << " Orntn: " << orntn[1]<< " x Offset: " << x1offset << " y Offset: "<< y1offset << endl;
 	}
@@ -372,8 +404,8 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[2] = yaw;
 	if (o2once == true){
-		x2offset = -1.3 * cos(orntn[2]);
-		y2offset = -1.3 * sin(orntn[2]);
+		x2offset = -1 * cos(orntn[2]);
+		y2offset = -1 * sin(orntn[2]);
 		o2once = false;
 //		cout << rover << " Orntn: " << orntn[2]<< " x Offset: " << x2offset << " y Offset: "<< y2offset << endl;
 	}
@@ -398,12 +430,24 @@ void roverNameHandler(const std_msgs::String& message){
 	}
 }
 
-bool sonarOverlapCheck(float x, float y, char l){
+
+void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
+	currentMode = message->data;
+	cout << "Mode message:" << currentMode << endl;
+	if(currentMode == 2 || currentMode == 3){
+		gridLock = true;
+	}
+}
+
+bool sonarOverlapCheck(const float x, const float y, const char l){
 	for(int inner = 1; inner <= arrCount; inner++){
 		float qx = xpos[inner];
 		float qy = ypos[inner];
-//		cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
+//		cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
+//		cout <<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
 		if (qx <= (x + 2*CELLDIVISION) && qx >= (x - 2*CELLDIVISION) && qy <= (y + 2*CELLDIVISION) && qy >= (y - 2*CELLDIVISION)){
+			cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
+			cout <<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
 			cout << "Match found"<<endl;
 			return true;
 		}
