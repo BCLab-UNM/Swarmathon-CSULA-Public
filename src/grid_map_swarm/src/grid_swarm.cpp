@@ -59,7 +59,7 @@ std::string publishedName;
   float ypos[namesArrSize];
   char host[128];
   bool firstgo = true;
-  bool gridLock = false;
+  bool modeLock = true, roverLock = true;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
@@ -84,7 +84,7 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
 
 void roverNameHandler(const std_msgs::String& message);
-void modeHandler(const std_msgs::UInt8::ConstPtr& message); 
+void modeHandler2(const std_msgs::UInt8::ConstPtr& message); 
 
 int main(int argc, char **argv){
   gethostname(host, sizeof (host));
@@ -108,11 +108,16 @@ int main(int argc, char **argv){
 //  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
 
 //SUBSCRIBER
-  roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
-  modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeHandler);
-  
-  cout << "Entering GridLock" << endl;
-  while(currentMode != 2){}
+  do{
+	sleep(10);
+	cout << "Attempting Connection" << endl;
+	roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
+	modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeHandler2);
+  }while (roverLock == true && modeLock == true);
+  cout << "Entering GridLock: "<< publishedName <<"/mode" << endl;
+  while(currentMode != 2){
+//	cout << "Current Mode: " << currentMode << endl;
+  }
   cout << "Exiting GridLock" << endl;
 
   if (publishedName != namesArr[0]){
@@ -376,7 +381,6 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 	string rover = message->header.frame_id;
 	rover = rover.substr(0,rover.find("/"));
-//	cout << rover << " entered odom Subscriver1" << endl;
 	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
 	tf::Matrix3x3 m(q);
 	double roll, pitch, yaw;
@@ -386,16 +390,13 @@ void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 		x1offset = -1 * cos(orntn[1]);
 		y1offset = -1 * sin(orntn[1]);
 		o1once = false;
-//		cout << rover << " Orntn: " << orntn[1]<< " x Offset: " << x1offset << " y Offset: "<< y1offset << endl;
 	}
 	xpos[1] = message->pose.pose.position.x + x1offset;
 	ypos[1] = message->pose.pose.position.y + y1offset;
-//	cout << rover << " Orntn: " << orntn[1]<< " x Offset: " << x1offset << " XPos: " << xpos[1] << " y Offset: "<< y1offset << " YPos: " << ypos[1] << endl;
 }
 void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 	string rover = message->header.frame_id;
 	rover = rover.substr(0,rover.find("/"));
-//	cout << rover << " entered odom Subscriver2" << endl;
 	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
 	tf::Matrix3x3 m(q);
 	double roll, pitch, yaw;
@@ -405,46 +406,36 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 		x2offset = -1 * cos(orntn[2]);
 		y2offset = -1 * sin(orntn[2]);
 		o2once = false;
-//		cout << rover << " Orntn: " << orntn[2]<< " x Offset: " << x2offset << " y Offset: "<< y2offset << endl;
 	}
 	xpos[2] = message->pose.pose.position.x + x2offset;
 	ypos[2] = message->pose.pose.position.y + y2offset;
-//	cout << rover << " Orntn: " << orntn[2]<< " x Offset: " << x2offset << " XPos: " << xpos[2] << " y Offset: "<< y2offset << " YPos: " << ypos[2] << endl;
 }
 
 void roverNameHandler(const std_msgs::String& message){
 	for(int i=0;i<namesArrSize; i++){
 		if(namesArr[i].compare("test") == 0){
 			namesArr[i] = message.data;
+			cout << "namesArray : " << namesArr[i] << endl;
 			i=7;
 		}
 		else if(namesArr[i].compare(message.data)==0){
 			i=7;
 		}
 	}
-	for(int i=0; i<namesArrSize; i++){ 
-	//	cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
-		// allRoversPublisher.publish(message);
-	}
+	roverLock = false;
 }
 
-void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
+void modeHandler2(const std_msgs::UInt8::ConstPtr& message) {
 	currentMode = message->data;
 	cout << "Mode message:" << currentMode << endl;
-	if(currentMode == 2 || currentMode == 3){
-		gridLock = true;
-	}
+	modeLock = false;
 }
 
 bool sonarOverlapCheck(const float x, const float y, const char l){
 	for(int inner = 1; inner <= arrCount; inner++){
 		float qx = xpos[inner];
 		float qy = ypos[inner];
-//		cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
-//		cout <<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
 		if (qx <= (x + 2*CELLDIVISION) && qx >= (x - 2*CELLDIVISION) && qy <= (y + 2*CELLDIVISION) && qy >= (y - 2*CELLDIVISION)){
-			cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
-			cout <<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
 			cout << "Match found"<<endl;
 			return true;
 		}
