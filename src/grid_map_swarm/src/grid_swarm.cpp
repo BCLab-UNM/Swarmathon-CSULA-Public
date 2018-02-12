@@ -14,7 +14,7 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
 #include <unistd.h>
-//#include "grid_swarm.h"
+#include "grid_swarm.h"
 
 
 using namespace std;
