@@ -150,7 +150,6 @@ ros::Subscriber virtualFenceSubscriber;
 // manualWaypointSubscriber listens on "/<robot>/waypoints/cmd" for
 // swarmie_msgs::Waypoint messages.
 ros::Subscriber manualWaypointSubscriber;
-ros::Subscriber roverNameSubscriber;
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -183,7 +182,6 @@ void behaviourStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
-void nameHandler(const std_msgs::String& message);
 
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
@@ -219,8 +217,6 @@ int main(int argc, char **argv) {
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
 
-  roverNameSubscriber = mNH.subscribe(("/roverNames"), 1, nameHandler);
-  
   status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);
   stateMachinePublish = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);
   fingerAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/fingerAngle/cmd"), 1, true);
@@ -759,26 +755,5 @@ void humanTime() {
   //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
 }
 
-void nameHandler(const std_msgs::String& message){
-
-  if(true){
-    for(int i=0;i<namesArrSize; i++){
-      if(namesArr[i].empty()){
-        namesArr[i] = message.data;
-        cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
-        i=7;
-      }
-      else if(namesArr[i].compare(message.data)==0){
-      i=7;
-      }
-      else{
-      
-      }
-    } 
-    //cout << "names array:" << namesArr[0] << endl;   
-  }else{
-  }
-
-}
 
 
