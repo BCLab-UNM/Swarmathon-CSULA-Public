@@ -14,6 +14,8 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
 #include <unistd.h>
+//#include "grid_swarm.h"
+
 
 using namespace std;
 
@@ -70,21 +72,21 @@ using namespace Eigen;
 
 bool sonarOverlapCheck(const float x, const float y, const char l);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
-
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
-  void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
-  void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
-  void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight);
+void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
+void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
+void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight);
 void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message);
-  void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft);
-  void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter);
-  void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight);
+void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft);
+void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter);
+void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight);
 void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
-  void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft);
-  void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
-  void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
+void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft);
+void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
+void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
 void roverNameHandler(const std_msgs::String& message);
 void modeHandler(const std_msgs::UInt8::ConstPtr& message); 
+
 
 int main(int argc, char **argv){
   gethostname(host, sizeof (host));
