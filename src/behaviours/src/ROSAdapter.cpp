@@ -133,7 +133,7 @@ ros::Publisher status_publisher;
 ros::Publisher fingerAnglePublish;
 ros::Publisher wristAnglePublish;
 ros::Publisher infoLogPublisher;
-ros::Publisher roverNamePublisher;
+//ros::Publisher roverNamePublisher;
 ros::Publisher driveControlPublish;
 ros::Publisher heartbeatPublisher;
 // Publishes swarmie_msgs::Waypoint messages on "/<robot>/waypooints"
@@ -222,10 +222,10 @@ int main(int argc, char **argv) {
   fingerAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/fingerAngle/cmd"), 1, true);
   wristAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/wristAngle/cmd"), 1, true);
   infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
-  roverNamePublisher = mNH.advertise<std_msgs::String>("/roverNames", 1, true);
   driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
+//  roverNamePublisher = mNH.advertise<std_msgs::String>("/roverNames", 1, true);
 
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   stateMachineTimer = mNH.createTimer(ros::Duration(behaviourLoopTimeStep), behaviourStateMachine);
@@ -247,10 +247,9 @@ int main(int argc, char **argv) {
   msg.data = ss.str();
   infoLogPublisher.publish(msg);
 
-
-  std_msgs::String nameMsg;
-  nameMsg.data=publishedName;
-  roverNamePublisher.publish(nameMsg);
+//  std_msgs::String nameMsg;
+//  nameMsg.data=publishedName;
+//  roverNamePublisher.publish(nameMsg);
 
   if(currentMode != 2 && currentMode != 3)
   {
@@ -754,6 +753,3 @@ void humanTime() {
   
   //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
 }
-
-
-

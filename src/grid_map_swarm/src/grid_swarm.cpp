@@ -106,14 +106,15 @@ int main(int argc, char **argv){
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
 //  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
-
 //SUBSCRIBER
+  roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
+
   do{
 	sleep(10);
 	cout << "Attempting Connection" << endl;
-	roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
 	modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeHandler2);
   }while (roverLock == true && modeLock == true);
+
   cout << "Entering GridLock: "<< publishedName <<"/mode" << endl;
   while(currentMode != 2){
 //	cout << "Current Mode: " << currentMode << endl;
