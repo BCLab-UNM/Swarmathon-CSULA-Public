@@ -19,9 +19,9 @@ sbridge::sbridge(std::string publishedName) {
     publish_heartbeat_timer = sNH.createTimer(ros::Duration(heartbeat_publish_interval), &sbridge::publishHeartBeatTimerEventHandler, this);
 
 
-    std_msgs::String nameMsg;
-    nameMsg.data=publishedName;
-    roverNamePublisher.publish(nameMsg);
+   std_msgs::String nameMsg;
+   nameMsg.data=publishedName;
+   roverNamePublisher.publish(nameMsg);
     ROS_INFO("constructor");
 
 }

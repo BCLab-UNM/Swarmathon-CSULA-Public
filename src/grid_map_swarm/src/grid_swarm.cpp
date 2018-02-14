@@ -1,19 +1,35 @@
 #include <ros/ros.h>
-#include <grid_map_ros/grid_map_ros.hpp>
-#include <grid_map_msgs/GridMap.h>
-#include <sensor_msgs/Range.h>
-#include <cmath>
-#include <sstream>
-#include <std_msgs/String.h>
-#include <std_msgs/UInt8.h>
+
+// ROS libraries
+#include <angles/angles.h>
+#include <random_numbers/random_numbers.h>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <grid_map_ros/grid_map_ros.hpp>
+#include <cmath>
+#include <sstream>
 #include <Eigen/Dense>
-#include <nav_msgs/Odometry.h>
-#include <tf/transform_datatypes.h>
-#include <tf/transform_listener.h>
 #include <unistd.h>
+
+// ROS messages
+#include <std_msgs/Float32.h>
+#include <std_msgs/Int16.h>
+#include <std_msgs/UInt8.h>
+#include <std_msgs/String.h>
+#include <sensor_msgs/Joy.h>
+#include <sensor_msgs/Range.h>
+#include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Twist.h>
+#include <nav_msgs/Odometry.h>
+#include <std_msgs/Float32MultiArray.h>
+#include <grid_map_msgs/GridMap.h>
+
+#include <signal.h>
+
+#include <exception>
 
 using namespace std;
 
@@ -103,30 +119,24 @@ int main(int argc, char **argv){
   ros::init(argc, argv, (hostname + "_GRIDSWARM"), ros::init_options::NoSigintHandler);
   ros::NodeHandle gNH;
 //PUBLISH
+//  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-//  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
+
 //SUBSCRIBER
   roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
 
   do{
 	sleep(10);
 	cout << "Attempting Connection" << endl;
-	modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeHandler2);
-  }while (roverLock == true && modeLock == true);
-
-  cout << "Entering GridLock: "<< publishedName <<"/mode" << endl;
-  while(currentMode != 2){
-//	cout << "Current Mode: " << currentMode << endl;
-  }
-  cout << "Exiting GridLock" << endl;
+  }while (roverLock == true);
 
   if (publishedName != namesArr[0]){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
 	return 0;
   }
 
-  cout << publishedName << " Was Listed first listed. Starting Grid-Map" <<endl;
+  cout << publishedName << " was Listed first listed. Starting Grid-Map" <<endl;
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("/grid_map", 1);
 
   for(int i = 0; i < namesArrSize; i++){
@@ -416,7 +426,7 @@ void roverNameHandler(const std_msgs::String& message){
 	for(int i=0;i<namesArrSize; i++){
 		if(namesArr[i].compare("test") == 0){
 			namesArr[i] = message.data;
-			cout << "namesArray : " << namesArr[i] << endl;
+			cout << "GRIDSWARM:namesArray : " << namesArr[i] << endl;
 			i=7;
 		}
 		else if(namesArr[i].compare(message.data)==0){
