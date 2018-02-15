@@ -121,6 +121,7 @@ Result result;
 
 std_msgs::String msg;
 std_msgs::String names;
+std::string n = "";
 
 geometry_msgs::Twist velocity;
 char host[128];
@@ -138,6 +139,7 @@ ros::Publisher heartbeatPublisher;
 // Publishes swarmie_msgs::Waypoint messages on "/<robot>/waypooints"
 // to indicate when waypoints have been reached.
 ros::Publisher waypointFeedbackPublisher;
+ros::Publisher chainNamePublisher;
 
 // Subscribers
 ros::Subscriber joySubscriber;
@@ -227,6 +229,7 @@ int main(int argc, char **argv) {
   driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
+  chainNamePublisher = mNH.advertise<std_msgs::String>(("/chainName"), 1, true);
 
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   stateMachineTimer = mNH.createTimer(ros::Duration(behaviourLoopTimeStep), behaviourStateMachine);
@@ -750,15 +753,11 @@ void humanTime() {
   
   //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
 }
+
 void roverNameHandler(const std_msgs::String& message){
-	for(int i=0;i<namesArrSize; i++){
-		if(namesArr[i].compare("test") == 0){
-			namesArr[i] = message.data;
-			cout << "ROSADAPTER:namesArray : " << namesArr[i] << endl;
-			i=7;
-		}
-		else if(namesArr[i].compare(message.data)==0){
-			i=7;
-		}
-	}
+	n += message.data + ",";
+	names.data=n;
+	chainNamePublisher.publish(names);
+ 	cout << "ROSADAPTER:namesArray : " << n << endl;
 }
+
