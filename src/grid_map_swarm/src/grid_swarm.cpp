@@ -50,12 +50,12 @@ ros::Publisher gridswarmPublisher;
 ros::Publisher test;
 ros::Publisher heartbeatPublisher;
 //Subscriber
+ros::Subscriber roverNameSubscriber;
+ros::Subscriber modeSubscriber;
 ros::Subscriber sonarLeftSubscriber	,sonarLeftSubscriber1	,sonarLeftSubscriber2	;
 ros::Subscriber sonarCenterSubscriber	,sonarCenterSubscriber1	,sonarCenterSubscriber2	;
 ros::Subscriber sonarRightSubscriber	,sonarRightSubscriber1	,sonarRightSubscriber2	;
 ros::Subscriber odometrySubscriber	,odometrySubscriber1	,odometrySubscriber2	;
-ros::Subscriber roverNameSubscriber;
-ros::Subscriber modeSubscriber;
 
 //Timer
 ros::Timer publish_heartbeat_timer;
@@ -64,7 +64,7 @@ std::string publishedName;
 //Global
   const double pi = std::acos(-1);
   const int namesArrSize=6;
-  string namesArr[namesArrSize] = {"test","test","test","test","test","test"};//"ajax""aeneas""achilles"
+  string namesArr[namesArrSize] = {"achilles","test","test","test","test","test"};//"achilles","ajax","aeneas"
   int currentMode = 0;
   int arrCount = 0;
   float sleft[namesArrSize];
@@ -86,6 +86,9 @@ using namespace Eigen;
 bool sonarOverlapCheck(const float x, const float y, const char l);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 
+void roverNameHandler(const std_msgs::String& message);
+void modeHandler2(const std_msgs::UInt8::ConstPtr& message); 
+
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
   void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
@@ -99,8 +102,6 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
   void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
 
-void roverNameHandler(const std_msgs::String& message);
-void modeHandler2(const std_msgs::UInt8::ConstPtr& message); 
 
 int main(int argc, char **argv){
   gethostname(host, sizeof (host));
@@ -116,15 +117,23 @@ int main(int argc, char **argv){
  }
   
   // NoSignalHandler so we can catch SIGINT ourselves and shutdown the node
-  ros::init(argc, argv, (hostname + "_GRIDSWARM"), ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, (hostname + "_GRID"), ros::init_options::NoSigintHandler);
   ros::NodeHandle gNH;
+//SUBSCRIBER
+  roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
 //PUBLISH
 //  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
 
-//SUBSCRIBER
-  roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
+  ros::Rate rate(30.0);
+  // Create grid Rover Specific Map.
+  GridMap map({"elevation"});
+  map.setFrameId("map");
+  map.setGeometry(Length(15.5, 15.5), CELLDIVISION);
+  ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
+    map.getLength().x(), map.getLength().y(),
+    map.getSize()(0), map.getSize()(1));  
 
   do{
 	sleep(10);
@@ -171,14 +180,6 @@ int main(int argc, char **argv){
   }//END OF FOR LOOP
   cout << " + Exit Subscriber loop -"<< "- arrCount:"<<arrCount<< endl;
 
-  ros::Rate rate(30.0);
-  // Create grid Rover Specific Map.
-  GridMap map({"elevation"});
-  map.setFrameId("map");
-  map.setGeometry(Length(15.5, 15.5), CELLDIVISION);
-  ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
-    map.getLength().x(), map.getLength().y(),
-    map.getSize()(0), map.getSize()(1));  
 
   while (ros::ok()) {
 	//cout << "Enter ROS OK"<<endl;
@@ -423,17 +424,19 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 }
 
 void roverNameHandler(const std_msgs::String& message){
+	cout << "GRIDSWARM:EnterNameHandler : " << endl;
 	for(int i=0;i<namesArrSize; i++){
+		cout << "GRIDSWARM:Inner Loop : "<< i << endl;
 		if(namesArr[i].compare("test") == 0){
 			namesArr[i] = message.data;
 			cout << "GRIDSWARM:namesArray : " << namesArr[i] << endl;
 			i=7;
 		}
 		else if(namesArr[i].compare(message.data)==0){
+			roverLock = false;
 			i=7;
 		}
 	}
-	roverLock = false;
 }
 
 void modeHandler2(const std_msgs::UInt8::ConstPtr& message) {
