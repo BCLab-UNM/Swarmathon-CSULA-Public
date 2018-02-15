@@ -11,6 +11,7 @@ sbridge::sbridge(std::string publishedName) {
     heartbeatPublisher = sNH.advertise<std_msgs::String>((publishedName + "/sbridge/heartbeat"), 1, false);
     skidsteerPublish = sNH.advertise<geometry_msgs::Twist>((publishedName + "/skidsteer"), 10);
     infoLogPublisher = sNH.advertise<std_msgs::String>("/infoLog", 1, true);
+    roverNamePublisher = sNH.advertise<std_msgs::String>("/roverNames", 1, true);
 
 //    publishNamePublisher = sNH.advertise<std_msgs::String>("/roverName",1);
 
@@ -18,7 +19,10 @@ sbridge::sbridge(std::string publishedName) {
     publish_heartbeat_timer = sNH.createTimer(ros::Duration(heartbeat_publish_interval), &sbridge::publishHeartBeatTimerEventHandler, this);
 
 
-     ROS_INFO("constructor");
+   std_msgs::String nameMsg;
+   nameMsg.data=publishedName;
+   roverNamePublisher.publish(nameMsg);
+    ROS_INFO("constructor");
 
 }
 /*

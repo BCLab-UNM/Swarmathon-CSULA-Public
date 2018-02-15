@@ -1,21 +1,37 @@
 #include <ros/ros.h>
-#include <grid_map_ros/grid_map_ros.hpp>
-#include <grid_map_msgs/GridMap.h>
-#include <sensor_msgs/Range.h>
-#include <cmath>
-#include <sstream>
-#include <std_msgs/String.h>
-#include <std_msgs/UInt8.h>
+
+// ROS libraries
+#include <angles/angles.h>
+#include <random_numbers/random_numbers.h>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <grid_map_ros/grid_map_ros.hpp>
+#include <cmath>
+#include <sstream>
 #include <Eigen/Dense>
-#include <nav_msgs/Odometry.h>
-#include <tf/transform_datatypes.h>
-#include <tf/transform_listener.h>
 #include <unistd.h>
 #include "grid_swarm.h"
 
+
+// ROS messages
+#include <std_msgs/Float32.h>
+#include <std_msgs/Int16.h>
+#include <std_msgs/UInt8.h>
+#include <std_msgs/String.h>
+#include <sensor_msgs/Joy.h>
+#include <sensor_msgs/Range.h>
+#include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Twist.h>
+#include <nav_msgs/Odometry.h>
+#include <std_msgs/Float32MultiArray.h>
+#include <grid_map_msgs/GridMap.h>
+
+#include <signal.h>
+
+#include <exception>
 
 using namespace std;
 
@@ -36,12 +52,11 @@ ros::Publisher gridswarmPublisher;
 ros::Publisher test;
 ros::Publisher heartbeatPublisher;
 //Subscriber
+ros::Subscriber roverNameSubscriber;
 ros::Subscriber sonarLeftSubscriber	,sonarLeftSubscriber1	,sonarLeftSubscriber2	;
 ros::Subscriber sonarCenterSubscriber	,sonarCenterSubscriber1	,sonarCenterSubscriber2	;
 ros::Subscriber sonarRightSubscriber	,sonarRightSubscriber1	,sonarRightSubscriber2	;
 ros::Subscriber odometrySubscriber	,odometrySubscriber1	,odometrySubscriber2	;
-ros::Subscriber roverNameSubscriber;
-ros::Subscriber modeSubscriber;
 
 //Timer
 ros::Timer publish_heartbeat_timer;
@@ -51,7 +66,7 @@ std::string publishedName;
   const double pi = std::acos(-1);
   const int namesArrSize=6;
 
-  string namesArr[namesArrSize] = {"test","test","test","test","test","test"};//"ajax""aeneas""achilles"
+  string namesArr[namesArrSize] = {"test","test","test","test","test","test"};//"achilles","ajax","aeneas"
   int currentMode = 0;
   int arrCount = 0;
   float sleft[namesArrSize];
@@ -62,7 +77,6 @@ std::string publishedName;
   float ypos[namesArrSize];
   char host[128];
   bool firstgo = true;
-  bool gridLock = false;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
@@ -70,8 +84,10 @@ using namespace std;
 using namespace grid_map;
 using namespace Eigen;
 
-bool sonarOverlapCheck(const float x, const float y, const char l);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
+
+void roverNameHandler(const std_msgs::String& message);
+
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
 void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
 void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
@@ -81,11 +97,9 @@ void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft);
 void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter);
 void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight);
 void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
-void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft);
 void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
 void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
-void roverNameHandler(const std_msgs::String& message);
-void modeHandler(const std_msgs::UInt8::ConstPtr& message); 
+
 
 
 int main(int argc, char **argv){
@@ -102,32 +116,31 @@ int main(int argc, char **argv){
  }
   
   // NoSignalHandler so we can catch SIGINT ourselves and shutdown the node
-  ros::init(argc, argv, (hostname + "_GRIDSWARM"), ros::init_options::NoSigintHandler);
+  ros::init(argc, argv, (hostname + "_GRID"), ros::init_options::NoSigintHandler);
   ros::NodeHandle gNH;
+//SUBSCRIBER
+  roverNameSubscriber = gNH.subscribe(("/chainName"), 1, roverNameHandler);
+
 //PUBLISH
+//gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-//  gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
 
-//SUBSCRIBER
-  roverNameSubscriber = gNH.subscribe(("/roverNames"), 1, roverNameHandler);
+ ros::Rate rate(30.0);
+  sleep(30);
+  ros::spinOnce();
+  rate.sleep();
 
-  modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeHandler);
-  
-  cout << "Entering GridLock" << endl;
-  while(currentMode != 2){}
-  cout << "Exiting GridLock" << endl;
 
   if (publishedName != namesArr[0]){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
 	return 0;
   }
 
-  cout << publishedName << " Was Listed first listed. Starting Grid-Map" <<endl;
+  cout << publishedName << " was Listed first listed. Starting Grid-Map" <<endl;
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("/grid_map", 1);
-
   for(int i = 0; i < namesArrSize; i++){
-	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop"<<endl;
+//	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop"<<endl;
 	if (namesArr[i] != "test"){
 		arrCount = i;
 		publishedName = namesArr[i];
@@ -157,7 +170,7 @@ int main(int argc, char **argv){
 	}//END OF IF STATEMENT
   }//END OF FOR LOOP
   cout << " + Exit Subscriber loop -"<< "- arrCount:"<<arrCount<< endl;
-  ros::Rate rate(20.0);
+
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
@@ -286,7 +299,7 @@ firstgo = false;
 	//PUBLISH Rover Specific Grid Map
 	GridMapRosConverter::toMessage(map, message);
 	gridswarmPublisher.publish(message);
-	ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
+//	ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
 	
 	// Wait for next cycle.
 	ros::spinOnce();
@@ -379,7 +392,6 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 	string rover = message->header.frame_id;
 	rover = rover.substr(0,rover.find("/"));
-//	cout << rover << " entered odom Subscriver1" << endl;
 	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
 	tf::Matrix3x3 m(q);
 	double roll, pitch, yaw;
@@ -390,16 +402,13 @@ void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 		x1offset = -1 * cos(orntn[1]);
 		y1offset = -1 * sin(orntn[1]);
 		o1once = false;
-//		cout << rover << " Orntn: " << orntn[1]<< " x Offset: " << x1offset << " y Offset: "<< y1offset << endl;
 	}
 	xpos[1] = message->pose.pose.position.x + x1offset;
 	ypos[1] = message->pose.pose.position.y + y1offset;
-//	cout << rover << " Orntn: " << orntn[1]<< " x Offset: " << x1offset << " XPos: " << xpos[1] << " y Offset: "<< y1offset << " YPos: " << ypos[1] << endl;
 }
 void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 	string rover = message->header.frame_id;
 	rover = rover.substr(0,rover.find("/"));
-//	cout << rover << " entered odom Subscriver2" << endl;
 	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
 	tf::Matrix3x3 m(q);
 	double roll, pitch, yaw;
@@ -409,50 +418,23 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 		x2offset = -1 * cos(orntn[2]);
 		y2offset = -1 * sin(orntn[2]);
 		o2once = false;
-//		cout << rover << " Orntn: " << orntn[2]<< " x Offset: " << x2offset << " y Offset: "<< y2offset << endl;
 	}
 	xpos[2] = message->pose.pose.position.x + x2offset;
 	ypos[2] = message->pose.pose.position.y + y2offset;
-//	cout << rover << " Orntn: " << orntn[2]<< " x Offset: " << x2offset << " XPos: " << xpos[2] << " y Offset: "<< y2offset << " YPos: " << ypos[2] << endl;
 }
 
 void roverNameHandler(const std_msgs::String& message){
+	std::string list= message.data;
 	for(int i=0;i<namesArrSize; i++){
 		if(namesArr[i].compare("test") == 0){
-			namesArr[i] = message.data;
-			i=7;
-		}
-		else if(namesArr[i].compare(message.data)==0){
-			i=7;
-		}
-	}
-	for(int i=0; i<namesArrSize; i++){ 
-	//	cout << "namesArr[" << i << "] =" << namesArr[i]<< endl;
-		// allRoversPublisher.publish(message);
-	}
-}
 
-
-void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
-	currentMode = message->data;
-	cout << "Mode message:" << currentMode << endl;
-	if(currentMode == 2 || currentMode == 3){
-		gridLock = true;
-	}
-}
-
-bool sonarOverlapCheck(const float x, const float y, const char l){
-	for(int inner = 1; inner <= arrCount; inner++){
-		float qx = xpos[inner];
-		float qy = ypos[inner];
-//		cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
-//		cout <<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
-		if (qx <= (x + 2*CELLDIVISION) && qx >= (x - 2*CELLDIVISION) && qy <= (y + 2*CELLDIVISION) && qy >= (y - 2*CELLDIVISION)){
-			cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
-			cout <<"|| Sonar "<<l<<":"<<"("<<x<<","<<y<<")"<<endl;
-			cout << "Match found"<<endl;
-			return true;
+			int index = list.find(",");
+			namesArr[i] = list.substr(0,index);
+			list.erase(0,index+1);
+//			cout << "GRIDSWARM:namesArray "<<i<<": " << namesArr[i] << endl;
+			if (list.empty()){
+				i = namesArrSize;
+			}
 		}
 	}
-	return false;
 }

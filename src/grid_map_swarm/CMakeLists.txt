@@ -4,7 +4,6 @@ project(grid_map_swarm)
 SET(CMAKE_CXX_FLAGS "-std=c++11")
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
   grid_map_core
   grid_map_ros
   grid_map_cv
@@ -15,15 +14,18 @@ find_package(catkin REQUIRED COMPONENTS
   grid_map_rviz_plugin
   grid_map_visualization
   geometry_msgs
+  roscpp
   sensor_msgs
+  std_msgs
+  tf
+  swarmie_msgs
   cv_bridge
   octomap_msgs
   filters
-  tf
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp grid_map_core grid_map_ros grid_map_cv grid_map_filters grid_map_loader grid_map_msgs grid_map_octomap grid_map_rviz_plugin grid_map_visualization geometry_msgs sensor_msgs cv_bridge octomap_msgs filters tf
+  CATKIN_DEPENDS grid_map_core grid_map_ros grid_map_cv grid_map_filters grid_map_loader grid_map_msgs grid_map_octomap grid_map_rviz_plugin grid_map_visualization geometry_msgs roscpp sensor_msgs std_msgs tf swarmie_msgs cv_bridge octomap_msgs filters
 )
 
 include_directories(

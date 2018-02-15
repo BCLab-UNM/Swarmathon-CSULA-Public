@@ -31,6 +31,7 @@ class sbridge {
 		ros::Publisher heartbeatPublisher;
 		ros::Publisher infoLogPublisher;
 		ros::Publisher publishNamePublisher;
+    		ros::Publisher roverNamePublisher;
 
 		//Subscribers
 		ros::Subscriber driveControlSubscriber;
