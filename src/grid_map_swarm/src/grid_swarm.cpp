@@ -51,7 +51,6 @@ ros::Publisher test;
 ros::Publisher heartbeatPublisher;
 //Subscriber
 ros::Subscriber roverNameSubscriber;
-ros::Subscriber modeSubscriber;
 ros::Subscriber sonarLeftSubscriber	,sonarLeftSubscriber1	,sonarLeftSubscriber2	;
 ros::Subscriber sonarCenterSubscriber	,sonarCenterSubscriber1	,sonarCenterSubscriber2	;
 ros::Subscriber sonarRightSubscriber	,sonarRightSubscriber1	,sonarRightSubscriber2	;
@@ -75,7 +74,6 @@ std::string publishedName;
   float ypos[namesArrSize];
   char host[128];
   bool firstgo = true;
-  bool modeLock = true, roverLock = true;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
@@ -86,7 +84,6 @@ using namespace Eigen;
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 
 void roverNameHandler(const std_msgs::String& message);
-void modeHandler2(const std_msgs::UInt8::ConstPtr& message); 
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
@@ -130,12 +127,8 @@ int main(int argc, char **argv){
   sleep(30);
   ros::spinOnce();
   rate.sleep();
-/*
-  do{
-	sleep(10);
-	cout << "Attempting Connection" << endl;
-  }while (roverLock == true);
-*/
+
+
   if (publishedName != namesArr[0]){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
 	return 0;
@@ -144,7 +137,7 @@ int main(int argc, char **argv){
   cout << publishedName << " was Listed first listed. Starting Grid-Map" <<endl;
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("/grid_map", 1);
   for(int i = 0; i < namesArrSize; i++){
-	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop"<<endl;
+//	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop"<<endl;
 	if (namesArr[i] != "test"){
 		arrCount = i;
 		publishedName = namesArr[i];
@@ -432,27 +425,10 @@ void roverNameHandler(const std_msgs::String& message){
 			int index = list.find(",");
 			namesArr[i] = list.substr(0,index);
 			list.erase(0,index+1);
-			cout << "GRIDSWARM:namesArray "<<i<<": " << namesArr[i] << endl;
+//			cout << "GRIDSWARM:namesArray "<<i<<": " << namesArr[i] << endl;
+			if (list.empty()){
+				i = namesArrSize;
+			}
 		}
 	}
-}
-/*
-void roverNameHandler(const std_msgs::String& message){
-	cout << "GRIDSWARM:Entered NameHandler " << endl;
-	for(int i=0;i<namesArrSize; i++){
-		if(namesArr[i].compare("test") == 0){
-			namesArr[i] = message.data;
-			cout << "GRIDSWARM:namesArray "<<i<<": " << namesArr[i] << endl;
-			i=namesArrSize;
-		}
-		else if(namesArr[i].compare(message.data)==0){
-			i=namesArrSize;
-		}
-	}
-}
-*/
-void modeHandler2(const std_msgs::UInt8::ConstPtr& message) {
-	currentMode = message->data;
-	cout << "Mode message:" << currentMode << endl;
-	modeLock = false;
 }
