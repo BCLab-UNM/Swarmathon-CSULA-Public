@@ -35,13 +35,14 @@ using namespace std;
 
 float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
+const float ROVERHALF = 0.20;
 const float WALL = 1;
 const float FOG = -0.5;
 const float ROVER = 0.5;
 const float DISCOVER = 0.0;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
-/*->->->->->->->->->*/	bool SIMMODE = true;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
+/*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 
 //Publisher
@@ -177,7 +178,6 @@ int main(int argc, char **argv){
     map.getSize()(0), map.getSize()(1));  
 
   while (ros::ok()) {
-	//cout << "Enter ROS OK"<<endl;
 	// Add data to Rover Specific Grid Map.
 	ros::Time time = ros::Time::now();
 	//Center Mat being Discovered
@@ -231,7 +231,7 @@ int main(int argc, char **argv){
 				for(int inner = 1; inner <= arrCount; inner++){
 					float qx = xpos[inner];
 					float qy = ypos[inner];
-					if (qx <= (cx + 2*CELLDIVISION) && qx >= (cx - 2*CELLDIVISION) && qy <= (cy + 2*CELLDIVISION) && qy >= (cy - 2*CELLDIVISION)){
+					if (qx <= (cx + ROVERHALF) && qx >= (cx - ROVERHALF) && qy <= (cy + ROVERHALF) && qy >= (cy - ROVERHALF)){
 					//	cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
 					//	cout <<"|| Sonar "<<":"<<"("<<cx<<","<<cy<<")"<<endl;
 					//	cout << "Match found"<<endl;
@@ -253,7 +253,7 @@ int main(int argc, char **argv){
 				for(int inner = 1; inner <= arrCount; inner++){
 					float qx = xpos[inner];
 					float qy = ypos[inner];
-					if (qx <= (lx + 2*CELLDIVISION) && qx >= (lx - 2*CELLDIVISION) && qy <= (ly + 2*CELLDIVISION) && qy >= (ly - 2*CELLDIVISION)){
+					if (qx <= (lx + ROVERHALF) && qx >= (lx - ROVERHALF) && qy <= (ly + ROVERHALF) && qy >= (ly - ROVERHALF)){
 					//	cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
 					//	cout <<"|| Sonar "<<":"<<"("<<lx<<","<<ly<<")"<<endl;
 					//	cout << "Match found"<<endl;
@@ -275,7 +275,7 @@ int main(int argc, char **argv){
 				for(int inner = 1; inner <= arrCount; inner++){
 					float qx = xpos[inner];
 					float qy = ypos[inner];
-					if (qx <= (rx + 2*CELLDIVISION) && qx >= (rx - 2*CELLDIVISION) && qy <= (ry + 2*CELLDIVISION) && qy >= (ry - 2*CELLDIVISION)){
+					if (qx <= (rx + ROVERHALF) && qx >= (rx - ROVERHALF) && qy <= (ry + ROVERHALF) && qy >= (ry - ROVERHALF)){
 					//	cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
 					//	cout <<"|| Sonar "<<":"<<"("<<rx<<","<<ry<<")"<<endl;
 					//	cout << "Match found"<<endl;
@@ -368,23 +368,20 @@ void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight) {
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	string rover = message->header.frame_id;
 	rover = rover.substr(0,rover.find("/"));
-//	cout << rover << " entered odom Subscriver0" << endl;
 	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
 	tf::Matrix3x3 m(q);
 	double roll, pitch, yaw;
 	m.getRPY(roll, pitch, yaw);
 	orntn[0] = yaw;
-//With orntn, get lenght form center, with this create offset for rover from center
 	if (o0once == true){
-		x0offset = -1 * cos(orntn[0]);
-		y0offset = -1 * sin(orntn[0]);
+		x0offset = (-1 - ROVERHALF) * cos(orntn[0]);
+		y0offset = (-1 - ROVERHALF) * sin(orntn[0]);
 		o0once = false;
-//		cout << rover << " Orntn: " << orntn[0]<< " x Offset: " << x1offset << " y Offset: "<< y1offset << endl;
 	}
 	xpos[0] = message->pose.pose.position.x + x0offset;
 	ypos[0] = message->pose.pose.position.y + y0offset;
-//	cout << rover << " Orntn: " << orntn[0]<< " x Offset: " << x0offset << " XPos: " << xpos[0] << " y Offset: "<< y0offset << " YPos: " << ypos[0] << endl;
 }
+
 void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 	string rover = message->header.frame_id;
 	rover = rover.substr(0,rover.find("/"));
@@ -394,8 +391,8 @@ void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[1] = yaw;
 	if (o1once == true){
-		x1offset = -1 * cos(orntn[1]);
-		y1offset = -1 * sin(orntn[1]);
+		x1offset = (-1 - ROVERHALF) * cos(orntn[1]);
+		y1offset = (-1 - ROVERHALF) * sin(orntn[1]);
 		o1once = false;
 	}
 	xpos[1] = message->pose.pose.position.x + x1offset;
@@ -410,8 +407,8 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[2] = yaw;
 	if (o2once == true){
-		x2offset = -1 * cos(orntn[2]);
-		y2offset = -1 * sin(orntn[2]);
+		x2offset = (-1 - ROVERHALF) * cos(orntn[2]);
+		y2offset = (-1 - ROVERHALF) * sin(orntn[2]);
 		o2once = false;
 	}
 	xpos[2] = message->pose.pose.position.x + x2offset;
