@@ -133,8 +133,16 @@ Result DropOffController::DoWork() {
   if (count > 0 || seenEnoughCenterTags || prevCount > 0) //if we have a target and the center is located drive towards it.
   {
 
-    cout << "DROPOFF: Center Seen" << endl;
+    if (seenEnoughCenterTags) { //if the rover sees enough center tags
+        cout << "DROPOFF: Driving into the center" << endl;
+    }
+    else
+    {
+        cout << "DROPOFF: Center Seen" << endl;
+    }
     centerSeen = true;
+
+    cout <<  "DROPOFF: Count: " << count << "\tLeft: " << countLeft << "\tRight: " << countRight << endl;
 
     if (first_center && isPrecisionDriving)
     {
@@ -148,15 +156,27 @@ Result DropOffController::DoWork() {
 
     if (seenEnoughCenterTags) //if we have seen enough tags
     {
-      if ((countLeft-10) > countRight) //and there are too many on the left
+      if ((countLeft-5) > countRight) //if there are too many on the left assuming the rover is inside the collection zone
       {
-        right = false; //then we say none on the right to cause us to turn right
-//          left = false; //TODO: checking to see if the rover doesn't drop the cube just outside of the collection zone
+          if (countRight > 0) //if there are more tags on the right
+          {
+              right = false;
+          }
+          else
+          {
+              left = false; //then we say none on the right to cause us to turn right
+          }
       }
-      else if ((countRight-10) > countLeft)
+      else if ((countRight-5) > countLeft)
       {
-        left = false; //or left in this case
-//          right = false; //TODO: checking to see if the rover doesn't drop the cube just outside of the collection zone
+          if (countLeft > 0) //if there are more tags on the left
+          {
+              left = false;
+          }
+          else
+          {
+              right = false; //then we say none on the right to cause us to turn right
+          }
       }
     }
 
