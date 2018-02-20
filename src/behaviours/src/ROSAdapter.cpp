@@ -84,9 +84,6 @@ Point updateCenterLocation();
 void transformMapCentertoOdom();
 
 
-const int namesArrSize=6;
-string namesArr[namesArrSize] = {"test","test","test","test","test","test"};
-
 // Numeric Variables for rover positioning
 geometry_msgs::Pose2D currentLocation;
 geometry_msgs::Pose2D currentLocationMap;
@@ -152,6 +149,7 @@ ros::Subscriber virtualFenceSubscriber;
 // swarmie_msgs::Waypoint messages.
 ros::Subscriber manualWaypointSubscriber;
 ros::Subscriber roverNameSubscriber;
+ros::Subscriber gridMapSubscriber;
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -185,6 +183,7 @@ void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
 void roverNameHandler(const std_msgs::String& message);
+void gridMapHandler(const grid_map_msgs::GridMap& message);
 
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
@@ -217,6 +216,7 @@ int main(int argc, char **argv) {
   virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
   manualWaypointSubscriber = mNH.subscribe((publishedName + "/waypoints/cmd"), 10, manualWaypointHandler);
   roverNameSubscriber = mNH.subscribe(("/roverNames"), 1, roverNameHandler);
+  gridMapSubscriber = mNH.subscribe(("//grid_map"), 1, gridMapHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
@@ -758,6 +758,10 @@ void roverNameHandler(const std_msgs::String& message){
 	n += message.data + ",";
 	names.data=n;
 	chainNamePublisher.publish(names);
- 	cout << "ROSADAPTER:namesArray : " << n << endl;
 }
 
+void gridMapHandler(const grid_map_msgs::GridMap& message){
+	n += message.data + ",";
+	names.data=n;
+	chainNamePublisher.publish(names);
+}
