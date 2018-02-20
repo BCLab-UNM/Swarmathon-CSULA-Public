@@ -40,7 +40,7 @@ const float WALL = 1;
 const float FOG = -0.5;
 const float ROVER = 0.5;
 const float DISCOVER = 0.0;
-const float DISCOVERSONAR = 0.25;
+const float SONARDISCOVER = 0.25;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
@@ -216,14 +216,15 @@ int main(int argc, char **argv){
 		}
 		//CENTER SONAR
 		bool overlap = false;
-		float cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
-		float cy = (sin(orntn[count]) * scenter[count]) + ypos[count];
+		double cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
+		double cy = (sin(orntn[count]) * scenter[count]) + ypos[count];
 		Eigen::Vector2d c(cx,cy);
-//		Position start(xpos, ypos);
-//		Position end(cx,cy);
-//	for(grid_map::LineIterator iterator(map,start,end); !iterator.isPastEnd(); ++iterator) {
-//		map.at("type", *iterator) = 0.25;
-//	}
+		Eigen::Vector2d start(xpos[count], ypos[count]);
+		for(grid_map::LineIterator iterator(map,start,c); !iterator.isPastEnd(); ++iterator) {
+			if (map.at("elevation", *iterator) == FOG){
+				map.at("elevation", *iterator) = SONARDISCOVER;
+			}
+		}
 		if (scenter[count] <= 2.8){
 			if (count == 0){
 				for(int inner = 1; inner <= arrCount; inner++){
@@ -239,11 +240,16 @@ int main(int argc, char **argv){
 			}
 		}
 		//LEFT SONAR
+		overlap = false;
+		float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
+		float ly = (sin((pi/6)+orntn[count]) * sleft[count]) + ypos[count];
+		Eigen::Vector2d l(lx,ly);
+		for(grid_map::LineIterator iterator(map,start,l); !iterator.isPastEnd(); ++iterator) {
+			if (map.at("elevation", *iterator) == FOG){
+				map.at("elevation", *iterator) = SONARDISCOVER;
+			}
+		}
 		if (sleft[count] <= 2.8){
-			bool overlap = false;
-			float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
-			float ly = (sin((pi/6)+orntn[count]) * sleft[count]) + ypos[count];
-			Eigen::Vector2d l(lx,ly);
 			if (count == 0){
 				for(int inner = 1; inner <= arrCount; inner++){
 					float qx = xpos[inner];
@@ -258,11 +264,16 @@ int main(int argc, char **argv){
 			}
 		}
 		//RIGHT SONAR
+		overlap = false;
+		float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
+		float ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + ypos[count];
+		Eigen::Vector2d r(rx,ry);
+		for(grid_map::LineIterator iterator(map,start,r); !iterator.isPastEnd(); ++iterator) {
+			if (map.at("elevation", *iterator) == FOG){
+				map.at("elevation", *iterator) = SONARDISCOVER;
+			}
+		}
 		if (sright[count] <= 2.8){
-			bool overlap = false;
-			float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
-			float ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + ypos[count];
-			Eigen::Vector2d r(rx,ry);
 			if (count == 0){
 				for(int inner = 1; inner <= arrCount; inner++){
 					float qx = xpos[inner];
