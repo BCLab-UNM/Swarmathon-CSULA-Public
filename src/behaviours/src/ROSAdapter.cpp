@@ -22,8 +22,11 @@
 #include <apriltags_ros/AprilTagDetectionArray.h>
 #include <std_msgs/Float32MultiArray.h>
 #include "swarmie_msgs/Waypoint.h"
+#include <grid_map_msgs/GridMap.h>
 
 // Include Controllers
+
+
 #include "LogicController.h"
 #include <vector>
 
@@ -81,6 +84,9 @@ Point updateCenterLocation();
 void transformMapCentertoOdom();
 
 
+const int namesArrSize=6;
+string namesArr[namesArrSize] = {"test","test","test","test","test","test"};
+
 // Numeric Variables for rover positioning
 geometry_msgs::Pose2D currentLocation;
 geometry_msgs::Pose2D currentLocationMap;
@@ -114,7 +120,8 @@ float drift_tolerance = 0.5; // meters
 Result result;
 
 std_msgs::String msg;
-
+std_msgs::String names;
+std::string n = "";
 
 geometry_msgs::Twist velocity;
 char host[128];
@@ -132,6 +139,7 @@ ros::Publisher heartbeatPublisher;
 // Publishes swarmie_msgs::Waypoint messages on "/<robot>/waypooints"
 // to indicate when waypoints have been reached.
 ros::Publisher waypointFeedbackPublisher;
+ros::Publisher chainNamePublisher;
 
 // Subscribers
 ros::Subscriber joySubscriber;
@@ -143,6 +151,7 @@ ros::Subscriber virtualFenceSubscriber;
 // manualWaypointSubscriber listens on "/<robot>/waypoints/cmd" for
 // swarmie_msgs::Waypoint messages.
 ros::Subscriber manualWaypointSubscriber;
+ros::Subscriber roverNameSubscriber;
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -175,12 +184,12 @@ void behaviourStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
+void roverNameHandler(const std_msgs::String& message);
 
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
 
 int main(int argc, char **argv) {
-  
   gethostname(host, sizeof (host));
   string hostname(host);
   
@@ -207,10 +216,11 @@ int main(int argc, char **argv) {
   mapSubscriber = mNH.subscribe((publishedName + "/odom/ekf"), 10, mapHandler);
   virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
   manualWaypointSubscriber = mNH.subscribe((publishedName + "/waypoints/cmd"), 10, manualWaypointHandler);
+  roverNameSubscriber = mNH.subscribe(("/roverNames"), 1, roverNameHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
-  
+
   status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);
   stateMachinePublish = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);
   fingerAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/fingerAngle/cmd"), 1, true);
@@ -219,6 +229,7 @@ int main(int argc, char **argv) {
   driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
   heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
+  chainNamePublisher = mNH.advertise<std_msgs::String>(("/chainName"), 1, true);
 
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
   stateMachineTimer = mNH.createTimer(ros::Duration(behaviourLoopTimeStep), behaviourStateMachine);
@@ -236,7 +247,7 @@ int main(int argc, char **argv) {
   infoLogPublisher.publish(msg);
   
   stringstream ss;
-  ss << "Rover start delay set to " << startDelayInSeconds << " seconds";
+  ss << publishedName << " Rover start delay set to " << startDelayInSeconds << " seconds";
   msg.data = ss.str();
   infoLogPublisher.publish(msg);
 
@@ -640,6 +651,10 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&) {
   heartbeatPublisher.publish(msg);
 }
 
+//void gridswarmHandler(const grid_map_msgs::GridMap message) {
+	
+//}
+
 long int getROSTimeInMilliSecs()
 {
   // Get the current time according to ROS (will be zero for simulated clock until the first time message is recieved).
@@ -740,3 +755,11 @@ void humanTime() {
   
   //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
 }
+
+void roverNameHandler(const std_msgs::String& message){
+	n += message.data + ",";
+	names.data=n;
+	chainNamePublisher.publish(names);
+ 	cout << "ROSADAPTER:namesArray : " << n << endl;
+}
+
