@@ -47,7 +47,6 @@ const float DISCOVER = 0.0;
 
 //Publisher
 ros::Publisher gridswarmPublisher;
-//ros::Publisher mainGridPublisher;
 ros::Publisher test;
 ros::Publisher heartbeatPublisher;
 //Subscriber
@@ -99,7 +98,6 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
   void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
 
-
 int main(int argc, char **argv){
   gethostname(host, sizeof (host));
   string hostname(host);
@@ -120,7 +118,6 @@ int main(int argc, char **argv){
   roverNameSubscriber = gNH.subscribe(("/chainName"), 1, roverNameHandler);
 
 //PUBLISH
-//gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
 
@@ -159,12 +156,6 @@ int main(int argc, char **argv){
 			sonarCenterSubscriber2 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter2);
 			sonarRightSubscriber2 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight2);
 		}
-	//	message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(gNH, (publishedName + "/sonarLeft"), 10);
-	//	message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(gNH, (publishedName + "/sonarCenter"), 10);
-	//	message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(gNH, (publishedName + "/sonarRight"), 10);
-	//	typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Range, sensor_msgs::Range, sensor_msgs::Range> sonarSyncPolicy;
-	//	message_filters::Synchronizer<sonarSyncPolicy> sonarSync(sonarSyncPolicy(10), sonarLeftSubscriber, sonarCenterSubscriber, sonarRightSubscriber);
-	//	sonarSync.registerCallback(boost::bind(&sonarHandler, _1, _2, _3));
 	}//END OF IF STATEMENT
   }//END OF FOR LOOP
   cout << " + Exit Subscriber loop -"<< "- arrCount:"<<arrCount<< endl;
@@ -178,10 +169,9 @@ int main(int argc, char **argv){
     map.getSize()(0), map.getSize()(1));  
 
   while (ros::ok()) {
-	// Add data to Rover Specific Grid Map.
 	ros::Time time = ros::Time::now();
-	//Center Mat being Discovered
 	if (firstgo == true){
+	//Populate the Entire Map intially to all FOG
 		cout << "Creating the initial FOG" << endl;
 		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 			Position position;
@@ -190,6 +180,7 @@ int main(int argc, char **argv){
 				map.at("elevation", *it) = FOG;
 			}	
 		}//END OF ITERATOR
+	//Center Mat being Discovered
 		cout << "Creating the Center Mat" << endl;
 		for (float length = -0.50; length <= 0.50;){
 			for(float width = -0.50; width <= 0.50;){
@@ -221,7 +212,7 @@ int main(int argc, char **argv){
 			}
 			length += CELLDIVISION;
 		}
-		//CENTER
+		//CENTER SONAR
 		if (scenter[count] <= 2.8){
 			bool overlap = false;
 			float cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
@@ -232,9 +223,6 @@ int main(int argc, char **argv){
 					float qx = xpos[inner];
 					float qy = ypos[inner];
 					if (qx <= (cx + ROVERHALF) && qx >= (cx - ROVERHALF) && qy <= (cy + ROVERHALF) && qy >= (cy - ROVERHALF)){
-					//	cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
-					//	cout <<"|| Sonar "<<":"<<"("<<cx<<","<<cy<<")"<<endl;
-					//	cout << "Match found"<<endl;
 						overlap = true;
 					}
 				}
@@ -243,7 +231,7 @@ int main(int argc, char **argv){
 				map.atPosition("elevation", c) = WALL;
 			}
 		}
-		//LEFT
+		//LEFT SONAR
 		if (sleft[count] <= 2.8){
 			bool overlap = false;
 			float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
@@ -254,9 +242,6 @@ int main(int argc, char **argv){
 					float qx = xpos[inner];
 					float qy = ypos[inner];
 					if (qx <= (lx + ROVERHALF) && qx >= (lx - ROVERHALF) && qy <= (ly + ROVERHALF) && qy >= (ly - ROVERHALF)){
-					//	cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
-					//	cout <<"|| Sonar "<<":"<<"("<<lx<<","<<ly<<")"<<endl;
-					//	cout << "Match found"<<endl;
 						overlap = true;
 					}
 				}
@@ -265,7 +250,7 @@ int main(int argc, char **argv){
 				map.atPosition("elevation", l) = WALL;
 			}
 		}
-		//RIGHT
+		//RIGHT SONAR
 		if (sright[count] <= 2.8){
 			bool overlap = false;
 			float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
@@ -276,9 +261,6 @@ int main(int argc, char **argv){
 					float qx = xpos[inner];
 					float qy = ypos[inner];
 					if (qx <= (rx + ROVERHALF) && qx >= (rx - ROVERHALF) && qy <= (ry + ROVERHALF) && qy >= (ry - ROVERHALF)){
-					//	cout << namesArr[inner]<<":"<<"("<<qx<<","<<qy<<")"<< endl;
-					//	cout <<"|| Sonar "<<":"<<"("<<rx<<","<<ry<<")"<<endl;
-					//	cout << "Match found"<<endl;
 						overlap = true;
 					}
 				}
@@ -293,7 +275,6 @@ int main(int argc, char **argv){
 	// Publish grid map.
 	map.setTimestamp(time.toNSec());
 	grid_map_msgs::GridMap message;
-	//PUBLISH Rover Specific Grid Map
 	GridMapRosConverter::toMessage(map, message);
 	gridswarmPublisher.publish(message);
 //	ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
