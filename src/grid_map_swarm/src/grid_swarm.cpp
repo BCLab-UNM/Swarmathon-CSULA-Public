@@ -40,6 +40,7 @@ const float WALL = 1;
 const float FOG = -0.5;
 const float ROVER = 0.5;
 const float DISCOVER = 0.0;
+const float DISCOVERSONAR = 0.25;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
@@ -79,7 +80,8 @@ std::string publishedName;
   float y0offset = 0, y1offset = 0, y2offset = 0;
 using namespace std;
 using namespace grid_map;
-using namespace Eigen;
+using namespace ros;
+//using namespace Eigen;
 
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 
@@ -184,7 +186,7 @@ int main(int argc, char **argv){
 		cout << "Creating the Center Mat" << endl;
 		for (float length = -0.50; length <= 0.50;){
 			for(float width = -0.50; width <= 0.50;){
-				Vector2d mat(length,width);
+				Eigen::Vector2d mat(length,width);
 				map.atPosition("elevation", mat) = DISCOVER;
 				width += CELLDIVISION;
 			}
@@ -195,7 +197,7 @@ int main(int argc, char **argv){
 		//ROVER
 		float qx = xpos[count];
 		float qy = ypos[count];
-		Vector2d q(qx,qy);
+		Eigen::Vector2d q(qx,qy);
 		if (map.isInside(q)){
 			map.atPosition("elevation", q) = ROVER;
 		}
@@ -204,7 +206,7 @@ int main(int argc, char **argv){
 			for(float width = -0.15; width <= 0.15;){
 				float Cax = (cos(orntn[count]) * length) + (xpos[count] + (sin(orntn[count]) * width));
 				float Cay = (sin(orntn[count]) * length) + (ypos[count] + (cos(orntn[count]) * width));
-				Vector2d cam(Cax,Cay);
+				Eigen::Vector2d cam(Cax,Cay);
 				if (map.isInside(cam)){
 					map.atPosition("elevation", cam) = DISCOVER;
 				}
@@ -213,11 +215,16 @@ int main(int argc, char **argv){
 			length += CELLDIVISION;
 		}
 		//CENTER SONAR
+		bool overlap = false;
+		float cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
+		float cy = (sin(orntn[count]) * scenter[count]) + ypos[count];
+		Eigen::Vector2d c(cx,cy);
+//		Position start(xpos, ypos);
+//		Position end(cx,cy);
+//	for(grid_map::LineIterator iterator(map,start,end); !iterator.isPastEnd(); ++iterator) {
+//		map.at("type", *iterator) = 0.25;
+//	}
 		if (scenter[count] <= 2.8){
-			bool overlap = false;
-			float cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
-			float cy = (sin(orntn[count]) * scenter[count]) + ypos[count];
-			Vector2d c(cx,cy);
 			if (count == 0){
 				for(int inner = 1; inner <= arrCount; inner++){
 					float qx = xpos[inner];
@@ -236,7 +243,7 @@ int main(int argc, char **argv){
 			bool overlap = false;
 			float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
 			float ly = (sin((pi/6)+orntn[count]) * sleft[count]) + ypos[count];
-			Vector2d l(lx,ly);
+			Eigen::Vector2d l(lx,ly);
 			if (count == 0){
 				for(int inner = 1; inner <= arrCount; inner++){
 					float qx = xpos[inner];
@@ -255,7 +262,7 @@ int main(int argc, char **argv){
 			bool overlap = false;
 			float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
 			float ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + ypos[count];
-			Vector2d r(rx,ry);
+			Eigen::Vector2d r(rx,ry);
 			if (count == 0){
 				for(int inner = 1; inner <= arrCount; inner++){
 					float qx = xpos[inner];
