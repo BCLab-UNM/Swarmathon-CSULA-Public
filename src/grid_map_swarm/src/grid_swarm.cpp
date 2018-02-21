@@ -13,8 +13,6 @@
 #include <sstream>
 #include <Eigen/Dense>
 #include <unistd.h>
-#include "grid_swarm.h"
-
 
 // ROS messages
 #include <std_msgs/Float32.h>
@@ -25,6 +23,7 @@
 #include <sensor_msgs/Range.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/PolygonStamped.h>
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <grid_map_msgs/GridMap.h>
@@ -51,6 +50,7 @@ ros::Publisher gridswarmPublisher;
 //ros::Publisher mainGridPublisher;
 ros::Publisher test;
 ros::Publisher heartbeatPublisher;
+ros::Publisher polygonPublisher;
 //Subscriber
 ros::Subscriber roverNameSubscriber;
 ros::Subscriber sonarLeftSubscriber	,sonarLeftSubscriber1	,sonarLeftSubscriber2	;
@@ -65,7 +65,6 @@ std::string publishedName;
 //Global
   const double pi = std::acos(-1);
   const int namesArrSize=6;
-
   string namesArr[namesArrSize] = {"test","test","test","test","test","test"};//"achilles","ajax","aeneas"
   int currentMode = 0;
   int arrCount = 0;
@@ -89,17 +88,17 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void roverNameHandler(const std_msgs::String& message);
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
-void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
-void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
-void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight);
+  void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
+  void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
+  void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight);
 void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message);
-void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft);
-void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter);
-void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight);
+  void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft);
+  void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter);
+  void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight);
 void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
-void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
-void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
-
+  void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft);
+  void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
+  void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
 
 
 int main(int argc, char **argv){
@@ -121,12 +120,14 @@ int main(int argc, char **argv){
 //SUBSCRIBER
   roverNameSubscriber = gNH.subscribe(("/chainName"), 1, roverNameHandler);
 
+
 //PUBLISH
 //gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>(publishedName + "/grid_map", 1);
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
+  polygonPublisher = gNH.advertise<geometry_msgs::PolygonStamped>("/polygon", 1, true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-
- ros::Rate rate(30.0);
+  
+  ros::Rate rate(30.0);
   sleep(30);
   ros::spinOnce();
   rate.sleep();
@@ -183,7 +184,7 @@ int main(int argc, char **argv){
 	//cout << "Enter ROS OK"<<endl;
 	// Add data to Rover Specific Grid Map.
 	ros::Time time = ros::Time::now();
-//Center Mat being Discovered
+	//Center Mat being Discovered
 	if (firstgo == true){
 		cout << "Creating the initial FOG" << endl;
 		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
@@ -213,19 +214,26 @@ int main(int argc, char **argv){
 		}
 		//CAMERA 0.3m
 		for (float length = CELLDIVISION; length <= 0.3;){
-			for(float width = -0.15; width <= 0.15;){
-				float Cax = (cos(orntn[count]) * length) + (xpos[count] + (sin(orntn[count]) * width));
-				float Cay = (sin(orntn[count]) * length) + (ypos[count] + (cos(orntn[count]) * width));
+			for(float width = -0.15; width <= 0.15;)
+			{
+				//this is where the drawing happens...
+				//if(cos(orntn[count]) <= 0 && cos(orntn[count]) >= 0.866)
+				//{
+					float Cax = (cos(orntn[count]) * length) + (xpos[count] + (sin(orntn[count]) * width));
+					float Cay = (sin(orntn[count]) * length) + (ypos[count] + (cos(orntn[count]) * width));
+				//}
 				Vector2d cam(Cax,Cay);
-				if (map.isInside(cam)){
+				if (map.isInside(cam))
+				{
 					map.atPosition("elevation", cam) = DISCOVER;
 				}
 				width += CELLDIVISION;
 			}
+
 			length += CELLDIVISION;
 		}
 		//CENTER
-		if (scenter[count] <= 2.8){
+		if (scenter[count] <= 2.7){
 			bool overlap = false;
 			float cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
 			float cy = (sin(orntn[count]) * scenter[count]) + ypos[count];
@@ -247,7 +255,7 @@ int main(int argc, char **argv){
 			}
 		}
 		//LEFT
-		if (sleft[count] <= 2.8){
+		if (sleft[count] <= 2.7){
 			bool overlap = false;
 			float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
 			float ly = (sin((pi/6)+orntn[count]) * sleft[count]) + ypos[count];
@@ -269,7 +277,7 @@ int main(int argc, char **argv){
 			}
 		}
 		//RIGHT
-		if (sright[count] <= 2.8){
+		if (sright[count] <= 2.7){
 			bool overlap = false;
 			float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
 			float ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + ypos[count];
@@ -291,7 +299,8 @@ int main(int argc, char **argv){
 			}
 		}
 	}//END OF FOR LOOP
-firstgo = false;
+	firstgo = false;
+
 
 	// Publish grid map.
 	map.setTimestamp(time.toNSec());
@@ -379,7 +388,6 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	orntn[0] = yaw;
 //With orntn, get lenght form center, with this create offset for rover from center
 	if (o0once == true){
-
 		x0offset = -1 * cos(orntn[0]);
 		y0offset = -1 * sin(orntn[0]);
 		o0once = false;
@@ -398,7 +406,6 @@ void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[1] = yaw;
 	if (o1once == true){
-
 		x1offset = -1 * cos(orntn[1]);
 		y1offset = -1 * sin(orntn[1]);
 		o1once = false;
@@ -427,7 +434,6 @@ void roverNameHandler(const std_msgs::String& message){
 	std::string list= message.data;
 	for(int i=0;i<namesArrSize; i++){
 		if(namesArr[i].compare("test") == 0){
-
 			int index = list.find(",");
 			namesArr[i] = list.substr(0,index);
 			list.erase(0,index+1);
