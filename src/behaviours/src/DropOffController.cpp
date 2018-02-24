@@ -155,29 +155,29 @@ Result DropOffController::DoWork() {
     isPrecisionDriving = true;
 
     if (seenEnoughCenterTags) //if we have seen enough tags
-    {
-      if ((countLeft-5) > countRight) //if there are too many on the left assuming the rover is inside the collection zone
-      {
-          if (countRight > 0) //if there are more tags on the right
+        {
+          if ((countLeft-5) > countRight) //if there are too many on the left assuming the rover is inside the collection zone
           {
-              right = false;
+              if (countRight > 0) //if there are more tags on the right
+              {
+                  right = false;
+              }
+              else
+              {
+                  left = false; //then we say none on the right to cause us to turn right
+              }
           }
-          else
+          else if ((countRight-5) > countLeft)
           {
-              left = false; //then we say none on the right to cause us to turn right
+              if (countLeft > 0) //if there are more tags on the left
+              {
+                  left = false;
+              }
+              else
+              {
+                  right = false; //then we say none on the right to cause us to turn left
+              }
           }
-      }
-      else if ((countRight-5) > countLeft)
-      {
-          if (countLeft > 0) //if there are more tags on the left
-          {
-              left = false;
-          }
-          else
-          {
-              right = false; //then we say none on the right to cause us to turn right
-          }
-      }
     }
 
     float turnDirection = 1;
