@@ -205,21 +205,100 @@ int main(int argc, char **argv){
 		if (map.isInside(q)){
 			map.atPosition("elevation", q) = ROVER;
 		}
-		//CAMERA 0.3m
-		for (float length = CELLDIVISION; length <= 0.3;){
+		
 
-			for(float width = -0.15; width <= 0.15;){
-				float Cax = (cos(orntn[count]) * length) + (xpos[count] + (sin(orntn[count]) * width));
-				float Cay = (sin(orntn[count]) * length) + (ypos[count] + (cos(orntn[count]) * width));
-				Eigen::Vector2d cam(Cax,Cay);
-				if (map.isInside(cam)){
-					map.atPosition("elevation", cam) = DISCOVER;
-				}
-				width += CELLDIVISION;
-			}
 
-			length += CELLDIVISION;
+
+
+
+
+
+  		
+grid_map::Polygon polygon;
+polygon.setFrameId(map.getFrameId());
+//CAMERA 0.3m
+double topLeftX;
+double topLeftY;
+double topRightX;
+double topRightY;
+double bottomLeftX;
+double bottomLeftY;
+double bottomRightX;
+double bottomRightY;
+
+
+		
+float Cax = (cos(orntn[count]) * 0.3/* * length*/) + (xpos[count] + (sin(orntn[count]) * 0.15/* * width*/));
+float Cay = (sin(orntn[count]) * 0.3/* * length*/) + (ypos[count] + (cos(orntn[count]) * 0.15/* * width*/));
+Eigen::Vector2d cam(Cax,Cay);
+
+
+topLeftX = (-0.15);
+topLeftY = (0.3);
+				
+topRightX = (0.15);
+topRightY = (0.3);
+
+
+bottomLeftX = (-0.15);
+bottomLeftY = (-0.3);
+				
+
+bottomRightX = (0.15);
+bottomRightY = (-0.3);
+
+
+double tipX = 0; 
+double tipY = 0.34;
+
+double rotateCamPt1x = (topLeftX * cos(orntn[count]) - topLeftY * sin(orntn[count]));
+double rotateCamPt1y = (topLeftX * sin(orntn[count]) + topLeftY * cos(orntn[count]));
+		
+double rotateCamPt2x = (topRightX * cos(orntn[count]) - topRightY * sin(orntn[count]));
+double rotateCamPt2y = (topRightX * sin(orntn[count]) + topRightY * cos(orntn[count]));
+		
+double rotateCamPt3x = (bottomRightX * cos(orntn[count]) - bottomRightY * sin(orntn[count]));
+double rotateCamPt3y = (bottomRightX * sin(orntn[count]) + bottomRightY * cos(orntn[count]));
+		
+double rotateCamPt4x = (bottomLeftX * cos(orntn[count]) - bottomLeftY * sin(orntn[count]));
+double rotateCamPt4y = (bottomLeftX * sin(orntn[count]) + bottomLeftY * cos(orntn[count]));
+
+
+double rotateCamPtTipx = (tipX * cos(orntn[count]) - tipY * sin(orntn[count]));
+double rotateCamPtTipy = (tipX * sin(orntn[count]) + tipY * cos(orntn[count]));
+
+
+polygon.addVertex(Position(rotateCamPt1x + Cax, rotateCamPt1y + Cay));
+//polygon.addVertex(Position(rotateCamPtTipx + Cax, rotateCamPtTipy + Cay));
+polygon.addVertex(Position(rotateCamPt2x + Cax, rotateCamPt2y + Cay));
+//polygon.addVertex(Position(rotateCamPtTipx + Cax, rotateCamPtTipy + Cay));
+
+polygon.addVertex(Position(rotateCamPt3x + Cax, rotateCamPt3y + Cay));
+polygon.addVertex(Position(rotateCamPt4x + Cax, rotateCamPt4y + Cay));
+//polygon.addVertex(Position(rotateCamPtTipx + Cax, rotateCamPtTipy + Cay));
+
+
+geometry_msgs::PolygonStamped message;
+grid_map::PolygonRosConverter::toMessage(polygon, message);		
+polygonPublisher.publish(message);
+
+
+
+
+
+		for(grid_map::PolygonIterator iterator(map,polygon); !iterator.isPastEnd(); ++iterator) 
+		{
+			
+				map.at("elevation", *iterator) = DISCOVER;
+			
 		}
+
+
+
+
+
+
+
 		//CENTER SONAR
 		bool overlap = false;
 		double cx = (cos(orntn[count]) * scenter[count]) + xpos[count];
