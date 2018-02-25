@@ -1,22 +1,25 @@
 #ifndef GRIDTOZONE
 #define GRIDTOZONE
 
-#include <random_numbers/random_numbers.h>
+#include <grid_map_ros/grid_map_ros.hpp>
+#include <Eigen/Dense>
+
+using namespace std;
+using namespace grid_map;
+using namespace Eigen;
 
 class GridtoZone {
 
 public:
 
+  GridMap paperMap;
+
   GridtoZone();
-
-  void SetCurrentLocation(Point currentLocation);
-
-protected:
-
-  void ProcessData();
+  void setGridMap(GridMap map);
 
 private:
 
-  Point currentLocation;
+  GridMap liveMap;
 };
 
+#endif // GRIDTOZONE

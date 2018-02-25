@@ -32,12 +32,14 @@
 #include <exception>
 
 using namespace std;
+using namespace grid_map;
+using namespace Eigen;
 
 float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
 const float ROVERHALF = 0.20;
 const float WALL = 1;
-const float FOG = -0.5;
+const float FOG = -1;
 const float ROVER = 0.5;
 const float DISCOVER = 0.0;
 
@@ -77,9 +79,6 @@ std::string publishedName;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
-using namespace std;
-using namespace grid_map;
-using namespace Eigen;
 
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 

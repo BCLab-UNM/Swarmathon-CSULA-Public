@@ -8,6 +8,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <grid_map_ros/grid_map_ros.hpp>
+#include <Eigen/Dense>
 
 // ROS messages
 #include <std_msgs/Float32.h>
@@ -28,6 +30,7 @@
 
 
 #include "LogicController.h"
+#include "GridtoZone.h"
 #include <vector>
 
 #include "Point.h"
@@ -41,6 +44,7 @@
 #include <exception> // For exception handling
 
 using namespace std;
+using namespace grid_map;
 
 // Define Exceptions
 // Define an exception to be thrown if the user tries to create
@@ -68,6 +72,7 @@ random_numbers::RandomNumberGenerator* rng;
 // Create logic controller
 
 LogicController logicController;
+GridtoZone gridtozone;
 
 void humanTime();
 
@@ -102,6 +107,7 @@ const float waypointTolerance = 0.1; //10 cm tolerance.
 
 // used for calling code once but not in main
 bool initilized = false;
+bool firstgo = true;
 
 float linearVelocity = 0;
 float angularVelocity = 0;
@@ -649,10 +655,6 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&) {
   heartbeatPublisher.publish(msg);
 }
 
-//void gridswarmHandler(const grid_map_msgs::GridMap message) {
-	
-//}
-
 long int getROSTimeInMilliSecs()
 {
   // Get the current time according to ROS (will be zero for simulated clock until the first time message is recieved).
@@ -761,7 +763,23 @@ void roverNameHandler(const std_msgs::String& message){
 }
 
 void gridMapHandler(const grid_map_msgs::GridMap& message){
-	n += message.data + ",";
-	names.data=n;
-	chainNamePublisher.publish(names);
+	GridMap map({"elevation"});
+	map.setFrameId("map");
+	map.setGeometry(Length(15.5,15.5), 0.05);
+//	cout << "ROSAdapter Map Test" << endl;
+	int row = 0;
+	for (double x = -7.70; x <= 7.75; row++){
+		int col = 0;
+		for(double y = 7.70; y >= -7.75; col++){
+			Eigen::Vector2d position(x,y);
+			double value = message.data[0].data[(row*310)+col];
+		//	cout << "("<<row<<","<<col<<"):"<<value;
+			map.atPosition("elevation", position) = value;
+			double point = map.atPosition("elevation", position);
+		//	cout << "---("<<x<<","<<y<<"):"<<point << endl;
+			y -= 0.05;
+		}
+		x += 0.05;
+	}
+    gridtozone.setGridMap(map);
 }

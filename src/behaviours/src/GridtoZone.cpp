@@ -1,19 +1,14 @@
 #include "GridtoZone.h"
 #include <angles/angles.h>
+#include <ros/ros.h>
 
 GridtoZone::GridtoZone() {
-  currentLocation.x = 0;
-  currentLocation.y = 0;
-  currentLocation.theta = 0;
 
 }
 
-void SearchController::SetCurrentLocation(Point currentLocation) {
-  this->currentLocation = currentLocation;
+void GridtoZone::setGridMap(GridMap map) {
+	cout << "Behavior Map Test" << endl;
+	Eigen::Vector2d origin(0,0);
+	cout << "At (0,0): "<<map.atPosition("elevation", origin) <<endl;
 }
-
-void SearchController::ProcessData() {
-}
-
-
 
