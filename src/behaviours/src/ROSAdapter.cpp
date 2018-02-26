@@ -514,6 +514,10 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
   m.getRPY(roll, pitch, yaw);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+if (yaw > 3.05432 || yaw < -3.05432){
+currentLocation.theta = yaw;
+}
+else{
     total = total - readings[readindex];
     readings[readindex] = yaw;
     total = total + readings[readindex];
@@ -523,7 +527,7 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
       }
     ave = total / numreadings;
 
-  currentLocation.theta = ave;///////////////////////////////updated orientation with the filtered yaw
+  currentLocation.theta = ave; }///////////////////////////////updated orientation with the filtered yaw
   /////currentLocation.theta = yaw;
   filtered_orientation.data = ave;
    cout << " currentLocation.theta : " << currentLocation.theta << endl; //DEBUGGING CODE
