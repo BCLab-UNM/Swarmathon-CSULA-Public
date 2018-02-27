@@ -33,15 +33,18 @@
 #include <exception>
 
 using namespace std;
+using namespace grid_map;
+using namespace Eigen;
 
 float heartbeat_publish_interval = 2;
 const double CELLDIVISION = 0.05;
 const double ROVERHALF = 0.20;
+//GRID POINT TYPE
 const double WALL = 1;
-const double FOG = -0.5;
+const double FOG = -1;
 const double ROVER = 0.5;
 const double DISCOVER = 0.0;
-const double SONARDISCOVER = 0.25;
+const double SONARDISCOVER = 0.15;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
@@ -208,10 +211,10 @@ int main(int argc, char **argv){
 //CAMERA 0.3m
 grid_map::Polygon polygon;
 polygon.setFrameId(map.getFrameId());
-double topLeftX = -0.15, topRightX= 0.15, bottomLeftX= -0.15, bottomRightX= 0.15;
-double topLeftY =  0.30, topRightY= 0.30, bottomLeftY=  0.00, bottomRightY= 0.00;
-double tipX = 0; 
-double tipY = 0.60;
+double topLeftX =  0.30, topRightX= 0.30, bottomLeftX=  0.00, bottomRightX= 0.00;
+double topLeftY = -0.15, topRightY= 0.15, bottomLeftY= -0.15, bottomRightY= 0.15;
+double tipX = 0.35; 
+double tipY = 0;
 double rotateCamTLX = (topLeftX * cos(orntn[count]) - topLeftY * sin(orntn[count]));
 double rotateCamTLY = (topLeftX * sin(orntn[count]) + topLeftY * cos(orntn[count]));
 double rotateCamTRX = (topRightX * cos(orntn[count]) - topRightY * sin(orntn[count]));
@@ -266,11 +269,11 @@ polygonPublisher.publish(message);
 		double lx = (cos((pi/6)+orntn[count]) * sleft[count]) + xpos[count];
 		double ly = (sin((pi/6)+orntn[count]) * sleft[count]) + ypos[count];
 		Eigen::Vector2d l(lx,ly);
-//		for(grid_map::LineIterator iterator(map,start,l); !iterator.isPastEnd(); ++iterator) {
-//			if (map.at("elevation", *iterator) == FOG){
-//				map.at("elevation", *iterator) = SONARDISCOVER;
-//			}
-//		}
+		for(grid_map::LineIterator iterator(map,start,l); !iterator.isPastEnd(); ++iterator) {
+			if (map.at("elevation", *iterator) == FOG){
+				map.at("elevation", *iterator) = SONARDISCOVER;
+			}
+		}
 		if (sleft[count] <= 2.8){
 			if (count == 0){
 				for(int inner = 1; inner <= arrCount; inner++){
@@ -290,11 +293,11 @@ polygonPublisher.publish(message);
 		double rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + xpos[count];
 		double ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + ypos[count];
 		Eigen::Vector2d r(rx,ry);
-//		for(grid_map::LineIterator iterator(map,start,r); !iterator.isPastEnd(); ++iterator) {
-//			if (map.at("elevation", *iterator) == FOG){
-//				map.at("elevation", *iterator) = SONARDISCOVER;
-//			}
-//		}
+		for(grid_map::LineIterator iterator(map,start,r); !iterator.isPastEnd(); ++iterator) {
+			if (map.at("elevation", *iterator) == FOG){
+				map.at("elevation", *iterator) = SONARDISCOVER;
+			}
+		}
 		if (sright[count] <= 2.8){
 			if (count == 0){
 				for(int inner = 1; inner <= arrCount; inner++){
