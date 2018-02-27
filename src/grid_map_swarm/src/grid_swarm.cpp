@@ -201,13 +201,6 @@ int main(int argc, char **argv){
 		}
 	}
 	for(int count = arrCount; count >= 0; count--){
-		//ROVER
-		float qx = xpos[count];
-		float qy = ypos[count];
-		Eigen::Vector2d q(qx,qy);
-		if (map.isInside(q)){
-			map.atPosition("elevation", q) = ROVER;
-		}
 		//CAMERA 0.3m
 		for (float length = CELLDIVISION; length <= 0.3;){
 
@@ -297,6 +290,21 @@ int main(int argc, char **argv){
 			}
 		}
 	}//END OF FOR LOOP
+
+
+
+
+	for(int count = arrCount; count >= 0; count--)
+	{
+	//ROVER
+		float qx = xpos[count];
+		float qy = ypos[count];
+		Eigen::Vector2d q(qx,qy);
+		if (map.isInside(q)){
+			map.atPosition("elevation", q) = ROVER;
+		}
+	}
+		
 	firstgo = false;
 
 
