@@ -33,15 +33,18 @@
 #include <exception>
 
 using namespace std;
+using namespace grid_map;
+using namespace Eigen;
 
 float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
 const float ROVERHALF = 0.20;
+//GRID POINT TYPE
 const float WALL = 1;
-const float FOG = -0.5;
+const float FOG = -1;
 const float ROVER = 0.5;
 const float DISCOVER = 0.0;
-const float SONARDISCOVER = 0.25;
+const float SONARDISCOVER = 0.15;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
