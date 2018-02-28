@@ -92,16 +92,18 @@ geometry_msgs::Pose2D centerLocationOdom;
 geometry_msgs::Pose2D centerLocationMapRef;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 const int numreadings = 15;
-float readings[numreadings];
+float x_component[numreadings];
+float y_component[numreadings];
     int readindex = 0;
-    float total = 0;
+    float x_total = 0;
+    float y_total = 0;
     float ave = 0;
-/*int thisreading = 0;
-for ( thisreading = 0; thisreading < numreadings; thisreading++){
-   readings[thisreading]=0;
-  }
-*/
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int currentMode = 0;
@@ -519,14 +521,17 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 
 //}
 //else{
-    total = total - readings[readindex];
-    readings[readindex] = yaw;
-    total = total + readings[readindex];
+    x_total =x_total - x_component[readindex];
+    y_total =y_total - y_component[readindex];
+    x_component[readindex]=cos(yaw);
+    y_component[readindex]=sin(yaw);
+   x_total = x_total + x_component[readindex];
+   y_total = y_total + y_component[readindex];
     readindex = readindex + 1;
       if (readindex >= numreadings){
         readindex = 0;
       }
-    ave = total / numreadings;
+    ave = atan2(y_total,x_total);
 
   currentLocation.theta = ave;// }///////////////////////////////updated orientation with the filtered yaw
   /////currentLocation.theta = yaw;
