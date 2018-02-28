@@ -48,7 +48,7 @@ const double DISCOVER = 0.0;
 const double SONARDISCOVER = 0.15;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
-/*->->->->->->->->->*/	bool SIMMODE = true;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
+/*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 
 //Publisher
@@ -244,9 +244,9 @@ int main(int argc, char **argv){
 		}
 		if (scenter[count] <= 2.8){
 			for(int inner = 0; inner <= arrCount; inner++){
-				float qx = xpos[count];
-				float qy = ypos[count];;
-				if (qx <= (cx + ROVPLUSCELL) && qx >= (cx - ROVPLUSCELL) && qy <= (cy + ROVPLUSCELL) && qy >= (cy - ROVPLUSCELL)){
+				float qx = xpos[inner];
+				float qy = ypos[inner];;
+				if (cx <= (qx + ROVPLUSCELL) && cx >= (qx - ROVPLUSCELL) && cy <= (qy + ROVPLUSCELL) && cy >= (qy - ROVPLUSCELL)){
 					overlap = true;
 				}
 			}
@@ -266,9 +266,9 @@ int main(int argc, char **argv){
 		}
 		if (sleft[count] <= 2.8){
 			for(int inner = 0; inner <= arrCount; inner++){
-				float qx = xpos[count];
-				float qy = ypos[count];
-				if (qx <= (lx + ROVPLUSCELL) && qx >= (lx - ROVPLUSCELL) && qy <= (ly + ROVPLUSCELL) && qy >= (ly - ROVPLUSCELL)){
+				float qx = xpos[inner];
+				float qy = ypos[inner];
+				if (lx <= (qx + ROVPLUSCELL) && lx >= (qx - ROVPLUSCELL) && ly <= (qy + ROVPLUSCELL) && ly >= (qy - ROVPLUSCELL)){
 					overlap = true;
 				}
 			}
@@ -288,9 +288,9 @@ int main(int argc, char **argv){
 		}
 		if (sright[count] <= 2.8){
 			for(int inner = 0; inner <= arrCount; inner++){
-				float qx = xpos[count];
-				float qy = ypos[count];
-				if (qx <= (rx + ROVPLUSCELL) && qx >= (rx - ROVPLUSCELL) && qy <= (ry + ROVPLUSCELL) && qy >= (ry - ROVPLUSCELL)){
+				float qx = xpos[inner];
+				float qy = ypos[inner];
+				if (rx <= (qx + ROVPLUSCELL) && rx >= (qx - ROVPLUSCELL) && ry <= (qy + ROVPLUSCELL) && ry >= (qy - ROVPLUSCELL)){
 					overlap = true;
 				}
 			}
@@ -354,31 +354,31 @@ void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	if(SIMMODE == true){
 		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
 	}
-	sleft[0] = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+	sleft[0] = sonarLeft->range + simoffsetLeft;
 }
 void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
 		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
 	}
-	sleft[1] = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+	sleft[1] = sonarLeft->range + simoffsetLeft;
 }
 void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
 		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
 	}
-	sleft[2] = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+	sleft[2] = sonarLeft->range + simoffsetLeft;
 }
 
 void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter) {
-	scenter[0]= ((float(int(10 * sonarCenter->range)))/10);
+	scenter[0]= sonarCenter->range;
 }
 void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter) {
-	scenter[1]= ((float(int(10 * sonarCenter->range)))/10);
+	scenter[1]= sonarCenter->range;
 }
 void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter) {
-	scenter[2]= ((float(int(10 * sonarCenter->range)))/10);
+	scenter[2]= sonarCenter->range;
 }
 
 void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
@@ -386,21 +386,21 @@ void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	if(SIMMODE == true){
 		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
-	sright[0] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+	sright[0] = sonarRight->range + simoffsetRight;
 }
 void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
 		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
-	sright[1] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+	sright[1] = sonarRight->range + simoffsetRight;
 }
 void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
 		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
-	sright[2] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+	sright[2] = sonarRight->range + simoffsetRight;
 }
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
