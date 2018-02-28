@@ -38,7 +38,7 @@ using namespace Eigen;
 
 float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
-const float ROVERHALF = 0.18;
+const float ROVERHALF = 0.20;
 const float ROVPLUSCELL = ROVERHALF + CELLDIVISION;
 //GRID POINT TYPE
 const double WALL = 1;
@@ -244,9 +244,9 @@ int main(int argc, char **argv){
 		}
 		if (scenter[count] <= 2.8){
 			for(int inner = 0; inner <= arrCount; inner++){
-				float qx = xpos[count];
-				float qy = ypos[count];;
-				if (qx <= (cx + ROVPLUSCELL) && qx >= (cx - ROVPLUSCELL) && qy <= (cy + ROVPLUSCELL) && qy >= (cy - ROVPLUSCELL)){
+				float qx = xpos[inner];
+				float qy = ypos[inner];;
+				if (cx <= (qx + ROVPLUSCELL) && cx >= (qx - ROVPLUSCELL) && cy <= (qy + ROVPLUSCELL) && cy >= (qy - ROVPLUSCELL)){
 					overlap = true;
 				}
 			}
@@ -266,9 +266,9 @@ int main(int argc, char **argv){
 		}
 		if (sleft[count] <= 2.8){
 			for(int inner = 0; inner <= arrCount; inner++){
-				float qx = xpos[count];
-				float qy = ypos[count];
-				if (qx <= (lx + ROVPLUSCELL) && qx >= (lx - ROVPLUSCELL) && qy <= (ly + ROVPLUSCELL) && qy >= (ly - ROVPLUSCELL)){
+				float qx = xpos[inner];
+				float qy = ypos[inner];
+				if (lx <= (qx + ROVPLUSCELL) && lx >= (qx - ROVPLUSCELL) && ly <= (qy + ROVPLUSCELL) && ly >= (qy - ROVPLUSCELL)){
 					overlap = true;
 				}
 			}
@@ -288,9 +288,9 @@ int main(int argc, char **argv){
 		}
 		if (sright[count] <= 2.8){
 			for(int inner = 0; inner <= arrCount; inner++){
-				float qx = xpos[count];
-				float qy = ypos[count];
-				if (qx <= (rx + ROVPLUSCELL) && qx >= (rx - ROVPLUSCELL) && qy <= (ry + ROVPLUSCELL) && qy >= (ry - ROVPLUSCELL)){
+				float qx = xpos[inner];
+				float qy = ypos[inner];
+				if (rx <= (qx + ROVPLUSCELL) && rx >= (qx - ROVPLUSCELL) && ry <= (qy + ROVPLUSCELL) && ry >= (qy - ROVPLUSCELL)){
 					overlap = true;
 				}
 			}
