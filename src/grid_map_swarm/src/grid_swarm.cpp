@@ -354,31 +354,31 @@ void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	if(SIMMODE == true){
 		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
 	}
-	sleft[0] = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+	sleft[0] = sonarLeft->range + simoffsetLeft;
 }
 void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
 		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
 	}
-	sleft[1] = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+	sleft[1] = sonarLeft->range + simoffsetLeft;
 }
 void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
 		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
 	}
-	sleft[2] = ((float(int(10 * sonarLeft->range)))/10) + simoffsetLeft;
+	sleft[2] = sonarLeft->range + simoffsetLeft;
 }
 
 void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter) {
-	scenter[0]= ((float(int(10 * sonarCenter->range)))/10);
+	scenter[0]= sonarCenter->range;
 }
 void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter) {
-	scenter[1]= ((float(int(10 * sonarCenter->range)))/10);
+	scenter[1]= sonarCenter->range;
 }
 void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter) {
-	scenter[2]= ((float(int(10 * sonarCenter->range)))/10);
+	scenter[2]= sonarCenter->range;
 }
 
 void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
@@ -386,21 +386,21 @@ void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	if(SIMMODE == true){
 		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
-	sright[0] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+	sright[0] = sonarRight->range + simoffsetRight;
 }
 void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
 		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
-	sright[1] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+	sright[1] = sonarRight->range + simoffsetRight;
 }
 void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
 		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
 	}
-	sright[2] = ((float(int(10 * sonarRight->range)))/10) + simoffsetRight;
+	sright[2] = sonarRight->range + simoffsetRight;
 }
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
