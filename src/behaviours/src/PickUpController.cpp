@@ -184,8 +184,7 @@ Result PickUpController::DoWork()
   if (!targetHeld)
   {
     //threshold distance to be from the target block before attempting pickup
-    //float targetDistance = 0.18; //meters //FOR ACTUAL TESTING (original value is 0.15)
-    float targetDistance = 0.13; //FOR SIMULATION
+    float targetDistance = 0.18; //meters
 
     // -----------------------------------------------------------
     // millisecond time = current time if not in a counting state
