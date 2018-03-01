@@ -39,7 +39,7 @@ using namespace Eigen;
 float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
 const float ROVERHALF = 0.20;
-const float ROVPLUSCELL = ROVERHALF + CELLDIVISION;
+const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
 //GRID POINT TYPE
 const double WALL = 1;
 const double FOG = -1;
@@ -188,9 +188,9 @@ int main(int argc, char **argv){
 		double botLeftX= -ROVERHALF, botRightX= -ROVERHALF;
 		double botLeftY= -ROVERHALF, botRightY=  ROVERHALF;
 		//These point create the area the CAMERA would see. Does not actually see what the camera sees, it just marks the area as seen.
-		double topLeftX =  0.30+ROVERHALF, topRightX= 0.30+ROVERHALF;
-		double topLeftY = -0.15          , topRightY= 0.15;
-		double tipX = 0.50+ROVERHALF; 
+		double topLeftX =  0.57+ROVERHALF, topRightX= 0.57+ROVERHALF;
+		double topLeftY = -0.215         , topRightY= 0.215;
+		double tipX = 0.60+ROVERHALF; 
 		double tipY = 0;
 		//Do the roatation math 
 		//Mid points
@@ -410,8 +410,8 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[0] = yaw;
 	if (o0once == true){
-		x0offset = -1.1 * cos(orntn[0]);
-		y0offset = -1.1 * sin(orntn[0]);
+		x0offset = -1.2 * cos(orntn[0]);
+		y0offset = -1.2 * sin(orntn[0]);
 		o0once = false;
 	}
 	xpos[0] = message->pose.pose.position.x + x0offset;
@@ -425,8 +425,8 @@ void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[1] = yaw;
 	if (o1once == true){
-		x1offset = -1.1 * cos(orntn[1]);
-		y1offset = -1.1 * sin(orntn[1]);
+		x1offset = -1.2 * cos(orntn[1]);
+		y1offset = -1.2 * sin(orntn[1]);
 		o1once = false;
 	}
 	xpos[1] = message->pose.pose.position.x + x1offset;
@@ -439,8 +439,8 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 	m.getRPY(roll, pitch, yaw);
 	orntn[2] = yaw;
 	if (o2once == true){
-		x2offset = -1.1 * cos(orntn[2]);
-		y2offset = -1.1 * sin(orntn[2]);
+		x2offset = -1.2 * cos(orntn[2]);
+		y2offset = -1.2 * sin(orntn[2]);
 		o2once = false;
 	}
 	xpos[2] = message->pose.pose.position.x + x2offset;
