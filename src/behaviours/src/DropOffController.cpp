@@ -156,7 +156,7 @@ Result DropOffController::DoWork() {
 
     if (seenEnoughCenterTags) //if we have seen enough tags
         {
-          if ((countLeft-5) > countRight) //if there are too many on the left assuming the rover is inside the collection zone
+          if ((countLeft-8) > countRight) //if there are too many on the left assuming the rover is inside the collection zone
           {
               if (countRight > 0) //if there are more tags on the right
               {
@@ -167,7 +167,7 @@ Result DropOffController::DoWork() {
                   left = false; //then we say none on the right to cause us to turn right
               }
           }
-          else if ((countRight-5) > countLeft)
+          else if ((countRight-8) > countLeft)
           {
               if (countLeft > 0) //if there are more tags on the left
               {
