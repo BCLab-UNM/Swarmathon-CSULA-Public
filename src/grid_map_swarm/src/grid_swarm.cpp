@@ -48,7 +48,7 @@ const double DISCOVER = 0.0;
 const double SONARDISCOVER = 0.15;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
-/*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
+/*->->->->->->->->->*/	bool SIMMODE = true;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 
 //Publisher
@@ -177,7 +177,6 @@ int main(int argc, char **argv){
 
   while (ros::ok()) {
 	ros::Time time = ros::Time::now();
-	cout << "Creating the initial FOG" << endl;
 	for(int count = arrCount; count >= 0; count--){
 		//CAMERA and ROVER cover Area
 		grid_map::Polygon polygon;
@@ -256,8 +255,8 @@ int main(int argc, char **argv){
 		}
 		//LEFT SONAR
 		overlap = false;
-		float lx = (cos((pi/6)+orntn[count]) * sleft[count]) + fromCenterX;
-		float ly = (sin((pi/6)+orntn[count]) * sleft[count]) + fromCenterY;
+		float lx = (cos((pi/6.8)+orntn[count]) * sleft[count]) + fromCenterX;
+		float ly = (sin((pi/6.8)+orntn[count]) * sleft[count]) + fromCenterY;
 		Eigen::Vector2d l(lx,ly);
 		for(grid_map::LineIterator iterator(map,start,l); !iterator.isPastEnd(); ++iterator) {
 			if (map.at("elevation", *iterator) == FOG){
@@ -278,8 +277,8 @@ int main(int argc, char **argv){
 		}
 		//RIGHT SONAR
 		overlap = false;
-		float rx = (cos(-1*(pi/6)+orntn[count]) * sright[count]) + fromCenterX;
-		float ry = (sin(-1*(pi/6)+orntn[count]) * sright[count]) + fromCenterY;
+		float rx = (cos(-1*(pi/6.8)+orntn[count]) * sright[count]) + fromCenterX;
+		float ry = (sin(-1*(pi/6.8)+orntn[count]) * sright[count]) + fromCenterY;
 		Eigen::Vector2d r(rx,ry);
 		for(grid_map::LineIterator iterator(map,start,r); !iterator.isPastEnd(); ++iterator) {
 			if (map.at("elevation", *iterator) == FOG){
@@ -309,6 +308,7 @@ int main(int argc, char **argv){
 		}
 	}
 	if (firstgo == true){
+		cout << "Creating the initial FOG" << endl;
 		//CREATE FOG
 		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 			Position position;
@@ -352,21 +352,21 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
-		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
+		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.8)) - (sonarLeft->range); 
 	}
 	sleft[0] = sonarLeft->range + simoffsetLeft;
 }
 void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
-		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
+		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.8)) - (sonarLeft->range); 
 	}
 	sleft[1] = sonarLeft->range + simoffsetLeft;
 }
 void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
-		simoffsetLeft = ((sonarLeft->range)/cos(pi/6)) - (sonarLeft->range); 
+		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.8)) - (sonarLeft->range); 
 	}
 	sleft[2] = sonarLeft->range + simoffsetLeft;
 }
@@ -384,21 +384,21 @@ void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter) {
 void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
-		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
+		simoffsetRight = ((sonarRight->range)/cos(pi/6.8)) - (sonarRight->range); 
 	}
 	sright[0] = sonarRight->range + simoffsetRight;
 }
 void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
-		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
+		simoffsetRight = ((sonarRight->range)/cos(pi/6.8)) - (sonarRight->range); 
 	}
 	sright[1] = sonarRight->range + simoffsetRight;
 }
 void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
-		simoffsetRight = ((sonarRight->range)/cos(pi/6)) - (sonarRight->range); 
+		simoffsetRight = ((sonarRight->range)/cos(pi/6.8)) - (sonarRight->range); 
 	}
 	sright[2] = sonarRight->range + simoffsetRight;
 }
