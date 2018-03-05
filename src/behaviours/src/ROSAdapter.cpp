@@ -773,10 +773,7 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 		for(double y = 7.70; y >= -7.75; col++){
 			Eigen::Vector2d position(x,y);
 			double value = message.data[0].data[(row*310)+col];
-		//	cout << "("<<row<<","<<col<<"):"<<value;
 			map.atPosition("elevation", position) = value;
-			double point = map.atPosition("elevation", position);
-		//	cout << "---("<<x<<","<<y<<"):"<<point << endl;
 			y -= 0.05;
 		}
 		x += 0.05;

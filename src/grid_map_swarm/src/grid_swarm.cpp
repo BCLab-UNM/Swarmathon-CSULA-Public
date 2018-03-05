@@ -41,14 +41,16 @@ const float CELLDIVISION = 0.05;
 const float ROVERHALF = 0.20;
 const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
 //GRID POINT TYPE
-const double WALL = 1;
-const double FOG = -1;
-const double ROVER = 0.5;
-const double DISCOVER = 0.0;
-const double SONARDISCOVER = 0.15;
+const double WALL = 2.00;
+const double FOG = -1.00;
+const double ROVER = 1.00;
+const double REVEALED = 0.00;
+const double MAT = 0.50;
+const double SONAR = 0.20;
+const double MULTICUBES = 0.70;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
-/*->->->->->->->->->*/	bool SIMMODE = true;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
+/*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 
 //Publisher
@@ -223,9 +225,9 @@ int main(int argc, char **argv){
 		grid_map::PolygonRosConverter::toMessage(polygon, message);		
 		for(grid_map::PolygonIterator iterator(map,polygon); !iterator.isPastEnd(); ++iterator) 
 		{
-		//	if (map.at("elevation", *iterator) != WALL){
-				map.at("elevation", *iterator) = DISCOVER;
-		//	}	
+			if (map.at("elevation", *iterator) != WALL && map.at("elevation", *iterator) != MAT){
+				map.at("elevation", *iterator) = REVEALED;
+			}	
 		}
 		//OFFSET FOR SONAR
 		float fromCenterX = xpos[count] + ROVERHALF * cos(orntn[count]);
@@ -238,10 +240,10 @@ int main(int argc, char **argv){
 		Eigen::Vector2d start(fromCenterX, fromCenterY);
 		for(grid_map::LineIterator iterator(map,start,c); !iterator.isPastEnd(); ++iterator) {
 			if (map.at("elevation", *iterator) == FOG){
-				map.at("elevation", *iterator) = SONARDISCOVER;
+				map.at("elevation", *iterator) = SONAR;
 			}
 		}
-		if (scenter[count] <= 2.8){
+		if (scenter[count] <= 2.8 && scenter[count] >= 0.2){
 			for(int inner = 0; inner <= arrCount; inner++){
 				float qx = xpos[inner];
 				float qy = ypos[inner];;
@@ -255,12 +257,12 @@ int main(int argc, char **argv){
 		}
 		//LEFT SONAR
 		overlap = false;
-		float lx = (cos((pi/6.8)+orntn[count]) * sleft[count]) + fromCenterX;
-		float ly = (sin((pi/6.8)+orntn[count]) * sleft[count]) + fromCenterY;
+		float lx = (cos((pi/6.7)+orntn[count]) * sleft[count]) + fromCenterX;
+		float ly = (sin((pi/6.7)+orntn[count]) * sleft[count]) + fromCenterY;
 		Eigen::Vector2d l(lx,ly);
 		for(grid_map::LineIterator iterator(map,start,l); !iterator.isPastEnd(); ++iterator) {
 			if (map.at("elevation", *iterator) == FOG){
-				map.at("elevation", *iterator) = SONARDISCOVER;
+				map.at("elevation", *iterator) = SONAR;
 			}
 		}
 		if (sleft[count] <= 2.8){
@@ -277,12 +279,12 @@ int main(int argc, char **argv){
 		}
 		//RIGHT SONAR
 		overlap = false;
-		float rx = (cos(-1*(pi/6.8)+orntn[count]) * sright[count]) + fromCenterX;
-		float ry = (sin(-1*(pi/6.8)+orntn[count]) * sright[count]) + fromCenterY;
+		float rx = (cos(-1*(pi/6.7)+orntn[count]) * sright[count]) + fromCenterX;
+		float ry = (sin(-1*(pi/6.7)+orntn[count]) * sright[count]) + fromCenterY;
 		Eigen::Vector2d r(rx,ry);
 		for(grid_map::LineIterator iterator(map,start,r); !iterator.isPastEnd(); ++iterator) {
 			if (map.at("elevation", *iterator) == FOG){
-				map.at("elevation", *iterator) = SONARDISCOVER;
+				map.at("elevation", *iterator) = SONAR;
 			}
 		}
 		if (sright[count] <= 2.8){
@@ -298,6 +300,16 @@ int main(int argc, char **argv){
 			}
 		}
 	}//END OF FOR LOOP
+	//CENTER MAT being Discovered
+	cout << "Creating the Center Mat" << endl;
+	for (float length = -0.50; length <= 0.50;){
+		for(float width = -0.50; width <= 0.50;){
+			Eigen::Vector2d mat(length,width);
+			map.atPosition("elevation", mat) = MAT;
+			width += CELLDIVISION;
+		}
+		length += CELLDIVISION;
+	}
 	//ROVERS
 	for(int count = arrCount; count >= 0; count--){
 		float qx = xpos[count];
@@ -313,20 +325,8 @@ int main(int argc, char **argv){
 		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 			Position position;
 			map.getPosition(*it, position);
-			if (map.at("elevation", *it) == FOG || firstgo == true){
-				map.at("elevation", *it) = FOG;
-			}	
+			map.at("elevation", *it) = FOG;
 		}//END OF ITERATOR
-		//Center Mat being Discovered
-		cout << "Creating the Center Mat" << endl;
-		for (float length = -0.50; length <= 0.50;){
-			for(float width = -0.50; width <= 0.50;){
-				Eigen::Vector2d mat(length,width);
-				map.atPosition("elevation", mat) = DISCOVER;
-				width += CELLDIVISION;
-			}
-			length += CELLDIVISION;
-		}
 	}
 	firstgo = false;
 	// Publish grid map.
@@ -352,21 +352,21 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
-		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.8)) - (sonarLeft->range); 
+		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.7)) - (sonarLeft->range); 
 	}
 	sleft[0] = sonarLeft->range + simoffsetLeft;
 }
 void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
-		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.8)) - (sonarLeft->range); 
+		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.7)) - (sonarLeft->range); 
 	}
 	sleft[1] = sonarLeft->range + simoffsetLeft;
 }
 void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
-		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.8)) - (sonarLeft->range); 
+		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.7)) - (sonarLeft->range); 
 	}
 	sleft[2] = sonarLeft->range + simoffsetLeft;
 }
@@ -384,21 +384,21 @@ void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter) {
 void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
-		simoffsetRight = ((sonarRight->range)/cos(pi/6.8)) - (sonarRight->range); 
+		simoffsetRight = ((sonarRight->range)/cos(pi/6.7)) - (sonarRight->range); 
 	}
 	sright[0] = sonarRight->range + simoffsetRight;
 }
 void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
-		simoffsetRight = ((sonarRight->range)/cos(pi/6.8)) - (sonarRight->range); 
+		simoffsetRight = ((sonarRight->range)/cos(pi/6.7)) - (sonarRight->range); 
 	}
 	sright[1] = sonarRight->range + simoffsetRight;
 }
 void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	float simoffsetRight = 0;
 	if(SIMMODE == true){
-		simoffsetRight = ((sonarRight->range)/cos(pi/6.8)) - (sonarRight->range); 
+		simoffsetRight = ((sonarRight->range)/cos(pi/6.7)) - (sonarRight->range); 
 	}
 	sright[2] = sonarRight->range + simoffsetRight;
 }
