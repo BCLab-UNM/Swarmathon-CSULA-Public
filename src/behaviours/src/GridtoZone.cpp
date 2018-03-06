@@ -5,9 +5,7 @@
 // needed for polygon shape
 #include <geometry_msgs/PolygonStamped.h>
 
-GridtoZone::GridtoZone() {
-
-}
+GridtoZone::GridtoZone() { }
 
 void GridtoZone::setGridMap(GridMap map) {
 	Eigen::Vector2d origin(0,0);
@@ -130,7 +128,8 @@ double percentOfZoneExplored(int zoneindex){
 }
 
 double percentOfSectionExplored(Poition center, double length){
-	int count = countInSection(center, length, floorvalues)
+	double sectionsize = (length / celldivision) * (length / celldivision);
+	int count = countInSection(center, length, floorvalues);
 	return count/sectionsize;
 }
 
@@ -143,7 +142,7 @@ double percentOfSectionDiscovered(Poition center, double length){
 	return count/sectionsize;
 }
 
-waypoints[] shortestPath(Position start, Position end){
+Waypoints shortestPath(Position start, Position end){
 	return null;
 }
 
