@@ -7,6 +7,7 @@ SearchController::SearchController() {
   currentLocation.y = 0;
   currentLocation.theta = 0;
 
+
   centerLocation.x = 0;
   centerLocation.y = 0;
   centerLocation.theta = 0;
@@ -21,53 +22,78 @@ void SearchController::Reset() {
 }
 
 /**
- * This code implements a basic random walk search.
+ * This code implements a 5 meter square loop starting at the center location.
  */
 Result SearchController::DoWork() {
 
-  if (!result.wpts.waypoints.empty()) {
-    if (hypot(result.wpts.waypoints[0].x-currentLocation.x, result.wpts.waypoints[0].y-currentLocation.y) < 0.15) {
-      attemptCount = 0;
-    }
-  }
 
-  if (attemptCount > 0 && attemptCount < 5) {
-    attemptCount++;
-    if (succesfullPickup) {
-      succesfullPickup = false;
-      attemptCount = 1;
-    }
-    return result;
-  }
-  else if (attemptCount >= 5 || attemptCount == 0) 
-  {
-    attemptCount = 1;
+ double rotations = 0;
+           result.type = waypoint;
+           Point searchLocation;
+           if (attemptCount==0)
+           {
+               searchLocation.theta = 0;
+               searchLocation.x =(x); // x = 0
+               searchLocation.y =(y); // y = 0
+               attemptCount++;
+               x=x+d;                 // d = 1
+               std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+           }
+           else if (attemptCount==1)
+           {
+               searchLocation.theta = M_PI/2;
+               searchLocation.x = (x); // x = 1
+               searchLocation.y = (y); // y = 0
+               attemptCount++;
+               y=y+d;
+               d=(-d)-1;               // d = -2
+               std::cout<< "Traveling to 2nd waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+                std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
+           }
+           else if (attemptCount==2)
+           {
+               searchLocation.theta = M_PI;
+               searchLocation.x = (x); // x = 1
+               searchLocation.y = (y); // y = 1
+               attemptCount++;
+               x=x+d;
+               std::cout<< "Traveling to 3rd waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+           }
+           else if (attemptCount==3){
+               searchLocation.theta = 3/2 *M_PI;
+               searchLocation.x = (x); // x = -1
+               searchLocation.y = (y); // y = 1
+               attemptCount++;
+               y=y+d;
+               d=(-d)+1;               // d = 3
+               std::cout<< "Traveling to 4th waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+
+           }
+           else{
+               searchLocation.theta = 0;
+               searchLocation.x = (x); // x = -1
+               searchLocation.y = (y); // y = -1
+               attemptCount=1;
+               x=x+d;
+
+               std::cout<< "Traveling to 5th waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+               rotations++;
+           }
 
 
-    result.type = waypoint;
-    Point  searchLocation;
 
-    //select new position 50 cm from current location
-    if (first_waypoint)
-    {
-      first_waypoint = false;
-      searchLocation.theta = currentLocation.theta + M_PI;
-      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
-    }
-    else
-    {
-      //select new heading from Gaussian distribution around current heading
-      searchLocation.theta = rng->gaussian(currentLocation.theta, 0.785398); //45 degrees in radians
-      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
-    }
 
-    result.wpts.waypoints.clear();
-    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
-    
-    return result;
-  }
+
+       result.wpts.waypoints.clear();
+       result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
+
+       return result;
+ 
 
 }
 
