@@ -5,7 +5,6 @@
 #include <random>
 #include "Point.h"
 
-using namespace std;
 
 class RandomSelector {
     int accuracy = 2;
@@ -60,7 +59,7 @@ class RandomSelector {
         int distance = areasize;
         Direction direction = West;
         
-        //cout << "\nx: " << position.x << "\ty: " << position.y;
+        //std::cout << "\nx: " << position.x << "\ty: " << position.y;
 
         for (int i = 0; i < index; i++){
 

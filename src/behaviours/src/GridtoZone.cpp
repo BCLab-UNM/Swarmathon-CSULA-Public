@@ -5,6 +5,10 @@
 // needed for polygon shape
 #include <geometry_msgs/PolygonStamped.h>
 
+
+//#include "Result.h"
+//#include "Spiral.cpp"
+
 //GridtoZone() { }
 
 void GridtoZone::setGridMap(GridMap map) {
@@ -28,6 +32,11 @@ bool GridtoZone::inZone(Position pos){
 }
 
 Position GridtoZone::getZonePosition(int zoneindex){
+	Position position = Position(0,0);
+	return position;
+}
+/*
+Position GridtoZone::getZonePosition(int zoneindex){
 
 	double x = zonesize;
 	double y = zonesize;
@@ -38,7 +47,7 @@ Position GridtoZone::getZonePosition(int zoneindex){
 	bool turn = true;
 
 	int distance = zonesize;
-	Direction direction = West;
+	Spiral::Direction direction = West;
 
 	//cout << "\nx: " << position.x << "\ty: " << position.y;
 
@@ -91,6 +100,7 @@ Position GridtoZone::getZonePosition(int zoneindex){
 	Position position = Position(x,y);
 	return position;
 }
+*/
 
 void GridtoZone::updatePaperMap(){
 	paperMap = liveMap;
@@ -118,7 +128,7 @@ int GridtoZone::countInSection(Position center, double length, float values[], i
 		// ask what each value is with Port to check with.
 		// ask about the layer
 
-		float mapValue = paperMap.atPosition(layer, *iterator);
+		float mapValue = paperMap.atPosition("elevation", *iterator);
 
 		for (int i =0; i < arrcount; i++){
 			if (mapValue == values[i]){
@@ -150,10 +160,12 @@ double GridtoZone::percentOfSectionDiscovered(Position center, double length){
 	return count/sectionsize;
 }
 
+// Ambrosio uncomment this
+/*
 Waypoints GridtoZone::shortestPath(Position start, Position end){
 	return NULL;
 }
-
+*/
 int GridtoZone::ClaimZone(int zone){
 	// check if available
 	zoneclaimed = zone;

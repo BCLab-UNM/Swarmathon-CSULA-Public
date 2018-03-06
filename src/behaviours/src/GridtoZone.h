@@ -3,8 +3,7 @@
 
 #include <grid_map_ros/grid_map_ros.hpp>
 #include <Eigen/Dense>
-#include "Result.h"
-#include "Spiral.cpp"
+
 
 using namespace std;
 using namespace grid_map;
@@ -20,6 +19,9 @@ public:
 
 	void updatePaperMap();
 
+	Position getZonePosition(int zoneindex);
+
+
 	int countInSection(Position center, double length, float value);
 	int countInSection(Position center, double length, float values[], int arrcount);
 	double percentOfZoneExplored(int zoneindex);
@@ -31,7 +33,9 @@ public:
 	double percentOfZoneDiscovered(int zoneindex);
 
 	double percentOfSectionDiscovered(Position center, double length);
-	Waypoints shortestPath(Position start, Position end);
+
+// Ambrosio uncomment this
+//	Waypoints shortestPath(Position start, Position end);
 
 	int ClaimZone(int zone);
 
@@ -39,7 +43,6 @@ public:
 
 	int countRoversInZone(int zone);
 	bool inZone(Position pos);
-	Position getZonePosition(int zoneindex);
 
 private:
 	GridMap liveMap;
