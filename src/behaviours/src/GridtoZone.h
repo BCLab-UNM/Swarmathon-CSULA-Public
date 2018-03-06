@@ -3,7 +3,8 @@
 
 #include <grid_map_ros/grid_map_ros.hpp>
 #include <Eigen/Dense>
-
+#include <vector>
+#include "Point.h"
 
 using namespace std;
 using namespace grid_map;
@@ -34,8 +35,8 @@ public:
 
 	double percentOfSectionDiscovered(Position center, double length);
 
-// Ambrosio uncomment this
-//	Waypoints shortestPath(Position start, Position end);
+// Ambrosio do this
+	vector<Point> shortestPath(Point start, Point end);
 
 	int ClaimZone(int zone);
 
@@ -44,7 +45,11 @@ public:
 	int countRoversInZone(int zone);
 	bool inZone(Position pos);
 
+	enum GridDirection { North, East, South, West };
+
+
 private:
+
 	GridMap liveMap;
 	bool verbose = false;
 

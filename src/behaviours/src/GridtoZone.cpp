@@ -5,10 +5,6 @@
 // needed for polygon shape
 #include <geometry_msgs/PolygonStamped.h>
 
-
-//#include "Result.h"
-//#include "Spiral.cpp"
-
 GridtoZone::GridtoZone() { }
 
 void GridtoZone::setGridMap(GridMap map) {
@@ -31,13 +27,14 @@ bool GridtoZone::inZone(Position pos){
 	return false;
 }
 
+/*
 Position GridtoZone::getZonePosition(int zoneindex){
 	Position position = Position(0,0);
 	return position;
 }
-/*
-Position GridtoZone::getZonePosition(int zoneindex){
+*/
 
+Position GridtoZone::getZonePosition(int zoneindex){
 	double x = zonesize;
 	double y = zonesize;
 
@@ -47,9 +44,8 @@ Position GridtoZone::getZonePosition(int zoneindex){
 	bool turn = true;
 
 	int distance = zonesize;
-	Spiral::Direction direction = West;
-
-	//cout << "\nx: " << position.x << "\ty: " << position.y;
+	// I couldn't get the other Direction from Spiral to work.
+	GridDirection direction = West;
 
 	for (int i = 0; i < zoneindex; i++){
 		if(counter % 2 == 0 && counter > 0) {
@@ -100,7 +96,7 @@ Position GridtoZone::getZonePosition(int zoneindex){
 	Position position = Position(x,y);
 	return position;
 }
-*/
+
 
 void GridtoZone::updatePaperMap(){
 	paperMap = liveMap;
@@ -160,12 +156,14 @@ double GridtoZone::percentOfSectionDiscovered(Position center, double length){
 	return count/sectionsize;
 }
 
-// Ambrosio uncomment this
-/*
-Waypoints GridtoZone::shortestPath(Position start, Position end){
-	return NULL;
+// Ambrosio do this
+vector<Point> GridtoZone::shortestPath(Point start, Point end){
+	// do something
+	vector<Point> waypoints;
+	return waypoints;
 }
-*/
+
+
 int GridtoZone::ClaimZone(int zone){
 	// check if available
 	zoneclaimed = zone;

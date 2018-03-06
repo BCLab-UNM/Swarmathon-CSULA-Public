@@ -6,7 +6,7 @@
 
 #include "Spiral.cpp"
 #include "RandomSelector.cpp"
-
+#include "GridtoZone.h"
 /**
  * This class implements the search control algorithm for the rovers. The code
  * here should be modified and enhanced to improve search performance.
