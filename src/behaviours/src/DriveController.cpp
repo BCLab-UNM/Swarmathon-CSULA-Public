@@ -115,8 +115,8 @@ Result DriveController::DoWork()
       waypoints.back().theta = atan2(waypoints.back().y - currentLocation.y, waypoints.back().x - currentLocation.x);
       result.pd.setPointYaw = waypoints.back().theta;
 
-      //cout << "**************************************************************************" << endl; //DEBUGGING CODE
-      //cout << "Waypoint x : " << waypoints.back().x << " y : " << waypoints.back().y << endl; //DEBUGGING CODE
+      cout << "**************************************************************************" << endl; //DEBUGGING CODE
+      cout << "Waypoint x : " << waypoints.back().x << " y : " << waypoints.back().y << endl; //DEBUGGING CODE
       //fall through on purpose
     }
   }
@@ -133,8 +133,8 @@ Result DriveController::DoWork()
     // Calculate the diffrence between current and desired heading in radians.
     float errorYaw = angles::shortest_angular_distance(currentLocation.theta, waypoints.back().theta);
 
-    //cout << "ROTATE Error yaw:  " << errorYaw << " target heading : " << waypoints.back().theta << " current heading : " << currentLocation.theta << endl; //DEBUGGING CODE
-    //cout << "Waypoint x : " << waypoints.back().x << " y : " << waypoints.back().y << " currentLoc x : " << currentLocation.x << " y : " << currentLocation.y << endl; //DEBUGGING CODE
+    cout << "ROTATE Error yaw:  " << errorYaw << " target heading : " << waypoints.back().theta << " current heading : " << currentLocation.theta << endl; //DEBUGGING CODE
+    cout << "Waypoint x : " << waypoints.back().x << " y : " << waypoints.back().y << " currentLoc x : " << currentLocation.x << " y : " << currentLocation.y << endl; //DEBUGGING CODE
 
     result.pd.setPointVel = 0.0;
     //Calculate absolute value of angle
@@ -172,8 +172,8 @@ Result DriveController::DoWork()
     float errorYaw = angles::shortest_angular_distance(currentLocation.theta, waypoints.back().theta);
     float distance = hypot(waypoints.back().x - currentLocation.x, waypoints.back().y - currentLocation.y);
 
-    //cout << "Skid steer, Error yaw:  " << errorYaw << " target heading : " << waypoints.back().theta << " current heading : " << currentLocation.theta << " error distance : " << distance << endl; //DEBUGGING CODE
-    //cout << "Waypoint x : " << waypoints.back().x << " y : " << waypoints.back().y << " currentLoc x : " << currentLocation.x << " y : " << currentLocation.y << endl; //DEBUGGING CODE
+    cout << "Skid steer, Error yaw:  " << errorYaw << " target heading : " << waypoints.back().theta << " current heading : " << currentLocation.theta << " error distance : " << distance << endl; //DEBUGGING CODE
+    cout << "Waypoint x : " << waypoints.back().x << " y : " << waypoints.back().y << " currentLoc x : " << currentLocation.x << " y : " << currentLocation.y << endl; //DEBUGGING CODE
 
 
 
@@ -184,7 +184,7 @@ Result DriveController::DoWork()
       result.pd.setPointVel = searchVelocity;
       if (result.PIDMode == FAST_PID)
       {
-        //cout << "linear velocity:  " << linearVelocity << endl; //DEBUGGING CODE
+        cout << "linear velocity:  " << linearVelocity << endl; //DEBUGGING CODE
         fastPID((searchVelocity-linearVelocity) ,errorYaw, result.pd.setPointVel, result.pd.setPointYaw);
       }
     }
@@ -277,7 +277,7 @@ void DriveController::ProcessData()
       float vel = result.pd.cmdVel - linearVelocity;
       float angular = result.pd.cmdAngular - angularVelocity;
 
-      //cout << "Ang. Vel.  " << angularVelocity << "  Ang. Error" << angular << endl; //DEBUGGING CODE
+      cout << "Ang. Vel.  " << angularVelocity << "  Ang. Error" << angular << endl; //DEBUGGING CODE
 
       constPID(vel, angular ,result.pd.setPointVel, result.pd.setPointYaw);
     }
@@ -288,7 +288,7 @@ void DriveController::ProcessData()
 void DriveController::fastPID(float errorVel, float errorYaw , float setPointVel, float setPointYaw)
 {
 
-  // cout << "PID FAST" << endl; //DEBUGGING CODE
+  cout << "PID FAST" << endl; //DEBUGGING CODE
 
   float velOut = fastVelPID.PIDOut(errorVel, setPointVel); //returns PWM target to try and get error vel to 0
   float yawOut = fastYawPID.PIDOut(errorYaw, setPointYaw); //returns PWM target to try and get yaw error to 0
@@ -308,7 +308,7 @@ void DriveController::fastPID(float errorVel, float errorYaw , float setPointVel
 
 void DriveController::slowPID(float errorVel,float errorYaw, float setPointVel, float setPointYaw)
 {
-  //cout << "PID SLOW" << endl; //DEBUGGING CODE
+  cout << "PID SLOW" << endl; //DEBUGGING CODE
 
   float velOut = slowVelPID.PIDOut(errorVel, setPointVel);
   float yawOut = slowYawPID.PIDOut(errorYaw, setPointYaw);
@@ -329,7 +329,7 @@ void DriveController::slowPID(float errorVel,float errorYaw, float setPointVel, 
 void DriveController::constPID(float erroVel,float constAngularError, float setPointVel, float setPointYaw)
 {
 
-  //cout << "PID CONST" << endl; //DEBUGGING CODE
+  cout << "PID CONST" << endl; //DEBUGGING CODE
 
   float velOut = constVelPID.PIDOut(erroVel, setPointVel);
   float yawOut = constYawPID.PIDOut(constAngularError, setPointYaw);
