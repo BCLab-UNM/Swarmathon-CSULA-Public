@@ -40,14 +40,14 @@ float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
 const float ROVERHALF = 0.20;
 const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
-//GRID POINT TYPE
-const double WALL = 2.00;
+//GRID PJ NUMBERS
 const double FOG = -1.00;
-const double ROVER = 1.00;
 const double REVEALED = 0.00;
-const double MAT = 0.50;
 const double SONAR = 0.20;
-const double MULTICUBES = 0.70;
+const double MAT = 0.50;
+const double CUBES = 0.70;
+const double ROVER = 1.00;
+const double WALL = 2.00;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
