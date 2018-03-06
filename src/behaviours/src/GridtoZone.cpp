@@ -1,11 +1,11 @@
 #include "GridtoZone.h"
-#include <angles/angles.h>
+//#include <angles/angles.h>
 #include <ros/ros.h>
 
 // needed for polygon shape
 #include <geometry_msgs/PolygonStamped.h>
 
-GridtoZone::GridtoZone() { }
+//GridtoZone() { }
 
 void GridtoZone::setGridMap(GridMap map) {
 	Eigen::Vector2d origin(0,0);
@@ -16,20 +16,21 @@ void GridtoZone::setGridMap(GridMap map) {
 	}
 }
 
-int countRoversInZone(int zone){
+int GridtoZone::countRoversInZone(int zone){
 	float rovervalue = 1.0;
+	getZonePosition(zone);
 	return countInSection(getZonePosition(zone),zonesize,rovervalue);
 }
 
 // forgot what this is suppose to do.
-bool inZone(Position pos){
+bool GridtoZone::inZone(Position pos){
 	return false;
 }
 
-Position getZone(int zoneindex){
-	Position position;
-	position.x = zonesize;
-	position.y = zonesize;
+Position GridtoZone::getZonePosition(int zoneindex){
+
+	double x = zonesize;
+	double y = zonesize;
 
 	int counter = 1;
 	int maxcount = 1;
@@ -49,28 +50,28 @@ Position getZone(int zoneindex){
 		switch(direction)
 		{
 			case North:
-				position.y += distance;
+				y += distance;
 				if(turn){
 					direction = West;
 					turn = false;
 				}
 				break;
 			case East:
-				position.x += distance;
+				x += distance;
 				if(turn){
 					direction = North;
 					turn = false;
 				}
 				break;
 			case South:
-				position.y -= distance;
+				y -= distance;
 				if(turn){
 					direction = East;
 					turn = false;
 				}
 				break;
 			case West:
-				position.x -= distance;
+				x -= distance;
 				if(turn){
 					direction = South;
 					turn = false;
@@ -86,79 +87,77 @@ Position getZone(int zoneindex){
 			turn = true;
 		}
 	}
+
+	Position position = Position(x,y);
 	return position;
 }
 
-void updatePaperMap(){
-	paperMap = LiveMap;
+void GridtoZone::updatePaperMap(){
+	paperMap = liveMap;
 }
 
-int countInSection(Poition center, double length, float value){
-	float values[] = {value}
-	return countInSection(center,length,values);
+int GridtoZone::countInSection(Position center, double length, float value){
+	float values[] = {value};
+	return countInSection(center,length,values,1);
 }
 
-int countInSection(Poition center, double length, float values[]=NULL){
+int GridtoZone::countInSection(Position center, double length, float values[], int arrcount){
 	double side = length / 2;
 
 	grid_map::Polygon polygon;
-	polygon.setFrameId(map_.getFrameId());
+	polygon.setFrameId(paperMap.getFrameId());
 	// TopRight, BottomRight, TopLeft, BottomLeft
-	polygon.addVertex(Position( center.x + side, center.y + side ));
-	polygon.addVertex(Position( center.x + side, center.y - side ));
-	polygon.addVertex(Position( center.x - side, center.y + side ));
-	polygon.addVertex(Position( center.x - side, center.y - side ));
+	polygon.addVertex(Position( center.x() + side, center.y() + side ));
+	polygon.addVertex(Position( center.x() + side, center.y() - side ));
+	polygon.addVertex(Position( center.x() - side, center.y() + side ));
+	polygon.addVertex(Position( center.x() - side, center.y() - side ));
 
 	int count = 0;
 
-	for (grid_map::PolygonIterator iterator(map_, polygon); !iterator.isPastEnd(); ++iterator) {
+	for (grid_map::PolygonIterator iterator(paperMap, polygon); !iterator.isPastEnd(); ++iterator) {
 		// ask what each value is with Port to check with.
 		// ask about the layer
 
-		mapValue = paperMap.atPosition(layer, *iterator);
-		if ( std::find(std::begin(values), std::end(values), mapValue) != std::end(values) ){
-			count++;
+		float mapValue = paperMap.atPosition(layer, *iterator);
+
+		for (int i =0; i < arrcount; i++){
+			if (mapValue == values[i]){
+				count++;
+				continue;
+			}
 		}
 	}
 	return count;
 }
 
-double percentOfZoneExplored(int zoneindex){
-	return percentOfSectionExplored(getZonePosition(zone),zonesize);
+double GridtoZone::percentOfZoneExplored(int zoneindex){
+	return percentOfSectionExplored(getZonePosition(zoneindex),zonesize);
 }
 
-double percentOfSectionExplored(Poition center, double length){
+double GridtoZone::percentOfSectionExplored(Position center, double length){
 	double sectionsize = (length / celldivision) * (length / celldivision);
-	int count = countInSection(center, length, floorvalues);
+	int count = countInSection(center, length, floorvalues,2);
 	return count/sectionsize;
 }
 
-double percentOfZoneDiscovered(int zoneindex){
-	return percentOfSectionDiscovered(getZonePosition(zone),zonesize);
+double GridtoZone::percentOfZoneDiscovered(int zoneindex){
+	return percentOfSectionDiscovered(getZonePosition(zoneindex),zonesize);
 }
 
-double percentOfSectionDiscovered(Poition center, double length){
-	int count = countInSection(center, length, discorvedvalues)
+double GridtoZone::percentOfSectionDiscovered(Position center, double length){
+	double sectionsize = (length / celldivision) * (length / celldivision);
+	int count = countInSection(center, length, discorvedvalues,2);
 	return count/sectionsize;
 }
 
-Waypoints shortestPath(Position start, Position end){
-	return null;
+Waypoints GridtoZone::shortestPath(Position start, Position end){
+	return NULL;
 }
 
-int ClaimZone(int zone){
+int GridtoZone::ClaimZone(int zone){
 	// check if available
 	zoneclaimed = zone;
 	return zone;
 	// else
 	// return -1;
 }
-=======
-GridtoZone::GridtoZone() {
-
-}
-
-void GridtoZone::setGridMap(GridMap map) {
-
-}
-

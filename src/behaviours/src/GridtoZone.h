@@ -3,6 +3,8 @@
 
 #include <grid_map_ros/grid_map_ros.hpp>
 #include <Eigen/Dense>
+#include "Result.h"
+#include "Spiral.cpp"
 
 using namespace std;
 using namespace grid_map;
@@ -14,6 +16,30 @@ public:
 	GridMap paperMap;
 	GridtoZone();
 	void setGridMap(GridMap map);
+
+
+	void updatePaperMap();
+
+	int countInSection(Position center, double length, float value);
+	int countInSection(Position center, double length, float values[], int arrcount);
+	double percentOfZoneExplored(int zoneindex);
+
+
+	double percentOfSectionExplored(Position center, double length);
+
+
+	double percentOfZoneDiscovered(int zoneindex);
+
+	double percentOfSectionDiscovered(Position center, double length);
+	Waypoints shortestPath(Position start, Position end);
+
+	int ClaimZone(int zone);
+
+
+
+	int countRoversInZone(int zone);
+	bool inZone(Position pos);
+	Position getZonePosition(int zoneindex);
 
 private:
 	GridMap liveMap;
@@ -39,9 +65,9 @@ private:
 	const float ROVER 	= 1.00;
 	const float WALL 	= 2.00;
 
-	float wallvalues[] = {WALL, ROVER};
-	float floorvalues[] = {REVEALED, SONAR};
-	float discorvedvalues[] = {REVEALED, MAT};
+	float wallvalues[2] = {WALL, ROVER};
+	float floorvalues[2] = {REVEALED, SONAR};
+	float discorvedvalues[2] = {REVEALED, MAT};
 
 };
 
