@@ -128,7 +128,7 @@ int GridtoZone::countInSection(Position center, double length, float values[], i
 		// ask what each value is with Port to check with.
 		// ask about the layer
 
-		float mapValue = paperMap.atPosition("elevation", *iterator);
+		float mapValue = paperMap.at("elevation", *iterator);
 
 		for (int i =0; i < arrcount; i++){
 			if (mapValue == values[i]){
