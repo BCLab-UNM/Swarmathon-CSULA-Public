@@ -4,7 +4,7 @@
 #include <random_numbers/random_numbers.h>
 #include "Controller.h"
 
-#include "Spiral.h"
+#include "Spiral.cpp"
 #include "RandomSelector.cpp"
 
 /**

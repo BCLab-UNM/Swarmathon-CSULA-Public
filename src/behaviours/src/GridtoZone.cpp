@@ -9,7 +9,7 @@
 //#include "Result.h"
 //#include "Spiral.cpp"
 
-//GridtoZone() { }
+GridtoZone::GridtoZone() { }
 
 void GridtoZone::setGridMap(GridMap map) {
 	Eigen::Vector2d origin(0,0);
