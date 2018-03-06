@@ -8,6 +8,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <grid_map_ros/grid_map_ros.hpp>
+#include <Eigen/Dense>
 
 // ROS messages
 #include <std_msgs/Float32.h>
@@ -28,6 +30,7 @@
 
 
 #include "LogicController.h"
+#include "GridtoZone.h"
 #include <vector>
 
 #include "Point.h"
@@ -41,6 +44,7 @@
 #include <exception> // For exception handling
 
 using namespace std;
+using namespace grid_map;
 
 // Define Exceptions
 // Define an exception to be thrown if the user tries to create
@@ -68,6 +72,7 @@ random_numbers::RandomNumberGenerator* rng;
 // Create logic controller
 
 LogicController logicController;
+GridtoZone gridtozone;
 
 void humanTime();
 
@@ -83,9 +88,6 @@ void resultHandler();
 Point updateCenterLocation();
 void transformMapCentertoOdom();
 
-
-const int namesArrSize=6;
-string namesArr[namesArrSize] = {"test","test","test","test","test","test"};
 
 // Numeric Variables for rover positioning
 geometry_msgs::Pose2D currentLocation;
@@ -105,6 +107,7 @@ const float waypointTolerance = 0.1; //10 cm tolerance.
 
 // used for calling code once but not in main
 bool initilized = false;
+bool firstgo = true;
 
 float linearVelocity = 0;
 float angularVelocity = 0;
@@ -152,6 +155,7 @@ ros::Subscriber virtualFenceSubscriber;
 // swarmie_msgs::Waypoint messages.
 ros::Subscriber manualWaypointSubscriber;
 ros::Subscriber roverNameSubscriber;
+ros::Subscriber gridMapSubscriber;
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -185,6 +189,7 @@ void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
 void roverNameHandler(const std_msgs::String& message);
+void gridMapHandler(const grid_map_msgs::GridMap& message);
 
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
@@ -217,6 +222,7 @@ int main(int argc, char **argv) {
   virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
   manualWaypointSubscriber = mNH.subscribe((publishedName + "/waypoints/cmd"), 10, manualWaypointHandler);
   roverNameSubscriber = mNH.subscribe(("/roverNames"), 1, roverNameHandler);
+  gridMapSubscriber = mNH.subscribe(("//grid_map"), 1, gridMapHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
@@ -277,8 +283,6 @@ void behaviourStateMachine(const ros::TimerEvent&)
   // time since timerStartTime was set to current time
   timerTimeElapsed = time(0) - timerStartTime;
   
-  //cout << timerTimeElapsed << endl;
-
   // init code goes here. (code that runs only once at start of
   // auto mode but wont work in main goes here)
   if (!initilized)
@@ -385,7 +389,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
     
     
     //adds a blank space between sets of debugging data to easily tell one tick from the next
-//    cout << endl;
+    cout << endl;
     
   }
   
@@ -464,14 +468,14 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       // Pass the position of the AprilTag
       geometry_msgs::PoseStamped tagPose = message->detections[i].pose;
       loc.setPosition( make_tuple( tagPose.pose.position.x,
-				   tagPose.pose.position.y,
-				   tagPose.pose.position.z ) );
+           tagPose.pose.position.y,
+           tagPose.pose.position.z ) );
 
       // Pass the orientation of the AprilTag
       loc.setOrientation( ::boost::math::quaternion<float>( tagPose.pose.orientation.x,
-							    tagPose.pose.orientation.y,
-							    tagPose.pose.orientation.z,
-							    tagPose.pose.orientation.w ) );
+                  tagPose.pose.orientation.y,
+                  tagPose.pose.orientation.z,
+                  tagPose.pose.orientation.w ) );
       tags.push_back(loc);
     }
     
@@ -651,10 +655,6 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&) {
   heartbeatPublisher.publish(msg);
 }
 
-//void gridswarmHandler(const grid_map_msgs::GridMap message) {
-	
-//}
-
 long int getROSTimeInMilliSecs()
 {
   // Get the current time according to ROS (will be zero for simulated clock until the first time message is recieved).
@@ -760,6 +760,24 @@ void roverNameHandler(const std_msgs::String& message){
 	n += message.data + ",";
 	names.data=n;
 	chainNamePublisher.publish(names);
- 	cout << "ROSADAPTER:namesArray : " << n << endl;
+}
+
+void gridMapHandler(const grid_map_msgs::GridMap& message){
+	GridMap map({"elevation"});
+	map.setFrameId("map");
+	map.setGeometry(Length(15.5,15.5), 0.05);
+//	cout << "ROSAdapter Map Test" << endl;
+	int row = 0;
+	for (double x = -7.70; x <= 7.75; row++){
+		int col = 0;
+		for(double y = 7.70; y >= -7.75; col++){
+			Eigen::Vector2d position(x,y);
+			double value = message.data[0].data[(row*310)+col];
+			map.atPosition("elevation", position) = value;
+			y -= 0.05;
+		}
+		x += 0.05;
+	}
+    gridtozone.setGridMap(map);
 }
 

@@ -153,3 +153,12 @@ int ClaimZone(int zone){
 	// else
 	// return -1;
 }
+=======
+GridtoZone::GridtoZone() {
+
+}
+
+void GridtoZone::setGridMap(GridMap map) {
+
+}
+
