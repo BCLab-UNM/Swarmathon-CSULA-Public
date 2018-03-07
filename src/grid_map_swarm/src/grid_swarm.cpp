@@ -243,7 +243,7 @@ int main(int argc, char **argv){
 				map.at("elevation", *iterator) = SONAR;
 			}
 		}
-		if (scenter[count] <= 2.8 && scenter[count] >= 0.2){
+		if (scenter[count] <= 2.0 && scenter[count] >= 0.2){
 			for(int inner = 0; inner <= arrCount; inner++){
 				float qx = xpos[inner];
 				float qy = ypos[inner];;
@@ -265,7 +265,7 @@ int main(int argc, char **argv){
 				map.at("elevation", *iterator) = SONAR;
 			}
 		}
-		if (sleft[count] <= 2.8){
+		if (sleft[count] <= 2.0 && sleft[count] >= 0.2){
 			for(int inner = 0; inner <= arrCount; inner++){
 				float qx = xpos[inner];
 				float qy = ypos[inner];
@@ -287,7 +287,7 @@ int main(int argc, char **argv){
 				map.at("elevation", *iterator) = SONAR;
 			}
 		}
-		if (sright[count] <= 2.8){
+		if (sright[count] <= 2.0 && sright[count] >= 0.2){
 			for(int inner = 0; inner <= arrCount; inner++){
 				float qx = xpos[inner];
 				float qy = ypos[inner];
