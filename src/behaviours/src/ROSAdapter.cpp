@@ -231,7 +231,7 @@ int main(int argc, char **argv) {
   virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
   manualWaypointSubscriber = mNH.subscribe((publishedName + "/waypoints/cmd"), 10, manualWaypointHandler);
   roverNameSubscriber = mNH.subscribe(("/roverNames"), 1, roverNameHandler);
-  gridMapSubscriber = mNH.subscribe(("//grid_map"), 1, gridMapHandler);
+  gridMapSubscriber = mNH.subscribe(("/grid_map"), 1, gridMapHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
@@ -793,6 +793,7 @@ void humanTime() {
 }
 
 void roverNameHandler(const std_msgs::String& message){
+	cout << "ROSAdapter message:"<<message << endl;
 	n += message.data + ",";
 	names.data=n;
 	chainNamePublisher.publish(names);
