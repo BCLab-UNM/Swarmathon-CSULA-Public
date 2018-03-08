@@ -152,8 +152,6 @@ ros::Publisher wristAnglePublish;
 ros::Publisher infoLogPublisher;
 ros::Publisher driveControlPublish;
 ros::Publisher heartbeatPublisher;
-// Publishes swarmie_msgs::Waypoint messages on "/<robot>/waypooints"
-// to indicate when waypoints have been reached.
 ros::Publisher waypointFeedbackPublisher;
 ros::Publisher chainNamePublisher;
 ros::Publisher filtered_orientationPublish;
@@ -165,8 +163,6 @@ ros::Subscriber targetSubscriber;
 ros::Subscriber odometrySubscriber;
 ros::Subscriber mapSubscriber;
 ros::Subscriber virtualFenceSubscriber;
-// manualWaypointSubscriber listens on "/<robot>/waypoints/cmd" for
-// swarmie_msgs::Waypoint messages.
 ros::Subscriber manualWaypointSubscriber;
 ros::Subscriber roverNameSubscriber;
 ros::Subscriber gridMapSubscriber;
@@ -504,6 +500,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
   currentMode = message->data;
   if(currentMode == 2 || currentMode == 3) {
+    sleep(5);
     logicController.SetModeAuto();
   }
   else {
@@ -550,7 +547,7 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
   currentLocation.theta = ave;// }///////////////////////////////updated orientation with the filtered yaw
   /////currentLocation.theta = yaw;
   filtered_orientation.data = ave;
-   cout << " currentLocation.theta : " << currentLocation.theta << endl; //DEBUGGING CODE
+//   cout << " currentLocation.theta : " << currentLocation.theta << endl; //DEBUGGING CODE
   filtered_orientationPublish.publish(filtered_orientation);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

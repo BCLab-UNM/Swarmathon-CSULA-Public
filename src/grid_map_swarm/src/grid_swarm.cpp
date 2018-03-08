@@ -58,6 +58,7 @@ ros::Publisher gridswarmPublisher;
 ros::Publisher heartbeatPublisher;
 //Subscriber
 ros::Subscriber roverNameSubscriber;
+ros::Subscriber modeSubscriber;
 ros::Subscriber sonarLeftSubscriber	,sonarLeftSubscriber1	,sonarLeftSubscriber2	;
 ros::Subscriber sonarCenterSubscriber	,sonarCenterSubscriber1	,sonarCenterSubscriber2	;
 ros::Subscriber sonarRightSubscriber	,sonarRightSubscriber1	,sonarRightSubscriber2	;
@@ -81,6 +82,7 @@ std::string publishedName;
   float ypos[namesArrSize];
   char host[128];
   bool firstgo = true;
+  bool modeAuto = false;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
@@ -92,6 +94,7 @@ using namespace ros;
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 
 void roverNameHandler(const std_msgs::String& message);
+void modeHandler(const std_msgs::UInt8::ConstPtr& message);
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
@@ -124,6 +127,7 @@ int main(int argc, char **argv){
   ros::NodeHandle gNH;
 //SUBSCRIBER
   roverNameSubscriber = gNH.subscribe(("/chainName"), 1, roverNameHandler);
+  modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeHandler);
 
 
 //PUBLISH
@@ -131,10 +135,10 @@ int main(int argc, char **argv){
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
   
   ros::Rate rate(30.0);
-  sleep(30);
-  ros::spinOnce();
-  rate.sleep();
-
+  do{
+  	ros::spinOnce();
+  	rate.sleep();
+  }while(modeAuto == false);
 
   if (publishedName != namesArr[0]){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
@@ -243,7 +247,7 @@ int main(int argc, char **argv){
 				map.at("elevation", *iterator) = SONAR;
 			}
 		}
-		if (scenter[count] <= 2.8 && scenter[count] >= 0.2){
+		if (scenter[count] <= 2.0 && scenter[count] >= 0.2){
 			for(int inner = 0; inner <= arrCount; inner++){
 				float qx = xpos[inner];
 				float qy = ypos[inner];;
@@ -265,7 +269,7 @@ int main(int argc, char **argv){
 				map.at("elevation", *iterator) = SONAR;
 			}
 		}
-		if (sleft[count] <= 2.8){
+		if (sleft[count] <= 2.0 && sleft[count] >= 0.2){
 			for(int inner = 0; inner <= arrCount; inner++){
 				float qx = xpos[inner];
 				float qy = ypos[inner];
@@ -287,7 +291,7 @@ int main(int argc, char **argv){
 				map.at("elevation", *iterator) = SONAR;
 			}
 		}
-		if (sright[count] <= 2.8){
+		if (sright[count] <= 2.0 && sright[count] >= 0.2){
 			for(int inner = 0; inner <= arrCount; inner++){
 				float qx = xpos[inner];
 				float qy = ypos[inner];
@@ -301,7 +305,7 @@ int main(int argc, char **argv){
 		}
 	}//END OF FOR LOOP
 	//CENTER MAT being Discovered
-	cout << "Creating the Center Mat" << endl;
+	//cout << "Creating the Center Mat" << endl;
 	for (float length = -0.50; length <= 0.50;){
 		for(float width = -0.50; width <= 0.50;){
 			Eigen::Vector2d mat(length,width);
@@ -450,14 +454,24 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 void roverNameHandler(const std_msgs::String& message){
 	std::string list= message.data;
 	for(int i=0;i<namesArrSize; i++){
+		namesArr[i] = "test";
+	}
+	for(int i=0;i<namesArrSize; i++){
 		if(namesArr[i].compare("test") == 0){
 			int index = list.find(",");
 			namesArr[i] = list.substr(0,index);
 			list.erase(0,index+1);
-//			cout << "GRIDSWARM:namesArray "<<i<<": " << namesArr[i] << endl;
+			cout << "GRIDSWARM:namesArray "<<i<<": " << namesArr[i] << endl;
 			if (list.empty()){
 				i = namesArrSize;
 			}
 		}
+	}
+}
+
+void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
+	currentMode = message->data;
+	if(currentMode == 2 || currentMode == 3) {
+		modeAuto = true;
 	}
 }

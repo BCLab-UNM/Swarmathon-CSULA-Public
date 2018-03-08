@@ -320,8 +320,8 @@ void parseData(string str) {
 			else if (dataSet.at(0) == "USC") {
 				sonarCenter.header.stamp = ros::Time::now();
 				data = atof(dataSet.at(2).c_str()) / 100.0;
-				cout << "  firstreading = " << firstreading << endl;
-				cout << "  updatereadings = " << updatereadings << endl;
+				//cout << "  firstreading = " << firstreading << endl;
+				//cout << "  updatereadings = " << updatereadings << endl;
 				center[1] = data; 
 
 				if(firstreading){
@@ -335,10 +335,10 @@ void parseData(string str) {
 				}
 
 				centerdiff = abs(center[1]-center[0]);
-				cout << "-----------------------------------------------"<<endl;
-				cout << " center[0] = " << center[0] << endl;
-				cout << " center[1] = " << center[1] << endl;
-				cout << " difference = " << centerdiff<<endl; 
+				//cout << "-----------------------------------------------"<<endl;
+				//cout << " center[0] = " << center[0] << endl;
+				//cout << " center[1] = " << center[1] << endl;
+				//cout << " difference = " << centerdiff<<endl; 
 			
 				if (centerdiff > diff) {
 					sonarCenter.range = center[0];
@@ -355,9 +355,9 @@ void parseData(string str) {
 				updatereadings = true;
 				counter=0;
 				}
-				cout << "   counter = " << counter << endl;
-				cout << "   sonar = " << sonarCenter.range<<endl;
-				cout << "-----------------------------------------------"<<endl; 
+				//cout << "   counter = " << counter << endl;
+				//cout << "   sonar = " << sonarCenter.range<<endl;
+				//cout << "-----------------------------------------------"<<endl; 
 				center[0] = center[1];
 			}
 			else if (dataSet.at(0) == "USR") {
