@@ -52,12 +52,18 @@ private:
 
   // JS was Here
   int zone = 0;
-  int spiralTurnsGoal = 10;
+  int spiralTurnsGoal = 8;
   int spiralTurnsCompleted = spiralTurnsGoal;
+
+  int accuracy = 2;
+  float areasize = 3.5;
+  float areamargin = 0.5;
+  float firsttravel = 0.25f;
+
 
   Point centralSpiralLocation;
 
-  RandomSelector rs;
+  RandomSelector rs = RandomSelector(accuracy, areasize, areamargin);
   Spiral s;
   int c = 0;
 

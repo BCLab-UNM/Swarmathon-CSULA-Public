@@ -5,11 +5,14 @@
 #include <random>
 #include "Point.h"
 
+#include <random_numbers/random_numbers.h>
+
 
 class RandomSelector {
     int accuracy = 2;
-    float areasize = 3.75;
+    float areasize = 3.5;
     float areamargin = 0.5;
+    random_numbers::RandomNumberGenerator* rng;
   public:
 
     float getAreaSize(){
@@ -38,12 +41,13 @@ class RandomSelector {
         areamargin = margin;
     }
 
-    RandomSelector() { }
+    RandomSelector() { rng = new random_numbers::RandomNumberGenerator(); }
 
     RandomSelector(float acc, float size, float margin){
         accuracy = acc;
         areasize = size;
         areamargin = margin;
+        rng = new random_numbers::RandomNumberGenerator();
     }
 
     Point getZone(int index){
@@ -133,7 +137,7 @@ class RandomSelector {
     }
 
     float RandomNumber(float Min, float Max){
-        float f =  ((float(rand()) / float(RAND_MAX)) * (Max - Min)) + Min;
+        float f =  float(rng->uniformReal( Min, Max ));
         f *= pow(10, accuracy);
         f = ceil(f);
         f /= pow(10, accuracy);

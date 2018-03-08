@@ -72,7 +72,6 @@ random_numbers::RandomNumberGenerator* rng;
 // Create logic controller
 
 LogicController logicController;
-GridtoZone gridtozone;
 
 void humanTime();	//translates time into human time
 
@@ -764,6 +763,10 @@ void roverNameHandler(const std_msgs::String& message){
 	names.data=n;
 	chainNamePublisher.publish(names);
 }
+
+
+
+GridtoZone gridtozone;
 
 void gridMapHandler(const grid_map_msgs::GridMap& message){
 	GridMap map({"elevation"});

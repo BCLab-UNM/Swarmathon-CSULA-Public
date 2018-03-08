@@ -31,7 +31,10 @@ Result SearchController::DoWork() {
         std::cout<<  "Zone: " << zone << std::endl;
         spiralTurnsCompleted = 0;
         centralSpiralLocation = rs.getRandomPointInZone(zone);
-        s.reset(centralSpiralLocation, North , false , 0.5f);
+
+
+
+        s.reset(centralSpiralLocation, North , false , firsttravel);
         zone++;
 
         searchLocation = centralSpiralLocation;

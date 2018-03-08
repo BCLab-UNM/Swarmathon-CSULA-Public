@@ -51,10 +51,9 @@ sbridge::sbridge(std::string publishedName) {
    nameMsg.data=publishedName;
    roverNamePublisher.publish(nameMsg);
     ROS_INFO("constructor");
-
+}
 // Command Handler
 // PWM (pulse with modulation) values to linear values
->>>>>>> master
 void sbridge::cmdHandler(const geometry_msgs::Twist::ConstPtr& message) {
     // Gets and sets the linear PWM value
     double left = (message->linear.x);
