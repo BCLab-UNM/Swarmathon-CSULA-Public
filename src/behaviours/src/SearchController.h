@@ -38,6 +38,9 @@ private:
   Point centerLocation;
   Point searchLocation;
   int attemptCount = 0;
+double x=0;
+double y=0;
+double d=1;
   //struct for returning data to ROS adapter
   Result result;
 
