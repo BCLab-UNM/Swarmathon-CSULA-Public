@@ -7,6 +7,17 @@
 
 GridtoZone::GridtoZone() { }
 
+GridtoZone* GridtoZone::m_pInstance = NULL;
+
+// OK //
+GridtoZone* GridtoZone::Instance(){
+	if (!m_pInstance){
+		m_pInstance = new GridtoZone;
+	}
+	return m_pInstance;
+}
+
+// OK //
 void GridtoZone::setGridMap(GridMap map) {
 	Eigen::Vector2d origin(0,0);
 	liveMap = map;
@@ -27,16 +38,11 @@ bool GridtoZone::inZone(Position pos){
 	return false;
 }
 
-/*
-Position GridtoZone::getZonePosition(int zoneindex){
-	Position position = Position(0,0);
-	return position;
-}
-*/
 
+// OK //
 Position GridtoZone::getZonePosition(int zoneindex){
-	double x = zonesize;
-	double y = zonesize;
+	double x = zonesize/2;
+	double y = zonesize/2;
 
 	int counter = 1;
 	int maxcount = 1;
@@ -94,6 +100,12 @@ Position GridtoZone::getZonePosition(int zoneindex){
 	}
 
 	Position position = Position(x,y);
+
+	if (positionverbose){
+		std::cout<<  "Center of zone" << std::endl;
+	    std::cout<<  "X: " << x << "  Y: " << y << std::endl;
+	}
+
 	return position;
 }
 
@@ -115,25 +127,79 @@ int GridtoZone::countInSection(Position center, double length, float values[], i
 	// TopRight, BottomRight, TopLeft, BottomLeft
 	polygon.addVertex(Position( center.x() + side, center.y() + side ));
 	polygon.addVertex(Position( center.x() + side, center.y() - side ));
-	polygon.addVertex(Position( center.x() - side, center.y() + side ));
 	polygon.addVertex(Position( center.x() - side, center.y() - side ));
+	polygon.addVertex(Position( center.x() - side, center.y() + side ));
+
+	if (positionverbose){
+		std::cout<<  "Corners of zone" << std::endl;	
+	    std::cout<<  "X: " << center.x() + side << "  Y: " << center.y() + side << std::endl;
+	    std::cout<<  "X: " << center.x() + side << "  Y: " << center.y() - side << std::endl;
+	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() - side << std::endl;
+	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() + side << std::endl;
+	}
 
 	int count = 0;
+	int count2 = 0;
 
 	for (grid_map::PolygonIterator iterator(paperMap, polygon); !iterator.isPastEnd(); ++iterator) {
 		// ask what each value is with Port to check with.
 		// ask about the layer
+		if (positionverbose){
+			//cout << "The value at index " << (*iterator).transpose() << " is " << paperMap.at("elevation", *iterator) << endl;
+		}
+
+		float mapValue = paperMap.at("elevation", *iterator);
+				count2++;
+
+		for (int i =0; i < arrcount; i++){
+			if (mapValue == values[i]){
+				count++;
+				break;
+			}
+		}
+	}
+	if (positionverbose){
+		std::cout<<  "Total itr count" << std::endl;	
+	    std::cout<<  count2 << std::endl;
+	}
+	return count;
+}
+
+double GridtoZone::percentInSection(Position center, double length, float values[], int arrcount){
+	double side = length / 2;
+
+	grid_map::Polygon polygon;
+	polygon.setFrameId(paperMap.getFrameId());
+	// TopRight, BottomRight, TopLeft, BottomLeft
+	polygon.addVertex(Position( center.x() + side, center.y() + side ));
+	polygon.addVertex(Position( center.x() + side, center.y() - side ));
+	polygon.addVertex(Position( center.x() - side, center.y() + side ));
+	polygon.addVertex(Position( center.x() - side, center.y() - side ));
+
+	if (positionverbose){
+		std::cout<<  "Corners of zone" << std::endl;	
+	    std::cout<<  "X: " << center.x() + side << "  Y: " << center.y() + side << std::endl;
+	    std::cout<<  "X: " << center.x() + side << "  Y: " << center.y() - side << std::endl;
+	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() + side << std::endl;
+	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() - side << std::endl;
+	}
+
+	int count = 0;
+	int totalcount = 0;
+
+	for (grid_map::PolygonIterator iterator(paperMap, polygon); !iterator.isPastEnd(); ++iterator) {
+		totalcount++;
 
 		float mapValue = paperMap.at("elevation", *iterator);
 
 		for (int i =0; i < arrcount; i++){
 			if (mapValue == values[i]){
 				count++;
-				continue;
+				break;
 			}
 		}
 	}
-	return count;
+	return 1.0*count/totalcount;
 }
 
 double GridtoZone::percentOfZoneExplored(int zoneindex){
@@ -142,7 +208,9 @@ double GridtoZone::percentOfZoneExplored(int zoneindex){
 
 double GridtoZone::percentOfSectionExplored(Position center, double length){
 	double sectionsize = (length / celldivision) * (length / celldivision);
-	int count = countInSection(center, length, floorvalues,2);
+	double sectionlength = (length / celldivision);
+	int count = countInSection(center, sectionlength, floorvalues, 3);
+	count = countInSection(center, length, allvalues, 7);
 	return count/sectionsize;
 }
 
@@ -152,7 +220,8 @@ double GridtoZone::percentOfZoneDiscovered(int zoneindex){
 
 double GridtoZone::percentOfSectionDiscovered(Position center, double length){
 	double sectionsize = (length / celldivision) * (length / celldivision);
-	int count = countInSection(center, length, discorvedvalues,2);
+	double sectionlength = (length / celldivision);
+	int count = countInSection(center, sectionlength, discorvedvalues,2);
 	return count/sectionsize;
 }
 
@@ -170,4 +239,24 @@ int GridtoZone::ClaimZone(int zone){
 	return zone;
 	// else
 	// return -1;
+}
+
+double GridtoZone::percentOfTest(){
+	int length = 15;
+	double sectionsize = (length / celldivision) * (length / celldivision);
+	double sectionlength = (length / celldivision);
+
+	float values[] = {MAT};
+//	int count = percentInSection(Position(0,0),length,values,1);
+	return percentInSection(Position(0,0),length,values,1);
+}
+
+int GridtoZone::countOfTest(){
+	int length = 1;
+
+	Position center = Position(0,0);
+
+	float values[] = {MAT};
+
+	return countInSection(center, length, MAT);
 }

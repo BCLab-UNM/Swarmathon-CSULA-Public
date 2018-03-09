@@ -60,13 +60,14 @@ private:
   float areamargin = 0.5;
   float firsttravel = 0.25f;
 
+  bool waypointsVerbose = false;
+  bool gtzVerbose = true;
 
   Point centralSpiralLocation;
 
   RandomSelector rs = RandomSelector(accuracy, areasize, areamargin);
   Spiral s;
   int c = 0;
-
 };
 
 #endif /* SEARCH_CONTROLLER */

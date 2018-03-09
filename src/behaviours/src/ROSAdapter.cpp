@@ -391,7 +391,8 @@ void behaviourStateMachine(const ros::TimerEvent&)
     
     
     //adds a blank space between sets of debugging data to easily tell one tick from the next
-    cout << endl;
+    
+    //cout << endl;
     
   }
   
@@ -754,8 +755,7 @@ void humanTime() {
   if (frac > 9) {
     frac = 0;
   }
-  
-  //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
+//cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
 }
 
 void roverNameHandler(const std_msgs::String& message){
@@ -764,11 +764,9 @@ void roverNameHandler(const std_msgs::String& message){
 	chainNamePublisher.publish(names);
 }
 
-
-
-GridtoZone gridtozone;
-
+//GridtoZone gridtozone;
 void gridMapHandler(const grid_map_msgs::GridMap& message){
+
 	GridMap map({"elevation"});
 	map.setFrameId("map");
 	map.setGeometry(Length(15.5,15.5), 0.05);
@@ -784,6 +782,6 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 		}
 		x += 0.05;
 	}
-    gridtozone.setGridMap(map);
+  GridtoZone::Instance()->setGridMap(map);
+//    gridtozone.setGridMap(map);
 }
-

@@ -24,17 +24,38 @@ void SearchController::Reset() {
 }
 
 Result SearchController::DoWork() {
-    // Search Here
+      // Search Here
       result.type = waypoint;
       first_waypoint = false;
+
+      GridtoZone::Instance()->updatePaperMap();
+      if(gtzVerbose){
+        std::cout << GridtoZone::Instance()->countOfTest() << std::endl;
+      }
+
+
       if(spiralTurnsCompleted == spiralTurnsGoal){
-        std::cout<<  "Zone: " << zone << std::endl;
+        if (waypointsVerbose){ std::cout<<  "Zone: " << zone << std::endl; }
         spiralTurnsCompleted = 0;
+
+
+        /*=============================
+            
+            Do Gripmap work here to choose a zone
+            check the zone if it does not have a good coverage or another rover has claimed it; otherwise get another zone
+            get random point in zone(see centralSpiralLocation = rs.getRandomPointInZone(zone);)             
+            check a the secion around that zone. if ok continue other wise get another point. Try for lets say 10 times otherwise choose adifferent zone.
+            if section ok do the rest
+
+        =============================*/
+
+
         centralSpiralLocation = rs.getRandomPointInZone(zone);
 
+        Direction direction = Direction(rng->uniformInteger(0,3));
+        bool clockwise = rng->uniformInteger(0,1);
 
-
-        s.reset(centralSpiralLocation, North , false , firsttravel);
+        s.reset(centralSpiralLocation, direction , clockwise , firsttravel);
         zone++;
 
         searchLocation = centralSpiralLocation;
@@ -45,16 +66,9 @@ Result SearchController::DoWork() {
 
       }
     searchLocation = s.getNextPoition();
-    std::cout<<  "X: " << searchLocation.x << "  Y: " << searchLocation.y << std::endl;
+    if (waypointsVerbose){ std::cout<<  "X: " << searchLocation.x << "  Y: " << searchLocation.y << std::endl; }
     spiralTurnsCompleted++;
  
-
-//	c = (c + 1) % 4;
-//    std::cout<<  c << std::endl;
-//	if(c == 0) { searchLocation.x = 2; searchLocation.y = 2; }
-//	if(c == 1) { searchLocation.x = -2; searchLocation.y = 2; }
-//	if(c == 2) { searchLocation.x = -2; searchLocation.y = -2; }
-//	if(c == 3) { searchLocation.x = 2; searchLocation.y = -2; }
 
     result.wpts.waypoints.clear();
     result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);

@@ -41,13 +41,13 @@ const float CELLDIVISION = 0.05;
 const float ROVERHALF = 0.20;
 const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
 //GRID POINT TYPE
-const double WALL = 2.00;
-const double FOG = -1.00;
-const double ROVER = 1.00;
-const double REVEALED = 0.00;
-const double MAT = 0.50;
-const double SONAR = 0.20;
-const double MULTICUBES = 0.70;
+const double FOG 	= -1.00;
+const double REVEALED 	= 0.00;
+const double MAT 	= 0.10;
+const double MULTICUBES	= 0.20;
+const double SONAR 	= 0.30;
+const double ROVER 	= 1.00;
+const double WALL 	= 2.00;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
@@ -301,7 +301,7 @@ int main(int argc, char **argv){
 		}
 	}//END OF FOR LOOP
 	//CENTER MAT being Discovered
-	cout << "Creating the Center Mat" << endl;
+//	cout << "Creating the Center Mat" << endl;
 	for (float length = -0.50; length <= 0.50;){
 		for(float width = -0.50; width <= 0.50;){
 			Eigen::Vector2d mat(length,width);

@@ -13,8 +13,10 @@ using namespace Eigen;
 class GridtoZone {
 
 public:
+	static GridtoZone* Instance();
+
 	GridMap paperMap;
-	GridtoZone();
+
 	void setGridMap(GridMap map);
 
 
@@ -45,16 +47,23 @@ public:
 	int countRoversInZone(int zone);
 	bool inZone(Position pos);
 
+	double percentOfTest();
+	int countOfTest();
+	double percentInSection(Position center, double length, float values[], int arrcount);
 	enum GridDirection { North, East, South, West };
 
 
 private:
+	static GridtoZone* m_pInstance;
+
+	GridtoZone();
 
 	GridMap liveMap;
 	bool verbose = false;
+	bool positionverbose = true;
 
 	int accuracy = 2;
-	float zonesize = 3.75;
+	float zonesize = 3.5;
 	int zoneclaimed = -1;
 
 	// for a fixed number of turns
@@ -74,9 +83,9 @@ private:
 	const float WALL 	= 2.00;
 
 	float wallvalues[2] = {WALL, ROVER};
-	float floorvalues[2] = {REVEALED, SONAR};
+	float floorvalues[3] = {REVEALED, SONAR, MAT};
 	float discorvedvalues[2] = {REVEALED, MAT};
+	float allvalues[7] = {FOG, REVEALED, MAT, CUBES, SONAR, ROVER, WALL};
 
 };
-
 #endif // GRIDTOZONE
