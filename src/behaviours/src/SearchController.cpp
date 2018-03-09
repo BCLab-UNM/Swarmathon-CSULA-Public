@@ -25,87 +25,64 @@ void SearchController::Reset() {
  */
 Result SearchController::DoWork() {
 
-               double rotations = 0;
-               result.type = waypoint;
-               Point searchLocation;
-               if (attemptCount==0)
-               {
-                   searchLocation.theta = 0;
-                   searchLocation.x =(x); // x = 0
-                   searchLocation.y =(y); // y = 0
-                   attemptCount++;
-                   x=x+d;                 // d = 1
-                   std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
-                    std::cout<< "X: " << x << "  Y: " << y <<endl;
-               }
-               else if (attemptCount==1)
-               {
-                   searchLocation.theta = M_PI/2;
-                   searchLocation.x = (x); // x = 1
-                   searchLocation.y = (y); // y = 0
-                   attemptCount++;
-                   y=y+d;
-                   d=(-d)-1;               // d = -2
-                   std::cout<< "Traveling to 2nd waypoint";
-                    std::cout<< "X: " << x << "  Y: " << y <<endl;
-                    std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
-               }
-               else if (attemptCount==2)
-               {
-                   searchLocation.theta = M_PI;
-                   searchLocation.x = (x); // x = 1
-                   searchLocation.y = (y); // y = 1
-                   attemptCount++;
-                   x=x+d;
-                   std::cout<< "Traveling to 3rd waypoint";
-                    std::cout<< "X: " << x << "  Y: " << y <<endl;
-               }
-               else if (attemptCount==3){
-                   searchLocation.theta = 3/2 *M_PI;
-                   searchLocation.x = (x); // x = -1
-                   searchLocation.y = (y); // y = 1
-                   attemptCount++;
-                   y=y+d;
-                   d=(-d)+1;               // d = 3
-                   std::cout<< "Traveling to 4th waypoint";
-                    std::cout<< "X: " << x << "  Y: " << y <<endl;
+  if (!result.wpts.waypoints.empty()) {
+    if (hypot(result.wpts.waypoints[0].x-currentLocation.x, result.wpts.waypoints[0].y-currentLocation.y) < 0.15) {
+      attemptCount = 0;
+    }
+  }
 
-               }
-               else{
-                   searchLocation.theta = 0;
-                   searchLocation.x = (x); // x = -1
-                   searchLocation.y = (y); // y = -1
-                   attemptCount=1;
-                   x=x+d;
-
-                   std::cout<< "Traveling to 5th waypoint";
-                    std::cout<< "X: " << x << "  Y: " << y <<endl;
-                   rotations++;
-               }
+  if (attemptCount > 0 && attemptCount < 5) {
+    attemptCount++;
+    if (succesfullPickup) {
+      succesfullPickup = false;
+      attemptCount = 1;
+    }
+    return result;
+  }
+  else if (attemptCount >= 5 || attemptCount == 0)
+  {
+    attemptCount = 1;
 
 
+    result.type = waypoint;
+    Point  searchLocation;
 
+    //select new position 50 cm from current location
+    if (first_waypoint)
+    {
+      first_waypoint = false;
+      searchLocation.theta = currentLocation.theta + M_PI;
+      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
+      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
+    }
+    else
+    {
+      //select new heading from Gaussian distribution around current heading
+      searchLocation.theta = rng->gaussian(currentLocation.theta, 0.785398); //45 degrees in radians
+      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
+      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
+    }
 
-
-           result.wpts.waypoints.clear();
-           result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
+    result.wpts.waypoints.clear();
+    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
 
     return result;
+  }
 
 }
 
 void SearchController::SetCenterLocation(Point centerLocation) {
-  
+
   float diffX = this->centerLocation.x - centerLocation.x;
   float diffY = this->centerLocation.y - centerLocation.y;
   this->centerLocation = centerLocation;
-  
+
   if (!result.wpts.waypoints.empty())
   {
   result.wpts.waypoints.back().x -= diffX;
   result.wpts.waypoints.back().y -= diffY;
   }
-  
+
 }
 
 void SearchController::SetCurrentLocation(Point currentLocation) {
@@ -128,5 +105,3 @@ bool SearchController::HasWork() {
 void SearchController::SetSuccesfullPickup() {
   succesfullPickup = true;
 }
-
-
