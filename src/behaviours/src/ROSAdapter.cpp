@@ -798,7 +798,7 @@ void humanTime() {
 
 void chainNameHandler(const std_msgs::String& message){
 	std::string list = message.data;
-	lastnames = list + ",";
+	lastnames = list;
 }
 
 void roverNameHandler(const std_msgs::String& message){
