@@ -38,7 +38,6 @@ sensor_msgs::Range sonarLeft;
 sensor_msgs::Range sonarCenter;
 sensor_msgs::Range sonarRight;
 USBSerial usb;
-//gridmap gmap;
 const int baud = 115200;
 char dataCmd[] = "d\n";
 char moveCmd[16];
@@ -142,7 +141,7 @@ int main(int argc, char **argv){
     sonarRightPublish = aNH.advertise<sensor_msgs::Range>((publishedName + "/sonarRight"), 10);
     infoLogPublisher = aNH.advertise<std_msgs::String>("/infoLog", 1, true);
     heartbeatPublisher = aNH.advertise<std_msgs::String>((publishedName + "/abridge/heartbeat"), 1, true);
-    roverNamePublisher = aNH.advertise<std_msgs::String>("/roverNames", 1,true);
+    roverNamePublisher = aNH.advertise<std_msgs::String>("/roverNames", 6,true);
     
     driveControlSubscriber = aNH.subscribe((publishedName + "/driveControl"), 10, driveCommandHandler);
     fingerAngleSubscriber = aNH.subscribe((publishedName + "/fingerAngle/cmd"), 1, fingerAngleHandler);

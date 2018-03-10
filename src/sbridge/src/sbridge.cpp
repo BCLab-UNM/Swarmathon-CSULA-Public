@@ -32,7 +32,7 @@ sbridge::sbridge(std::string publishedName) {
 
     // Create a infoLog publisher to send log information to the log box in the GUI
     infoLogPublisher = sNH.advertise<std_msgs::String>("/infoLog", 1, true);
-    roverNamePublisher = sNH.advertise<std_msgs::String>("/roverNames", 1,true);
+    roverNamePublisher = sNH.advertise<std_msgs::String>("/roverNames", 6,true);
 
 //    publishNamePublisher = sNH.advertise<std_msgs::String>("/roverName",1);
 

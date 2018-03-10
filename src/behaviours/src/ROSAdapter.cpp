@@ -135,6 +135,7 @@ Result result;		//result struct for passing and storing values to drive robot
 
 std_msgs::String msg;
 std_msgs::String names;
+std::string lastnames;
 std::string n = "";
 std_msgs::Float32 filtered_orientation;
 
@@ -164,6 +165,7 @@ ros::Subscriber mapSubscriber;
 ros::Subscriber virtualFenceSubscriber;
 ros::Subscriber manualWaypointSubscriber;
 ros::Subscriber roverNameSubscriber;
+ros::Subscriber chainNameSubscriber;
 ros::Subscriber gridMapSubscriber;
 
 // Timers
@@ -198,6 +200,7 @@ void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
 void roverNameHandler(const std_msgs::String& message);
+void chainNameHandler(const std_msgs::String& message);
 void gridMapHandler(const grid_map_msgs::GridMap& message);
 
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
@@ -230,6 +233,7 @@ int main(int argc, char **argv) {
   mapSubscriber = mNH.subscribe((publishedName + "/odom/ekf"), 10, mapHandler);
   virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
   manualWaypointSubscriber = mNH.subscribe((publishedName + "/waypoints/cmd"), 10, manualWaypointHandler);
+  chainNameSubscriber = mNH.subscribe(("/chainName"), 1, chainNameHandler);
   roverNameSubscriber = mNH.subscribe(("/roverNames"), 1, roverNameHandler);
   gridMapSubscriber = mNH.subscribe(("/grid_map"), 1, gridMapHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
@@ -792,9 +796,13 @@ void humanTime() {
   //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
 }
 
+void chainNameHandler(const std_msgs::String& message){
+	std::string list = message.data;
+	lastnames = list + ",";
+}
+
 void roverNameHandler(const std_msgs::String& message){
-	cout << "ROSAdapter message:"<<message << endl;
-	n += message.data + ",";
+	n = lastnames + "" + message.data + ",";
 	names.data=n;
 	chainNamePublisher.publish(names);
 }
