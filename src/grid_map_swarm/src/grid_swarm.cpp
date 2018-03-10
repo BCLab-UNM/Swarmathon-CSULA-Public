@@ -41,13 +41,13 @@ const float CELLDIVISION = 0.05;
 const float ROVERHALF = 0.20;
 const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
 //GRID POINT TYPE
-const double FOG 	= -1.00;
+const double FOG 	= -10.00;
 const double REVEALED 	= 0.00;
-const double MAT 	= 0.10;
-const double MULTICUBES	= 0.20;
-const double SONAR 	= 0.30;
-const double ROVER 	= 1.00;
-const double WALL 	= 2.00;
+const double MAT 	= 1.0;
+const double MULTICUBES	= 2.0;
+const double SONAR 	= 3.0;
+const double ROVER 	= 10.0;
+const double WALL 	= 20.0;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
@@ -70,7 +70,7 @@ std::string publishedName;
 //Global
   const float pi = std::acos(-1);
   const int namesArrSize=6;
-  string namesArr[namesArrSize] = {"test","test","test","test","test","test"};//"achilles","ajax","aeneas"
+  string namesArr[namesArrSize] = {"achilles","test","test","test","test","test"};//"achilles","ajax","aeneas"
   int currentMode = 0;
   int arrCount = 0;
   float sleft[namesArrSize];
@@ -131,7 +131,9 @@ int main(int argc, char **argv){
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
   
   ros::Rate rate(30.0);
-  sleep(30);
+
+
+  //sleep(30);
   ros::spinOnce();
   rate.sleep();
 
@@ -461,4 +463,3 @@ void roverNameHandler(const std_msgs::String& message){
 		}
 	}
 }
-

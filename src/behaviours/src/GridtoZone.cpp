@@ -4,6 +4,7 @@
 
 // needed for polygon shape
 #include <geometry_msgs/PolygonStamped.h>
+using namespace Eigen;
 
 GridtoZone::GridtoZone() { }
 
@@ -27,10 +28,44 @@ void GridtoZone::setGridMap(GridMap map) {
 	}
 }
 
+bool GridtoZone::otherRoverInZone(int zone, Position rover){
+	int count = countRoversInZone(zone);
+	Position center = getZonePosition(zone);
+	double side = zonesize / 2;
+	
+	Vector2f A( center.x() + side, center.y() + side );
+	Vector2f B( center.x() + side, center.y() - side );
+	Vector2f C( center.x() - side, center.y() - side );
+	Vector2f D( center.x() - side, center.y() + side );
+
+	Vector2f P( rover.x(), rover.y());
+
+	Vector2f AB = A.cross(B);
+	Vector2f AP = A.cross(P);
+	Vector2f BC = B.cross(C);
+	Vector2f BP = B.cross(P);
+
+
+	double APdotAB = AP.adjoint()*AB;
+	double ABdotAB = AB.adjoint()*AB;
+	double BPdotBC = BP.adjoint()*BC;
+	double BCdotBC = BC.adjoint()*BC;
+
+
+// (0< APdotAB<ABdotAB)∧(0<APdotAD<ADdotAD)
+	bool roverInZone = (0.0 <= APdotAB && APdotAB <= ABdotAB) && (0.0 <= BPdotBC && BPdotBC <= BCdotBC);
+
+	if (roverInZone){
+		count--;
+	}
+
+	return count <= 0;
+}
+
+
 int GridtoZone::countRoversInZone(int zone){
-	float rovervalue = 1.0;
 	getZonePosition(zone);
-	return countInSection(getZonePosition(zone),zonesize,rovervalue);
+	return countInSection(getZonePosition(zone),zonesize,ROVER);
 }
 
 // forgot what this is suppose to do.
@@ -137,7 +172,7 @@ int GridtoZone::countInSection(Position center, double length, float values[], i
 	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() - side << std::endl;
 	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() + side << std::endl;
 	}
-
+ 
 	int count = 0;
 	int count2 = 0;
 
@@ -149,18 +184,17 @@ int GridtoZone::countInSection(Position center, double length, float values[], i
 		}
 
 		float mapValue = paperMap.at("elevation", *iterator);
-				count2++;
+		count2++;
 
 		for (int i =0; i < arrcount; i++){
-			if (mapValue == values[i]){
+			if (comparefloats(mapValue,values[i])){
 				count++;
 				break;
 			}
 		}
 	}
 	if (positionverbose){
-		std::cout<<  "Total itr count" << std::endl;	
-	    std::cout<<  count2 << std::endl;
+		std::cout<<  "Total itr count: " <<  count2 << std::endl;	
 	}
 	return count;
 }
@@ -173,16 +207,17 @@ double GridtoZone::percentInSection(Position center, double length, float values
 	// TopRight, BottomRight, TopLeft, BottomLeft
 	polygon.addVertex(Position( center.x() + side, center.y() + side ));
 	polygon.addVertex(Position( center.x() + side, center.y() - side ));
-	polygon.addVertex(Position( center.x() - side, center.y() + side ));
 	polygon.addVertex(Position( center.x() - side, center.y() - side ));
+	polygon.addVertex(Position( center.x() - side, center.y() + side ));
 
 	if (positionverbose){
 		std::cout<<  "Corners of zone" << std::endl;	
 	    std::cout<<  "X: " << center.x() + side << "  Y: " << center.y() + side << std::endl;
 	    std::cout<<  "X: " << center.x() + side << "  Y: " << center.y() - side << std::endl;
-	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() + side << std::endl;
 	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() - side << std::endl;
+	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() + side << std::endl;
 	}
+
 
 	int count = 0;
 	int totalcount = 0;
@@ -193,12 +228,19 @@ double GridtoZone::percentInSection(Position center, double length, float values
 		float mapValue = paperMap.at("elevation", *iterator);
 
 		for (int i =0; i < arrcount; i++){
-			if (mapValue == values[i]){
+			if (comparefloats(mapValue,values[i])){
 				count++;
 				break;
 			}
 		}
 	}
+
+	if (positionverbose){
+		std::cout<<  "Count stuff" << std::endl;	
+	    std::cout<<  "count: " << count << std::endl;
+	    std::cout<<  "totalcount: " << totalcount << std::endl;
+	}
+
 	return 1.0*count/totalcount;
 }
 
@@ -242,21 +284,30 @@ int GridtoZone::ClaimZone(int zone){
 }
 
 double GridtoZone::percentOfTest(){
-	int length = 15;
-	double sectionsize = (length / celldivision) * (length / celldivision);
-	double sectionlength = (length / celldivision);
+
+	Position center = Position(0,0);
+	Position zone0 = Position(1.75,1.75);
+	Position pos_1count = Position(2.20,2.20); // expect 0.0002040816
+
 
 	float values[] = {MAT};
 //	int count = percentInSection(Position(0,0),length,values,1);
-	return percentInSection(Position(0,0),length,values,1);
+	return percentInSection(pos_1count,zonesize,values,1);
 }
 
 int GridtoZone::countOfTest(){
-	int length = 1;
 
 	Position center = Position(0,0);
+	Position zone0 = Position(1.75,1.75);
+	Position pos_1count = Position(2.0,2.0); // expect 0.0002040816
 
 	float values[] = {MAT};
 
-	return countInSection(center, length, MAT);
+	return countInSection(pos_1count, zonesize, MAT);
+}
+
+
+bool GridtoZone::comparefloats(float a, float b){
+	float c = b - a;
+	return (c <= 0.5 && c >= -0.5);
 }

@@ -52,6 +52,9 @@ public:
 	double percentInSection(Position center, double length, float values[], int arrcount);
 	enum GridDirection { North, East, South, West };
 
+	bool comparefloats(float a, float b);
+
+	bool otherRoverInZone(int zone, Position pos);
 
 private:
 	static GridtoZone* m_pInstance;
@@ -60,7 +63,8 @@ private:
 
 	GridMap liveMap;
 	bool verbose = false;
-	bool positionverbose = true;
+	bool positionverbose = false;
+	bool rovercountverbose = true;
 
 	int accuracy = 2;
 	float zonesize = 3.5;
@@ -74,13 +78,13 @@ private:
 	string layer = "elevation";
 	const float celldivision 	= 0.05;
 
-	const float FOG 	= -1.00;
+	const float FOG 	= -10.00;
 	const float REVEALED 	= 0.00;
-	const float MAT 	= 0.10;
-	const float CUBES	= 0.20;
-	const float SONAR 	= 0.30;
-	const float ROVER 	= 1.00;
-	const float WALL 	= 2.00;
+	const float MAT 	= 1.0;
+	const float CUBES	= 2.0;
+	const float SONAR 	= 3.0;
+	const float ROVER 	= 10.0;
+	const float WALL 	= 20.0;
 
 	float wallvalues[2] = {WALL, ROVER};
 	float floorvalues[3] = {REVEALED, SONAR, MAT};

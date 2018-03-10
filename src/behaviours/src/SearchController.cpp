@@ -30,8 +30,16 @@ Result SearchController::DoWork() {
 
       GridtoZone::Instance()->updatePaperMap();
       if(gtzVerbose){
+        std::cout << "Testing GTZ" << std::endl;
         std::cout << GridtoZone::Instance()->countOfTest() << std::endl;
+        std::cout << GridtoZone::Instance()->percentOfTest() << std::endl;
       }
+
+      //int zone, Position rover
+      if(rovercountverbose){
+        std::cout << "check for other rover: " << GridtoZone::Instance()->otherRoverInZone(zone, Position(currentLocation.x, currentLocation.y = 0)) << std::endl;
+      }
+
 
 
       if(spiralTurnsCompleted == spiralTurnsGoal){

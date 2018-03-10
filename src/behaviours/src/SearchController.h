@@ -61,7 +61,8 @@ private:
   float firsttravel = 0.25f;
 
   bool waypointsVerbose = false;
-  bool gtzVerbose = true;
+  bool gtzVerbose = false;
+  bool rovercountverbose = true;
 
   Point centralSpiralLocation;
 
