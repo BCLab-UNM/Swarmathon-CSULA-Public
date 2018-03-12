@@ -30,6 +30,9 @@ public:
   void SetCenterLocation(Point centerLocation);
   void SetSuccesfullPickup();
 
+  int ChooseZone();
+  Point GetNewSearchPoint();
+
 protected:
 
   void ProcessData();
@@ -58,13 +61,17 @@ private:
   int accuracy = 2;
   float areasize = 3.5;
   float areamargin = 0.5;
-  float firsttravel = 0.25f;
+  float firsttravel = 0.25;
+  float sectionlength = 2.0; // <- double check if true
 
   bool waypointsVerbose = false;
   bool gtzVerbose = false;
   bool rovercountverbose = true;
 
   Point centralSpiralLocation;
+
+  double coverageWanted = 0.8;
+  double sectionCoverageWanted = 0.25;
 
   RandomSelector rs = RandomSelector(accuracy, areasize, areamargin);
   Spiral s;

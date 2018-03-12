@@ -37,7 +37,7 @@ Result SearchController::DoWork() {
 
       //int zone, Position rover
       if(rovercountverbose){
-        std::cout << "check for other rover in zone 0: " << GridtoZone::Instance()->otherRoverInZone(0, Position(currentLocation.x, currentLocation.y = 0)) << std::endl;
+        std::cout << "check for other rover in zone 0: " << GridtoZone::Instance()->otherRoverInZone(0, Position(currentLocation.x, currentLocation.y)) << std::endl;
       }
 
       if(spiralTurnsCompleted == spiralTurnsGoal){
@@ -45,7 +45,7 @@ Result SearchController::DoWork() {
         spiralTurnsCompleted = 0;
 
         /*=============================
-            
+
             Do Gripmap work here to choose a zone
             check the zone if it does not have a good coverage or another rover has claimed it; otherwise get another zone
             get random point in zone(see centralSpiralLocation = rs.getRandomPointInZone(zone);)             
@@ -121,3 +121,61 @@ void SearchController::SetSuccesfullPickup() {
 }
 
 
+//  centralSpiralLocation = rs.getRandomPointInZone(zone);
+Point SearchController::GetNewSearchPoint(){
+  int zonetries = 25;
+  int pointstries = 25;
+  Point pt =  rs.getRandomPointInZone(zone);
+
+  for (int i = 0; i <= zonetries; i++){
+    int choosenZone = ChooseZone();
+    for (int j = 0; j <= pointstries; j++){
+      pt =  rs.getRandomPointInZone(choosenZone);
+      Position pos = Position(pt.x, pt.y);
+      if (!GridtoZone::Instance()->obstaclesInZone(pos, sectionlength)){
+        return pt;
+      }
+      else if(GridtoZone::Instance()->percentOfSectionDiscovered(pos, sectionlength) <= sectionCoverageWanted){
+        return pt;
+      }
+    }
+  }
+
+  std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
+  std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
+  std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
+  std::cout << "Find out why" << std::endl;
+  return pt;
+
+}
+
+int SearchController::ChooseZone(){
+  int zoneChecking = 0;
+  int tries = 100;
+  int prelimCheck = 50;
+
+  for(int i = 0; i <= tries; i++){
+    if (GridtoZone::Instance()->otherRoverInZone(zone, Position(currentLocation.x, currentLocation.y))){
+      zoneChecking++;
+    }
+    else if(GridtoZone::Instance()->percentOfZoneDiscovered(zone) <= coverageWanted){
+        zone = zoneChecking;
+        return zone;
+    }
+    else{
+      zoneChecking++;
+      if(i <= prelimCheck){
+        zoneChecking = zoneChecking % 16; // ((15-1)/3.5)^2
+      }
+      else{
+       zoneChecking = zoneChecking % 36; // ((22-1)/3.5)^2
+      }
+    }
+  }
+  std::cout << "It reached the last line at ChooseZone" << std::endl;
+  std::cout << "It reached the last line at ChooseZone" << std::endl;
+  std::cout << "It reached the last line at ChooseZone" << std::endl;
+  std::cout << "Find out why" << std::endl;
+  zone = zoneChecking;
+  return 0; // <----- because I have to return something
+}

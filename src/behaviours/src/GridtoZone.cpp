@@ -352,3 +352,7 @@ bool GridtoZone::comparefloats(float a, float b, float acc){
 	float c = b - a;
 	return (c <= acc && c >= -1 * acc);
 }
+
+bool GridtoZone::obstaclesInZone(Position pos, float sectionlength){
+	return countInSection(pos, sectionlength, WALL) > 0;
+}

@@ -34,7 +34,6 @@ public:
 
 
 	double percentOfZoneDiscovered(int zoneindex);
-
 	double percentOfSectionDiscovered(Position center, double length);
 
 // Ambrosio do this
@@ -55,6 +54,9 @@ public:
 	bool comparefloats(float a, float b, float acc);
 
 	bool otherRoverInZone(int zone, Position pos);
+
+	bool obstaclesInZone(Position pos, float sectionlength);
+
 
 private:
 	static GridtoZone* m_pInstance;

@@ -41,13 +41,17 @@ class RandomSelector {
         areamargin = margin;
     }
 
-    RandomSelector() { rng = new random_numbers::RandomNumberGenerator(); }
+    RandomSelector() { 
+        rng = new random_numbers::RandomNumberGenerator(0); 
+//        rng = new random_numbers::RandomNumberGenerator(); 
+    }
 
     RandomSelector(float acc, float size, float margin){
         accuracy = acc;
         areasize = size;
         areamargin = margin;
-        rng = new random_numbers::RandomNumberGenerator();
+        rng = new random_numbers::RandomNumberGenerator(0); 
+//        rng = new random_numbers::RandomNumberGenerator(); 
     }
 
     Point getZone(int index){
