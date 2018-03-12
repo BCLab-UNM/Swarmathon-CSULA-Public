@@ -55,13 +55,16 @@ Result SearchController::DoWork() {
         =============================*/
 
 
-        centralSpiralLocation = rs.getRandomPointInZone(zone);
+
+        centralSpiralLocation = GetNewSearchPoint();
+        //centralSpiralLocation = rs.getRandomPointInZone(zone);
 
         Direction direction = Direction(rng->uniformInteger(0,3));
         bool clockwise = rng->uniformInteger(0,1);
 
         s.reset(centralSpiralLocation, direction , clockwise , firsttravel);
         zone++;
+
 
         searchLocation = centralSpiralLocation;
 
@@ -130,12 +133,26 @@ Point SearchController::GetNewSearchPoint(){
   for (int i = 0; i <= zonetries; i++){
     int choosenZone = ChooseZone();
     for (int j = 0; j <= pointstries; j++){
+
+
       pt =  rs.getRandomPointInZone(choosenZone);
+
+
       Position pos = Position(pt.x, pt.y);
-      if (!GridtoZone::Instance()->obstaclesInZone(pos, sectionlength)){
-        return pt;
+
+      bool obstacle = GridtoZone::Instance()->obstaclesInZone(pos, sectionlength);
+      double percent = GridtoZone::Instance()->percentOfSectionDiscovered(pos, sectionlength);
+      bool percentOK = percent <= sectionCoverageWanted;
+
+
+      if(waypointsDebugVerbose){
+        std::cout << "Considering point : " << pt.x  << ", "<< pt.y << std::endl;
+        std::cout << "Zone : " << zone << std::endl;
+        std::cout << "obstacle : " << obstacle << std::endl;
+        std::cout << "percent of section : " << percent << std::endl;
       }
-      else if(GridtoZone::Instance()->percentOfSectionDiscovered(pos, sectionlength) <= sectionCoverageWanted){
+
+      if (!obstacle && percentOK){
         return pt;
       }
     }
@@ -150,28 +167,42 @@ Point SearchController::GetNewSearchPoint(){
 }
 
 int SearchController::ChooseZone(){
-  int zoneChecking = 0;
+  int zoneChecking = zone;
   int tries = 100;
   int prelimCheck = 50;
 
   for(int i = 0; i <= tries; i++){
-    if (GridtoZone::Instance()->otherRoverInZone(zone, Position(currentLocation.x, currentLocation.y))){
+    bool rovercount = GridtoZone::Instance()->otherRoverInZone(zoneChecking, Position(currentLocation.x, currentLocation.y));
+    double percentZone = GridtoZone::Instance()->percentOfZoneDiscovered(zoneChecking);
+
+    if(waypointsDebugVerbose){
+      std::cout << "zoneChecking: " << zoneChecking  << ", prelimCheck: " << (i <= prelimCheck) << std::endl;
+      std::cout << "other rover : " << rovercount  << std::endl;
+      std::cout << "zone coverage : " << percentZone  << std::endl;
+    }
+
+
+
+    if(i <= prelimCheck){
+      zoneChecking = zoneChecking % 16; // ((15-1)/3.5)^2
+    }
+    else{
+     zoneChecking = zoneChecking % 36; // ((22-1)/3.5)^2
+    }
+
+    if (rovercount){
       zoneChecking++;
     }
-    else if(GridtoZone::Instance()->percentOfZoneDiscovered(zone) <= coverageWanted){
+
+    else if(percentZone <= coverageWanted){
         zone = zoneChecking;
-        return zone;
+        return zoneChecking;
     }
     else{
       zoneChecking++;
-      if(i <= prelimCheck){
-        zoneChecking = zoneChecking % 16; // ((15-1)/3.5)^2
-      }
-      else{
-       zoneChecking = zoneChecking % 36; // ((22-1)/3.5)^2
-      }
     }
   }
+
   std::cout << "It reached the last line at ChooseZone" << std::endl;
   std::cout << "It reached the last line at ChooseZone" << std::endl;
   std::cout << "It reached the last line at ChooseZone" << std::endl;
