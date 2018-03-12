@@ -93,19 +93,14 @@ Result DropOffController::DoWork() {
 
   //check to see if we are driving to the center location or if we need to drive in a circle and look.
   if (distanceToCenter > collectionPointVisualDistance && !circularCenterSearching && (count == 0)) {
-
-      Point testPoint;
-      testPoint.x = 1;
-      testPoint.y = 0;
-
-      cout << "DROPOFF: Distance to center: " << distanceToCenter << endl;
+    cout << "DROPOFF: Distance to center: " << distanceToCenter << endl;
 
     // Sets driving mode to waypoint
     result.type = waypoint;
     // Clears all the waypoints in the vector
     result.wpts.waypoints.clear();
     // Adds the current location's point into the waypoint vector
-    result.wpts.waypoints.push_back(testPoint);
+    result.wpts.waypoints.push_back(this->centerLocation);
     // Do not start following waypoints
     startWaypoint = false;
     // Disable precision driving
