@@ -93,12 +93,19 @@ Result DropOffController::DoWork() {
 
   //check to see if we are driving to the center location or if we need to drive in a circle and look.
   if (distanceToCenter > collectionPointVisualDistance && !circularCenterSearching && (count == 0)) {
+
+      Point testPoint;
+      testPoint.x = 1;
+      testPoint.y = 0;
+
+      cout << "DROPOFF: Distance to center: " << distanceToCenter << endl;
+
     // Sets driving mode to waypoint
     result.type = waypoint;
     // Clears all the waypoints in the vector
     result.wpts.waypoints.clear();
     // Adds the current location's point into the waypoint vector
-    result.wpts.waypoints.push_back(this->centerLocation);
+    result.wpts.waypoints.push_back(testPoint);
     // Do not start following waypoints
     startWaypoint = false;
     // Disable precision driving
@@ -118,6 +125,8 @@ Result DropOffController::DoWork() {
     nextSpinPoint.x = centerLocation.x + (initialSpinSize + spinSizeIncrease) * cos(spinner);
     nextSpinPoint.y = centerLocation.y + (initialSpinSize + spinSizeIncrease) * sin(spinner);
     nextSpinPoint.theta = atan2(nextSpinPoint.y - currentLocation.y, nextSpinPoint.x - currentLocation.x);
+
+    cout << "DROPOFF: NextSpinPoint X: " << nextSpinPoint.x << "\tNextSpinPoint Y: " << nextSpinPoint.y << "\tNextSpinPoint theta: " << nextSpinPoint.theta << endl;
 
     result.type = waypoint;
     result.wpts.waypoints.clear();
@@ -174,7 +183,7 @@ Result DropOffController::DoWork() {
 
     if (seenEnoughCenterTags) //if we have seen enough tags
         {
-          if ((countLeft-5) > countRight) //if there are too many on the left assuming the rover is inside the collection zone
+          if ((countLeft-8) > countRight) //if there are too many on the left assuming the rover is inside the collection zone
           {
               if (countRight > 0) //if there are more tags on the right
               {
@@ -185,7 +194,7 @@ Result DropOffController::DoWork() {
                   left = false; //then we say none on the right to cause us to turn left
               }
           }
-          else if ((countRight-5) > countLeft)
+          else if ((countRight-8) > countLeft)
           {
               if (countLeft > 0) //if there are more tags on the left
               {
@@ -406,11 +415,13 @@ bool DropOffController::IsChangingMode() {
 // Setter function to set the center location (the collection disk)
 // Of the Point class (x, y, theta)
 void DropOffController::SetCenterLocation(Point center) {
+    cout << "DROPOFF: CenterLocation x: " << centerLocation.x << "\tCenterLocation y: " << centerLocation.y << endl;
   centerLocation = center;
 }
 
 // Setter function to set the current location of the Point class (x, y, theta)
 void DropOffController::SetCurrentLocation(Point current) {
+    cout << "DROPOFF: CurrentLocation x: " << currentLocation.x << "\tCurrentLocation y: " << currentLocation.y << endl;
   currentLocation = current;
 }
 
