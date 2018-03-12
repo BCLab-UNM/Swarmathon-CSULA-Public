@@ -37,15 +37,12 @@ Result SearchController::DoWork() {
 
       //int zone, Position rover
       if(rovercountverbose){
-        std::cout << "check for other rover: " << GridtoZone::Instance()->otherRoverInZone(zone, Position(currentLocation.x, currentLocation.y = 0)) << std::endl;
+        std::cout << "check for other rover in zone 0: " << GridtoZone::Instance()->otherRoverInZone(0, Position(currentLocation.x, currentLocation.y = 0)) << std::endl;
       }
-
-
 
       if(spiralTurnsCompleted == spiralTurnsGoal){
         if (waypointsVerbose){ std::cout<<  "Zone: " << zone << std::endl; }
         spiralTurnsCompleted = 0;
-
 
         /*=============================
             

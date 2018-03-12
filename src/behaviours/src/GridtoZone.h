@@ -52,13 +52,12 @@ public:
 	double percentInSection(Position center, double length, float values[], int arrcount);
 	enum GridDirection { North, East, South, West };
 
-	bool comparefloats(float a, float b);
+	bool comparefloats(float a, float b, float acc);
 
 	bool otherRoverInZone(int zone, Position pos);
 
 private:
 	static GridtoZone* m_pInstance;
-
 	GridtoZone();
 
 	GridMap liveMap;

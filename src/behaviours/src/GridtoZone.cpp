@@ -4,6 +4,9 @@
 
 // needed for polygon shape
 #include <geometry_msgs/PolygonStamped.h>
+
+#include <math.h>
+
 using namespace Eigen;
 
 GridtoZone::GridtoZone() { }
@@ -32,18 +35,20 @@ bool GridtoZone::otherRoverInZone(int zone, Position rover){
 	int count = countRoversInZone(zone);
 	Position center = getZonePosition(zone);
 	double side = zonesize / 2;
-	
-	Vector2f A( center.x() + side, center.y() + side );
-	Vector2f B( center.x() + side, center.y() - side );
-	Vector2f C( center.x() - side, center.y() - side );
-	Vector2f D( center.x() - side, center.y() + side );
 
-	Vector2f P( rover.x(), rover.y());
+/* No work
 
-	Vector2f AB = A.cross(B);
-	Vector2f AP = A.cross(P);
-	Vector2f BC = B.cross(C);
-	Vector2f BP = B.cross(P);
+	Vector2d A( center.x() + side, center.y() + side );
+	Vector2d B( center.x() + side, center.y() - side );
+	Vector2d C( center.x() - side, center.y() - side );
+	Vector2d D( center.x() - side, center.y() + side );
+
+	Vector2d P( rover.x(), rover.y());
+
+	Vector2d AB = A.cross(B);
+	Vector2d AP = A.cross(P);
+	Vector2d BC = B.cross(C);
+	Vector2d BP = B.cross(P);
 
 
 	double APdotAB = AP.adjoint()*AB;
@@ -53,13 +58,49 @@ bool GridtoZone::otherRoverInZone(int zone, Position rover){
 
 
 // (0< APdotAB<ABdotAB)∧(0<APdotAD<ADdotAD)
+
+
 	bool roverInZone = (0.0 <= APdotAB && APdotAB <= ABdotAB) && (0.0 <= BPdotBC && BPdotBC <= BCdotBC);
 
+*/
+
+	//https://math.stackexchange.com/a/190403
+	float zoneside = zonesize;
+	float zonearea = zonesize * zonesize;
+
+	float x1 = center.x() + side;
+	float x2 = center.x() + side;
+	float x3 = center.x() - side;
+	float x4 = center.x() - side;
+
+	float y1 = center.y() + side;
+	float y2 = center.y() - side;
+	float y3 = center.y() - side;
+	float y4 = center.y() + side;
+
+	float b1 = sqrt ( pow (x1 - rover.x(), 2.0) + pow (y1 - rover.y(), 2.0) );
+	float b2 = sqrt ( pow (x2 - rover.x(), 2.0) + pow (y2 - rover.y(), 2.0) );
+	float b3 = sqrt ( pow (x3 - rover.x(), 2.0) + pow (y3 - rover.y(), 2.0) );
+	float b4 = sqrt ( pow (x4 - rover.x(), 2.0) + pow (y4 - rover.y(), 2.0) );
+
+	float u1 = zoneside + b1 + b2;
+	float u2 = zoneside + b2 + b3;
+	float u3 = zoneside + b3 + b4;
+	float u4 = zoneside + b4 + b1;
+
+	float a1 = sqrt( u1 * (u1 - zoneside) * (u1 - b1) * (u1 - b2) );
+	float a2 = sqrt( u2 * (u2 - zoneside) * (u2 - b2) * (u2 - b3) );
+	float a3 = sqrt( u3 * (u3 - zoneside) * (u3 - b3) * (u3 - b4) );
+	float a4 = sqrt( u4 * (u4 - zoneside) * (u4 - b4) * (u4 - b1) );
+
+	float area = a1 + a2 + a3 + a4;
+
+	bool roverInZone = comparefloats(zonearea, area, .5);
 	if (roverInZone){
 		count--;
 	}
 
-	return count <= 0;
+	return count >= 1;
 }
 
 
@@ -187,7 +228,7 @@ int GridtoZone::countInSection(Position center, double length, float values[], i
 		count2++;
 
 		for (int i =0; i < arrcount; i++){
-			if (comparefloats(mapValue,values[i])){
+			if (comparefloats(mapValue,values[i],0.5)){
 				count++;
 				break;
 			}
@@ -228,7 +269,7 @@ double GridtoZone::percentInSection(Position center, double length, float values
 		float mapValue = paperMap.at("elevation", *iterator);
 
 		for (int i =0; i < arrcount; i++){
-			if (comparefloats(mapValue,values[i])){
+			if (comparefloats(mapValue,values[i], 0.5)){
 				count++;
 				break;
 			}
@@ -307,7 +348,7 @@ int GridtoZone::countOfTest(){
 }
 
 
-bool GridtoZone::comparefloats(float a, float b){
+bool GridtoZone::comparefloats(float a, float b, float acc){
 	float c = b - a;
-	return (c <= 0.5 && c >= -0.5);
+	return (c <= acc && c >= -1 * acc);
 }
