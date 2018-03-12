@@ -654,7 +654,7 @@ long int getROSTimeInMilliSecs()
 
 Point updateCenterLocation()
 {
-  transformMapCentertoOdom();
+  //transformMapCentertoOdom(); NOTE: This is commented to prevent center location to stay constant!
   
   Point tmp;
   tmp.x = centerLocationOdom.x;
