@@ -87,7 +87,7 @@ private:
 	const float ROVER 	= 10.0;
 	const float WALL 	= 20.0;
 
-	float wallvalues[2] = {WALL, ROVER};
+	float wallvalues[3] = {WALL, ROVER, MAT};
 	float floorvalues[3] = {REVEALED, SONAR, MAT};
 	float discorvedvalues[2] = {REVEALED, MAT};
 	float allvalues[7] = {FOG, REVEALED, MAT, CUBES, SONAR, ROVER, WALL};

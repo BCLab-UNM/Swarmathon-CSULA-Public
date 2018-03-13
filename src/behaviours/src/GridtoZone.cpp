@@ -228,7 +228,8 @@ int GridtoZone::countInSection(Position center, double length, float values[], i
 		count2++;
 
 		for (int i =0; i < arrcount; i++){
-			if (comparefloats(mapValue,values[i],0.5)){
+//			if (comparefloats(mapValue,values[i],0.5)){
+			if (mapValue == values[i]){
 				count++;
 				break;
 			}
@@ -236,9 +237,16 @@ int GridtoZone::countInSection(Position center, double length, float values[], i
 	}
 	if (positionverbose){
 		std::cout<<  "Total itr count: " <<  count2 << std::endl;	
+		std::cout<<  "Total value count: " <<  count << std::endl;	
 	}
 	return count;
 }
+
+
+
+
+
+
 
 double GridtoZone::percentInSection(Position center, double length, float values[], int arrcount){
 	double side = length / 2;
@@ -276,7 +284,7 @@ double GridtoZone::percentInSection(Position center, double length, float values
 		}
 	}
 
-	if (positionverbose){
+	if (true){
 		std::cout<<  "Count stuff" << std::endl;	
 	    std::cout<<  "count: " << count << std::endl;
 	    std::cout<<  "totalcount: " << totalcount << std::endl;
@@ -284,6 +292,16 @@ double GridtoZone::percentInSection(Position center, double length, float values
 
 	return 1.0*count/totalcount;
 }
+
+
+
+
+
+
+
+
+
+
 
 double GridtoZone::percentOfZoneExplored(int zoneindex){
 	return percentOfSectionExplored(getZonePosition(zoneindex),zonesize);
@@ -297,16 +315,57 @@ double GridtoZone::percentOfSectionExplored(Position center, double length){
 	return count/sectionsize;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 double GridtoZone::percentOfZoneDiscovered(int zoneindex){
 	return percentOfSectionDiscovered(getZonePosition(zoneindex),zonesize);
 }
 
 double GridtoZone::percentOfSectionDiscovered(Position center, double length){
-	double sectionsize = (length / celldivision) * (length / celldivision);
-	double sectionlength = (length / celldivision);
-	int count = countInSection(center, sectionlength, discorvedvalues,2);
-	return count/sectionsize;
+//	double sectionsize = (length / celldivision) * (length / celldivision);
+//	double sectionlength = (length / celldivision);
+
+//	int count = countInSection(center, sectionlength, discorvedvalues,2);
+
+//	int count = countInSection(center, sectionlength, arr,1);
+
+	double per = percentInSection(center, length, discorvedvalues, 2);
+
+	
+//	cout << "percentInSection 1: "<< (count/sectionsize) <<endl;
+//	cout << "percentInSection: "<< per <<endl;
+
+
+
+	return per;
 }
+
+
+
+
+
+
+
+
+
 
 // Ambrosio do this
 vector<Point> GridtoZone::shortestPath(Point start, Point end){
@@ -354,5 +413,6 @@ bool GridtoZone::comparefloats(float a, float b, float acc){
 }
 
 bool GridtoZone::obstaclesInZone(Position pos, float sectionlength){
-	return countInSection(pos, sectionlength, WALL) > 0;
+	return countInSection(pos, sectionlength, wallvalues, 3) > 0;
 }
+

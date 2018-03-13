@@ -70,7 +70,7 @@ std::string publishedName;
 //Global
   const float pi = std::acos(-1);
   const int namesArrSize=6;
-  string namesArr[namesArrSize] = {"achilles","test","test","test","test","test"};//"achilles","ajax","aeneas"
+  string namesArr[namesArrSize] = {"achilles","ajax","aeneas","test","test","test"};//"achilles","ajax","aeneas"
   int currentMode = 0;
   int arrCount = 0;
   float sleft[namesArrSize];

@@ -33,6 +33,10 @@ public:
   int ChooseZone();
   Point GetNewSearchPoint();
 
+  Position realtogridPosition(Point point);
+//  Point gridtorealPosition(Position position);
+
+
 protected:
 
   void ProcessData();
@@ -64,7 +68,7 @@ private:
 
 
   float firsttravel = 0.25;
-  float sectionlength = 2.0; // <- double check if true
+  float sectionlength = 1.0; // <- double check if true
 
   bool waypointsVerbose = false;
   bool gtzVerbose = false;
@@ -73,8 +77,8 @@ private:
 
   Point centralSpiralLocation;
 
-  double coverageWanted = 0.8;
-  double sectionCoverageWanted = 0.5;
+  double coverageWanted = 0.2;
+  double sectionCoverageWanted = 0.25;
 
   RandomSelector rs = RandomSelector(accuracy, areasize, areamargin);
   Spiral s;
