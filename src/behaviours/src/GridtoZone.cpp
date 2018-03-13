@@ -284,7 +284,7 @@ double GridtoZone::percentInSection(Position center, double length, float values
 		}
 	}
 
-	if (true){
+	if (positionverbose){
 		std::cout<<  "Count stuff" << std::endl;	
 	    std::cout<<  "count: " << count << std::endl;
 	    std::cout<<  "totalcount: " << totalcount << std::endl;

@@ -181,11 +181,17 @@ int SearchController::ChooseZone(){
 
     bool rovercount = GridtoZone::Instance()->otherRoverInZone(zoneChecking, position);
     rovercount = false;
-    double percentZone = GridtoZone::Instance()->percentOfZoneDiscovered(zoneChecking);
+
+    Point zonepoint = rs.getZoneCenter(zoneChecking);
+
+    double percentZone = GridtoZone::Instance()->percentOfSectionDiscovered(realtogridPosition(zonepoint), areasize);
+
+//    double percentZone = GridtoZone::Instance()->percentOfZoneDiscovered(zoneChecking);
 
     if(waypointsDebugVerbose){
       std::cout << "========= ChooseZone ======================" << std::endl;
       std::cout << "zoneChecking: " << zoneChecking  << ", prelimCheck: " << (i <= prelimCheck) << std::endl;
+      std::cout << "zonepoint: " << zonepoint.x  << ", " << zonepoint.y << std::endl;
       std::cout << "other rover : " << rovercount  << std::endl;
       std::cout << "zone coverage : " << percentZone  << std::endl;
     }

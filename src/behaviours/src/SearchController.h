@@ -66,9 +66,8 @@ private:
   float areasize = 3.5;
   float areamargin = 0.1;
 
-
-  float firsttravel = 0.25;
-  float sectionlength = 1.0; // <- double check if true
+  float firsttravel = 0.4;
+  float sectionlength = 1.2; // <- double check if true
 
   bool waypointsVerbose = false;
   bool gtzVerbose = false;
@@ -77,8 +76,8 @@ private:
 
   Point centralSpiralLocation;
 
-  double coverageWanted = 0.2;
-  double sectionCoverageWanted = 0.25;
+  double coverageWanted = 0.8;
+  double sectionCoverageWanted = 0.45;
 
   RandomSelector rs = RandomSelector(accuracy, areasize, areamargin);
   Spiral s;

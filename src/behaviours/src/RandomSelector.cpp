@@ -123,6 +123,14 @@ class RandomSelector {
         return position;
     }
 
+    Point getZoneCenter(int index){
+        Point zonepoint = getZone(index);
+        double diff = areasize/2;
+        zonepoint.x = zonepoint.x - diff;
+        zonepoint.y = zonepoint.y - diff;
+        return zonepoint;
+    }
+
     Point getRandomPoint(Point zone){
         float min_x = zone.x - areasize + areamargin;
         float max_x = zone.x - areamargin;
