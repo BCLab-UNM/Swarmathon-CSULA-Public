@@ -23,6 +23,7 @@ then
     exit 1
 else
     export ROS_MASTER_URI=http://$1:11311
+    export ROS_HOSTNAME=10.0.0.1
 
 fi
 

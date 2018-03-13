@@ -38,7 +38,7 @@ using namespace Eigen;
 
 float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
-const float ROVERHALF = 0.20;
+const float ROVERHALF = 0.17;
 const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
 //GRID PJ NUMBERS
 const double FOG = -1.00;
@@ -72,7 +72,6 @@ std::string publishedName;
   const float pi = std::acos(-1);
   const int namesArrSize=6;
   string namesArr[namesArrSize] = {"test","test","test","test","test","test"};//"achilles","ajax","aeneas"
-  int currentMode = 0;
   int arrCount = 0;
   float sleft[namesArrSize];
   float scenter[namesArrSize];
@@ -470,7 +469,7 @@ void roverNameHandler(const std_msgs::String& message){
 }
 
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
-	currentMode = message->data;
+	int currentMode = message->data;
 	if(currentMode == 2 || currentMode == 3) {
 		modeAuto = true;
 	}
