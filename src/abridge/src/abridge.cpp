@@ -141,7 +141,7 @@ int main(int argc, char **argv){
     sonarRightPublish = aNH.advertise<sensor_msgs::Range>((publishedName + "/sonarRight"), 10);
     infoLogPublisher = aNH.advertise<std_msgs::String>("/infoLog", 1, true);
     heartbeatPublisher = aNH.advertise<std_msgs::String>((publishedName + "/abridge/heartbeat"), 1, true);
-    roverNamePublisher = aNH.advertise<std_msgs::String>("/roverNames", 6,true);
+    roverNamePublisher = aNH.advertise<std_msgs::String>("/roverNames", 1,true);
     
     driveControlSubscriber = aNH.subscribe((publishedName + "/driveControl"), 10, driveCommandHandler);
     fingerAngleSubscriber = aNH.subscribe((publishedName + "/fingerAngle/cmd"), 1, fingerAngleHandler);

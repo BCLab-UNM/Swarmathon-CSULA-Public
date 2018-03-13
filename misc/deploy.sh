@@ -5,7 +5,8 @@
 #-------------------------READ THIS----------------------------#
 #If you have changed your rovers password you MUST edit this variable with the correct password to 
 #allow the reboot feature to work correctly!!
-roverPass="KSC-2018"
+#roverPass="KSC-2018"
+roverPass="Swarmie"
 #--------------------------------------------------------------#
 
 OPTION=$1
