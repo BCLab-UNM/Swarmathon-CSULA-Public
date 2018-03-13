@@ -136,7 +136,7 @@ Result result;		//result struct for passing and storing values to drive robot
 std_msgs::String msg;
 std_msgs::String names;
 std::string lastnames;
-std::string n = "";
+std::string nam = "";
 std_msgs::Float32 filtered_orientation;
 
 geometry_msgs::Twist velocity;
@@ -794,8 +794,8 @@ void humanTime() {
 }
 
 void roverNameHandler(const std_msgs::String& message){
-	n += message.data + ",";
-	names.data=n;
+	nam += message.data + ",";
+	names.data=nam;
 	chainNamePublisher.publish(names);
 }
 

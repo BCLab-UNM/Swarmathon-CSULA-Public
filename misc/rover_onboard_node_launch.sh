@@ -24,6 +24,7 @@ then
 else
     export ROS_MASTER_URI=http://$1:11311
     echo "$(hostname -I)"
+    STR="$(hostname -I)"
     export ROS_IP="${STR}"
 fi
 
