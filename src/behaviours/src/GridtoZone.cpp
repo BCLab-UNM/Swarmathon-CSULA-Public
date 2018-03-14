@@ -7,6 +7,8 @@
 
 #include <math.h>
 
+#include "SearchController.h"
+
 using namespace Eigen;
 
 GridtoZone::GridtoZone() { }
@@ -312,6 +314,8 @@ double GridtoZone::percentOfSectionDiscovered(Position center, double length){
 vector<Point> GridtoZone::shortestPath(Point start, Point end){
 	// do something
 	vector<Point> waypoints;
+	SearchController searchController;
+	waypoints=searchController.findPath(start, end);
 	return waypoints;
 }
 
