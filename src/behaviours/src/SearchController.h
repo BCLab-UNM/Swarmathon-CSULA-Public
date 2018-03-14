@@ -72,7 +72,7 @@ private:
   bool waypointsVerbose = false;
   bool gtzVerbose = false;
   bool rovercountverbose = false;
-  bool waypointsDebugVerbose = true;
+  bool waypointsDebugVerbose = false;
 
   Point centralSpiralLocation;
 
