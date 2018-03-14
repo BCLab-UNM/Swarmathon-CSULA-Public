@@ -153,17 +153,17 @@ int main(int argc, char **argv){
 		publishedName = namesArr[i];
 		cout << "Entered Subscriber loop: "<< publishedName <<"["<<arrCount<<"]"<< endl;
 		if (i == 0){
-			odometrySubscriber = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
+			odometrySubscriber = gNH.subscribe((publishedName + "/odom"), 10, odometryHandler);
 			sonarLeftSubscriber = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft);
 			sonarCenterSubscriber = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter);
 			sonarRightSubscriber = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight);
 		}else if(i == 1){
-			odometrySubscriber1 = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler1);
+			odometrySubscriber1 = gNH.subscribe((publishedName + "/odom"), 10, odometryHandler1);
 			sonarLeftSubscriber1 = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft1);
 			sonarCenterSubscriber1 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter1);
 			sonarRightSubscriber1 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight1);
 		}else if(i == 2){
-			odometrySubscriber2 = gNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler2);
+			odometrySubscriber2 = gNH.subscribe((publishedName + "/odom"), 10, odometryHandler2);
 			sonarLeftSubscriber2 = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft2);
 			sonarCenterSubscriber2 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter2);
 			sonarRightSubscriber2 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight2);
