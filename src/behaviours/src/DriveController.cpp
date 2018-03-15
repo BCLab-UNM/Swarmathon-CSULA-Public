@@ -361,9 +361,9 @@ PIDConfig DriveController::fastVelConfig()
 {
   PIDConfig config;
 
-  config.Kp = 30; //30  proportional constant
-  config.Ki = 10; //10  integral constant
-  config.Kd = 5; //2  derivative constant
+  config.Kp = 50; //30  proportional constant
+  config.Ki = 6; //10  integral constant
+  config.Kd = 8; //2  derivative constant
   config.satUpper = 255; //upper limit for PID output
   config.satLower = -255; //lower limit for PID output
   config.antiWindup = config.satUpper; //prevent integral from acruing error untill proportional output drops below a certain limit
@@ -383,8 +383,8 @@ PIDConfig DriveController::fastVelConfig()
 PIDConfig DriveController::fastYawConfig() {
   PIDConfig config;
 
-  config.Kp = 30; //60
-  config.Ki = 1.88;   //15 1.5
+  config.Kp = 50; //60
+  config.Ki = 5;   //15 1.5
   config.Kd = 10;    //5 10
   config.satUpper = 255;
   config.satLower = -255;
@@ -405,9 +405,9 @@ PIDConfig DriveController::fastYawConfig() {
 PIDConfig DriveController::slowVelConfig() {
   PIDConfig config;
 
-  config.Kp = 25;   //100
-  config.Ki = 5.5;    //8
-  config.Kd = 10;  //1.1
+  config.Kp = 100;   //100
+  config.Ki = 8;    //8
+  config.Kd = 1.1;  //1.1
   config.satUpper = 255;
   config.satLower = -255;
   config.antiWindup = config.satUpper/2;
