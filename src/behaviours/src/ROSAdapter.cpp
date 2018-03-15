@@ -647,7 +647,7 @@ void joyCmdHandler(const sensor_msgs::Joy::ConstPtr& message) {
 
 void publishStatusTimerEventHandler(const ros::TimerEvent&) {
   std_msgs::String msg;
-  msg.data = "online";		//change this with team name
+  msg.data = "Cal State LA - Not Last!!+";		//change this with team name
   status_publisher.publish(msg);
 }
 
