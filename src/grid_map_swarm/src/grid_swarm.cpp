@@ -63,6 +63,7 @@ ros::Subscriber sonarLeftSubscriber	,sonarLeftSubscriber1	,sonarLeftSubscriber2	
 ros::Subscriber sonarCenterSubscriber	,sonarCenterSubscriber1	,sonarCenterSubscriber2	;
 ros::Subscriber sonarRightSubscriber	,sonarRightSubscriber1	,sonarRightSubscriber2	;
 ros::Subscriber odometrySubscriber	,odometrySubscriber1	,odometrySubscriber2	;
+ros::Subscriber orntnSubscriber		,orntnSubscriber1	,orntnSubscriber2	;
 
 //Timer
 ros::Timer publish_heartbeat_timer;
@@ -96,14 +97,17 @@ void roverNameHandler(const std_msgs::String& message);
 void modeHandler(const std_msgs::UInt8::ConstPtr& message);
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
+  void orntnHandler(const std_msgs::Float32& message);
   void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft);
   void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter);
   void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight);
 void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message);
+  void orntnHandler1(const std_msgs::Float32& message);
   void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft);
   void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter);
   void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight);
 void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
+  void orntnHandler2(const std_msgs::Float32& message);
   void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft);
   void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
   void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
@@ -154,16 +158,19 @@ int main(int argc, char **argv){
 		cout << "Entered Subscriber loop: "<< publishedName <<"["<<arrCount<<"]"<< endl;
 		if (i == 0){
 			odometrySubscriber = gNH.subscribe((publishedName + "/odom"), 10, odometryHandler);
+			orntnSubscriber = gNH.subscribe((publishedName + "/filtered_orientation"), 10, orntnHandler);
 			sonarLeftSubscriber = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft);
 			sonarCenterSubscriber = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter);
 			sonarRightSubscriber = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight);
 		}else if(i == 1){
 			odometrySubscriber1 = gNH.subscribe((publishedName + "/odom"), 10, odometryHandler1);
+			orntnSubscriber1 = gNH.subscribe((publishedName + "/filtered_orientation"), 10, orntnHandler1);
 			sonarLeftSubscriber1 = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft1);
 			sonarCenterSubscriber1 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter1);
 			sonarRightSubscriber1 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight1);
 		}else if(i == 2){
 			odometrySubscriber2 = gNH.subscribe((publishedName + "/odom"), 10, odometryHandler2);
+			orntnSubscriber2 = gNH.subscribe((publishedName + "/filtered_orientation"), 10, orntnHandler2);
 			sonarLeftSubscriber2 = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft2);
 			sonarCenterSubscriber2 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter2);
 			sonarRightSubscriber2 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight2);
@@ -406,46 +413,42 @@ void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight) {
 	sright[2] = sonarRight->range + simoffsetRight;
 }
 
-void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
-	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
-	tf::Matrix3x3 m(q);
-	double roll, pitch, yaw;
-	m.getRPY(roll, pitch, yaw);
-	orntn[0] = yaw;
-	if (o0once == true){
+void orntnHandler(const std_msgs::Float32& message) {
+	orntn[0] = message.data;
+	if (o0once == true && SIMMODE == false){
 		x0offset = -1.2 * cos(orntn[0]);
 		y0offset = -1.2 * sin(orntn[0]);
 		o0once = false;
 	}
+}
+
+void orntnHandler1(const std_msgs::Float32& message) {
+	orntn[1] = message.data;
+	if (o1once == true && SIMMODE == false){
+		x1offset = -1.2 * cos(orntn[1]);
+		y1offset = -1.2 * sin(orntn[1]);
+		o1once = false;
+	}
+}
+
+void orntnHandler2(const std_msgs::Float32& message) {
+	orntn[2] = message.data;
+	if (o2once == true && SIMMODE == false){
+		x2offset = -1.2 * cos(orntn[2]);
+		y2offset = -1.2 * sin(orntn[2]);
+		o2once = false;
+	}
+}
+void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	xpos[0] = message->pose.pose.position.x + x0offset;
 	ypos[0] = message->pose.pose.position.y + y0offset;
 }
 
 void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
-	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
-	tf::Matrix3x3 m(q);
-	double roll, pitch, yaw;
-	m.getRPY(roll, pitch, yaw);
-	orntn[1] = yaw;
-	if (o1once == true){
-		x1offset = -1.2 * cos(orntn[1]);
-		y1offset = -1.2 * sin(orntn[1]);
-		o1once = false;
-	}
 	xpos[1] = message->pose.pose.position.x + x1offset;
 	ypos[1] = message->pose.pose.position.y + y1offset;
 }
 void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
-	tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
-	tf::Matrix3x3 m(q);
-	double roll, pitch, yaw;
-	m.getRPY(roll, pitch, yaw);
-	orntn[2] = yaw;
-	if (o2once == true){
-		x2offset = -1.2 * cos(orntn[2]);
-		y2offset = -1.2 * sin(orntn[2]);
-		o2once = false;
-	}
 	xpos[2] = message->pose.pose.position.x + x2offset;
 	ypos[2] = message->pose.pose.position.y + y2offset;
 }

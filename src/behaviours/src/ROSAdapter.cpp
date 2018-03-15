@@ -100,17 +100,14 @@ geometry_msgs::Pose2D centerLocationOdom;	//The centers location based on ODOM
 geometry_msgs::Pose2D centerLocationMapRef;	//Variable used in TransformMapCenterToOdom, can be moved to make it local instead of global
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const int numreadings = 15;
+const int numreadings = 7;
 float x_component[numreadings];
 float y_component[numreadings];
     int readindex = 0;
     float x_total = 0;
     float y_total = 0;
     float ave = 0;
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 int currentMode = 0;
 const float behaviourLoopTimeStep = 0.1; 	//time between the behaviour loop calls
 const float status_publish_interval = 1;	//time between publishes
@@ -496,7 +493,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
   currentMode = message->data;
   if(currentMode == 2 || currentMode == 3) {
-    sleep(5);
+    //sleep(5);
     logicController.SetModeAuto();
   }
   else {
