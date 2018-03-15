@@ -49,7 +49,8 @@ findDevicePath() {
     )
     done
 }
-
+echo "******************************************************************************************************Loading calibration values************************************************************************************************************************"
+./load_calibration_values.sh
 
 #Startup ROS packages/processes
 echo "rosrun tf static_transform_publisher"
@@ -79,7 +80,7 @@ if [ -z "$microcontrollerDevicePath" ]
 then
     echo "Error: Microcontroller device not found"
 else
-    nohup > logs/$HOSTNAME"_abridge_log.txt" rosrun abridge abridge _device:=/dev/$microcontrollerDevicePath &
+    nohup > logs/$HOSTNAME"_abridge_log.txt" rosrun abridge abridge _device:=/dev/$microcontrollerDevicePath & 
 fi
 
 gpsDevicePath=$(findDevicePath u-blox)
