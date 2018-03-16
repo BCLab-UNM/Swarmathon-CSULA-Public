@@ -29,6 +29,8 @@ void GridtoZone::setGridMap(GridMap map) {
 		cout << "Behavior Map Test" << endl;
 		cout << "At (0,0): "<<map.atPosition("elevation", origin) <<endl;
 	}
+	
+
 }
 
 bool GridtoZone::otherRoverInZone(int zone, Position rover){
@@ -214,6 +216,8 @@ int GridtoZone::countInSection(Position center, double length, float values[], i
 	    std::cout<<  "X: " << center.x() - side << "  Y: " << center.y() + side << std::endl;
 	}
  
+
+
 	int count = 0;
 	int count2 = 0;
 

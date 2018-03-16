@@ -56,6 +56,7 @@ const double WALL 	= 20.0;
 //Publisher
 ros::Publisher gridswarmPublisher;
 ros::Publisher heartbeatPublisher;
+ros::Publisher polygonPublisher;
 //Subscriber
 ros::Subscriber roverNameSubscriber;
 ros::Subscriber sonarLeftSubscriber	,sonarLeftSubscriber1	,sonarLeftSubscriber2	;
@@ -84,6 +85,9 @@ std::string publishedName;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
+
+  bool cs_testing = true;
+
 using namespace std;
 using namespace grid_map;
 using namespace ros;
@@ -129,7 +133,7 @@ int main(int argc, char **argv){
 //PUBLISH
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-  
+  polygonPublisher = gNH.advertise<geometry_msgs::PolygonStamped>("/polygon", 1, true);
   ros::Rate rate(30.0);
 
 
@@ -223,6 +227,40 @@ int main(int argc, char **argv){
 		polygon.addVertex(Position(rotateCamMRX + xpos[count], rotateCamMRY + ypos[count]));
 		polygon.addVertex(Position(rotateCamBRX + xpos[count], rotateCamBRY + ypos[count]));
 		
+
+
+
+
+	if(cs_testing)
+		{
+			
+			grid_map::Polygon polygonPath;
+			polygonPath.setFrameId(map.getFrameId());
+	
+			double x = 5.0;
+			double y = 5.0;
+			double lengthU = 1.0;
+			double mapValue = 5.0;
+			// TopRight, BottomRight, TopLeft, BottomLeft
+			polygonPath.addVertex(Position(rotateCamBLX, rotateCamBLY));
+			polygonPath.addVertex(Position(rotateCamTLX + xpos[count], rotateCamTLY + ypos[count]));
+			polygonPath.addVertex(Position(rotateCamTRX + xpos[count], rotateCamTRY + ypos[count]));
+			polygonPath.addVertex(Position(rotateCamBRX, rotateCamBRY));
+
+
+
+			geometry_msgs::PolygonStamped messagePath;
+			grid_map::PolygonRosConverter::toMessage(polygonPath, messagePath);		
+			polygonPublisher.publish(messagePath);
+ 	
+			for(grid_map::PolygonIterator iterator(map,polygonPath); !iterator.isPastEnd(); ++iterator) 
+			{
+				map.at("elevation", *iterator) = mapValue;
+			}
+		}
+
+
+
 		geometry_msgs::PolygonStamped message;
 		grid_map::PolygonRosConverter::toMessage(polygon, message);		
 		for(grid_map::PolygonIterator iterator(map,polygon); !iterator.isPastEnd(); ++iterator) 
@@ -331,17 +369,22 @@ int main(int argc, char **argv){
 		}//END OF ITERATOR
 	}
 	firstgo = false;
+		
+
 	// Publish grid map.
 	map.setTimestamp(time.toNSec());
 	grid_map_msgs::GridMap message;
 	GridMapRosConverter::toMessage(map, message);
 	gridswarmPublisher.publish(message);
 //	ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
-	
 	// Wait for next cycle.
 	ros::spinOnce();
 	rate.sleep();
   }//END OF ROS OK
+
+
+
+
 
 return 0;
 }
@@ -463,3 +506,4 @@ void roverNameHandler(const std_msgs::String& message){
 		}
 	}
 }
+
