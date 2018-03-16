@@ -154,8 +154,8 @@ Point SearchController::GetNewSearchPoint(){
       Point start, end;
       start.x=0.0;
       start.y=0.0;
-      end.x=5.0;
-      end.y=5.2;
+      end.x=-5.0;
+      end.y=5.9;
 
       vector<Point> waypoints;
 
@@ -411,7 +411,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     const int n=btmn; // horizontal size of the map
     const int m=btwmn; // vertical size size of the map
 
-
+    
 
     float closed_nodes_map[n][m]; // map of closed (tried-out) nodes
     float open_nodes_map[n][m]; // map of open (not-yet-tried) nodes
@@ -453,7 +453,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
 
         // quit searching when the goal state is reached
         //if((*n0).estimate(xFinish, yFinish) == 0)
-        if(x==xFinish && y==yFinish) 
+        if(x==adjustedFinishx && y==adjustedFinishy) 
         {
             // generate the path from finish to start
             // by following the directions
@@ -468,6 +468,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                 path=c+path;
                 x+=dx[j];
                 y+=dy[j];
+                cout<<"here"<<endl;
             }
             // garbage collection
             delete n0;
@@ -484,7 +485,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
             int temp_ydy=ydy;
             indexRevertFromMap(mapAdjustValue, temp_xdx,temp_ydy);
             //Todo: make adjustments since Position takes floats
-            // cout<<"LOOKING AT ("<<xdx<<","<<ydy<<")"<<endl;
+            cout<<"LOOKING AT ("<<xdx<<","<<ydy<<")"<<endl;
             positionPtr = Position(temp_xdx/20.0,temp_ydy/20.0);
             // if(mapx->paperMap.isInside(positionPtr)){
             //   cout<<"inside the map position ("<<positionPtr<<") "<<endl;
@@ -502,9 +503,9 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                 // generate a child node
                 m0=new node( xdx, ydy, n0->getLevel(), n0->getPriority(), n0->getParentDirection());
                 m0->nextLevel(i);
-                m0->updatePriority(xFinish, yFinish);
+                m0->updatePriority(adjustedFinishx, adjustedFinishy);
                 if(mapx->paperMap.atPosition("elevation",positionPtr)!=-10){
-                  //cout<<"value at position( "<<positionPtr<<") is "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
+                  cout<<"value at position( "<<positionPtr<<") is "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
                 }
 
                 if(mapx->paperMap.atPosition("elevation",positionPtr)==3){
