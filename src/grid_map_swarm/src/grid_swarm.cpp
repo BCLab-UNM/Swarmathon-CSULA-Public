@@ -50,7 +50,7 @@ const double ROVER = 1.00;
 const double WALL = 2.00;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
-/*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
+/*->->->->->->->->->*/	bool SIMMODE = true;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 
 //Publisher
@@ -83,6 +83,7 @@ std::string publishedName;
   char host[128];
   bool firstgo = true;
   bool modeAuto = false;
+  bool noSonar = true;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
@@ -240,75 +241,77 @@ int main(int argc, char **argv){
 			}	
 		}
 		//OFFSET FOR SONAR
-		float fromCenterX = xpos[count] + ROVERHALF * cos(orntn[count]);
-		float fromCenterY = ypos[count] + ROVERHALF * sin(orntn[count]);
-		//CENTER SONAR
-		bool overlap = false;
-		float cx = (cos(orntn[count]) * scenter[count]) + fromCenterX;
-		float cy = (sin(orntn[count]) * scenter[count]) + fromCenterY;
-		Eigen::Vector2d c(cx,cy);
-		Eigen::Vector2d start(fromCenterX, fromCenterY);
-		for(grid_map::LineIterator iterator(map,start,c); !iterator.isPastEnd(); ++iterator) {
-			if (map.at("elevation", *iterator) == FOG){
-				map.at("elevation", *iterator) = SONAR;
-			}
-		}
-		if (scenter[count] <= 2.0 && scenter[count] >= 0.2){
-			for(int inner = 0; inner <= arrCount; inner++){
-				float qx = xpos[inner];
-				float qy = ypos[inner];;
-				if (cx <= (qx + ROVPLUSCELL) && cx >= (qx - ROVPLUSCELL) && cy <= (qy + ROVPLUSCELL) && cy >= (qy - ROVPLUSCELL)){
-					overlap = true;
+		if (noSonar == false){
+			float fromCenterX = xpos[count] + ROVERHALF * cos(orntn[count]);
+			float fromCenterY = ypos[count] + ROVERHALF * sin(orntn[count]);
+			//CENTER SONAR
+			bool overlap = false;
+			float cx = (cos(orntn[count]) * scenter[count]) + fromCenterX;
+			float cy = (sin(orntn[count]) * scenter[count]) + fromCenterY;
+			Eigen::Vector2d c(cx,cy);
+			Eigen::Vector2d start(fromCenterX, fromCenterY);
+			for(grid_map::LineIterator iterator(map,start,c); !iterator.isPastEnd(); ++iterator) {
+				if (map.at("elevation", *iterator) == FOG){
+					map.at("elevation", *iterator) = SONAR;
 				}
 			}
-			if (map.isInside(c) && overlap == false){
-				map.atPosition("elevation", c) = WALL;
-			}
-		}
-		//LEFT SONAR
-		overlap = false;
-		float lx = (cos((pi/6.7)+orntn[count]) * sleft[count]) + fromCenterX;
-		float ly = (sin((pi/6.7)+orntn[count]) * sleft[count]) + fromCenterY;
-		Eigen::Vector2d l(lx,ly);
-		for(grid_map::LineIterator iterator(map,start,l); !iterator.isPastEnd(); ++iterator) {
-			if (map.at("elevation", *iterator) == FOG){
-				map.at("elevation", *iterator) = SONAR;
-			}
-		}
-		if (sleft[count] <= 2.0 && sleft[count] >= 0.2){
-			for(int inner = 0; inner <= arrCount; inner++){
-				float qx = xpos[inner];
-				float qy = ypos[inner];
-				if (lx <= (qx + ROVPLUSCELL) && lx >= (qx - ROVPLUSCELL) && ly <= (qy + ROVPLUSCELL) && ly >= (qy - ROVPLUSCELL)){
-					overlap = true;
+			if (scenter[count] <= 2.0 && scenter[count] >= 0.2){
+				for(int inner = 0; inner <= arrCount; inner++){
+					float qx = xpos[inner];
+					float qy = ypos[inner];;
+					if (cx <= (qx + ROVPLUSCELL) && cx >= (qx - ROVPLUSCELL) && cy <= (qy + ROVPLUSCELL) && cy >= (qy - ROVPLUSCELL)){
+						overlap = true;
+					}
+				}
+				if (map.isInside(c) && overlap == false){
+					map.atPosition("elevation", c) = WALL;
 				}
 			}
-			if (map.isInside(l) && overlap == false){
-				map.atPosition("elevation", l) = WALL;
-			}
-		}
-		//RIGHT SONAR
-		overlap = false;
-		float rx = (cos(-1*(pi/6.7)+orntn[count]) * sright[count]) + fromCenterX;
-		float ry = (sin(-1*(pi/6.7)+orntn[count]) * sright[count]) + fromCenterY;
-		Eigen::Vector2d r(rx,ry);
-		for(grid_map::LineIterator iterator(map,start,r); !iterator.isPastEnd(); ++iterator) {
-			if (map.at("elevation", *iterator) == FOG){
-				map.at("elevation", *iterator) = SONAR;
-			}
-		}
-		if (sright[count] <= 2.0 && sright[count] >= 0.2){
-			for(int inner = 0; inner <= arrCount; inner++){
-				float qx = xpos[inner];
-				float qy = ypos[inner];
-				if (rx <= (qx + ROVPLUSCELL) && rx >= (qx - ROVPLUSCELL) && ry <= (qy + ROVPLUSCELL) && ry >= (qy - ROVPLUSCELL)){
-					overlap = true;
+			//LEFT SONAR
+			overlap = false;
+			float lx = (cos((pi/6.7)+orntn[count]) * sleft[count]) + fromCenterX;
+			float ly = (sin((pi/6.7)+orntn[count]) * sleft[count]) + fromCenterY;
+			Eigen::Vector2d l(lx,ly);
+			for(grid_map::LineIterator iterator(map,start,l); !iterator.isPastEnd(); ++iterator) {
+				if (map.at("elevation", *iterator) == FOG){
+					map.at("elevation", *iterator) = SONAR;
 				}
 			}
-			if (map.isInside(r) && overlap == false){
-				map.atPosition("elevation", r) = WALL;
+			if (sleft[count] <= 2.0 && sleft[count] >= 0.2){
+				for(int inner = 0; inner <= arrCount; inner++){
+					float qx = xpos[inner];
+					float qy = ypos[inner];
+					if (lx <= (qx + ROVPLUSCELL) && lx >= (qx - ROVPLUSCELL) && ly <= (qy + ROVPLUSCELL) && ly >= (qy - ROVPLUSCELL)){
+						overlap = true;
+					}
+				}
+				if (map.isInside(l) && overlap == false){
+					map.atPosition("elevation", l) = WALL;
+				}
 			}
-		}
+			//RIGHT SONAR
+			overlap = false;
+			float rx = (cos(-1*(pi/6.7)+orntn[count]) * sright[count]) + fromCenterX;
+			float ry = (sin(-1*(pi/6.7)+orntn[count]) * sright[count]) + fromCenterY;
+			Eigen::Vector2d r(rx,ry);
+			for(grid_map::LineIterator iterator(map,start,r); !iterator.isPastEnd(); ++iterator) {
+				if (map.at("elevation", *iterator) == FOG){
+					map.at("elevation", *iterator) = SONAR;
+				}
+			}
+			if (sright[count] <= 2.0 && sright[count] >= 0.2){
+				for(int inner = 0; inner <= arrCount; inner++){
+					float qx = xpos[inner];
+					float qy = ypos[inner];
+					if (rx <= (qx + ROVPLUSCELL) && rx >= (qx - ROVPLUSCELL) && ry <= (qy + ROVPLUSCELL) && ry >= (qy - ROVPLUSCELL)){
+						overlap = true;
+					}
+				}
+				if (map.isInside(r) && overlap == false){
+					map.atPosition("elevation", r) = WALL;
+				}
+			}
+		}//END OF SONAR BOOLEAN
 	}//END OF FOR LOOP
 	//CENTER MAT being Discovered
 	//cout << "Creating the Center Mat" << endl;
@@ -339,6 +342,16 @@ int main(int argc, char **argv){
 		}//END OF ITERATOR
 	}
 	firstgo = false;
+	if (noSonar == true){
+		for(int count = arrCount; count >= 0; count--){
+			float x = xpos[count];
+			float y = ypos[count];
+			cout<<count<<"("<<x<<","<<y<<")"<<endl;
+			if (x > 2.00 || x < -2.00 || y > 2.00 || y < -2.00){
+				noSonar = false;
+			}
+		}
+	}
 	// Publish grid map.
 	map.setTimestamp(time.toNSec());
 	grid_map_msgs::GridMap message;
@@ -359,6 +372,7 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 	msg.data = "";
 	heartbeatPublisher.publish(msg);
 }
+
 void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft) {
 	float simoffsetLeft = 0;
 	if(SIMMODE == true){
@@ -414,36 +428,55 @@ void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight) {
 }
 
 void orntnHandler(const std_msgs::Float32& message) {
+	double point;
 	orntn[0] = message.data;
 	if (o0once == true && SIMMODE == false){
-		x0offset = -1.2 * cos(orntn[0]);
-		y0offset = -1.2 * sin(orntn[0]);
+		for (point = 3.14; point >= -3.15; point -= pi/12){
+			//cout <<"0Point:"<<point<<endl;
+			if (orntn[0] <= point + pi/24 && orntn[0] >= point - pi/24){
+				break;
+			}
+		}
+		x0offset = -1.2 * cos(point);
+		y0offset = -1.2 * sin(point);
 		o0once = false;
 	}
 }
-
 void orntnHandler1(const std_msgs::Float32& message) {
+	double point;
 	orntn[1] = message.data;
 	if (o1once == true && SIMMODE == false){
-		x1offset = -1.2 * cos(orntn[1]);
-		y1offset = -1.2 * sin(orntn[1]);
+		for (point = 3.14; point >= -3.15; point -= pi/12){
+			//cout <<"1Point:"<<point<<endl;
+			if (orntn[1] <= point + pi/24 && orntn[1] >= point - pi/24){
+				break;
+			}
+		}
+		x1offset = -1.2 * cos(point);
+		y1offset = -1.2 * sin(point);
 		o1once = false;
 	}
 }
-
 void orntnHandler2(const std_msgs::Float32& message) {
+	double point;
 	orntn[2] = message.data;
 	if (o2once == true && SIMMODE == false){
-		x2offset = -1.2 * cos(orntn[2]);
-		y2offset = -1.2 * sin(orntn[2]);
+		for (point = 3.14; point >= -3.15; point -= pi/12){
+			//cout <<"2Point:"<<point<<endl;
+			if (orntn[2] <= point + pi/24 && orntn[2] >= point - pi/24){
+				break;
+			}
+		}
+		x2offset = -1.2 * cos(point);
+		y2offset = -1.2 * sin(point);
 		o2once = false;
 	}
 }
+
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	xpos[0] = message->pose.pose.position.x + x0offset;
 	ypos[0] = message->pose.pose.position.y + y0offset;
 }
-
 void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 	xpos[1] = message->pose.pose.position.x + x1offset;
 	ypos[1] = message->pose.pose.position.y + y1offset;
@@ -475,5 +508,8 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
 	int currentMode = message->data;
 	if(currentMode == 2 || currentMode == 3) {
 		modeAuto = true;
+		cout<<"Sleep for a bit"<<endl;
+		cout<<"Wake up Man"<<endl;
+		
 	}
 }

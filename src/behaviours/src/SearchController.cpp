@@ -37,8 +37,8 @@ Result SearchController::DoWork() {
                searchLocation.y =(y); // y = 0
                attemptCount++;
                x=x+d;                 // d = 1
-               std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
-                std::cout<< "X: " << x << "  Y: " << y <<endl;
+               //std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
+               //std::cout<< "X: " << x << "  Y: " << y <<endl;
            }
            else if (attemptCount==1)
            {
@@ -48,9 +48,9 @@ Result SearchController::DoWork() {
                attemptCount++;
                y=y+d;
                d=(-d)-1;               // d = -2
-               std::cout<< "Traveling to 2nd waypoint";
-                std::cout<< "X: " << x << "  Y: " << y <<endl;
-                std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
+               //std::cout<< "Traveling to 2nd waypoint";
+               //std::cout<< "X: " << x << "  Y: " << y <<endl;
+               //std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
            }
            else if (attemptCount==2)
            {
@@ -59,8 +59,8 @@ Result SearchController::DoWork() {
                searchLocation.y = (y); // y = 1
                attemptCount++;
                x=x+d;
-               std::cout<< "Traveling to 3rd waypoint";
-                std::cout<< "X: " << x << "  Y: " << y <<endl;
+               //std::cout<< "Traveling to 3rd waypoint";
+               //std::cout<< "X: " << x << "  Y: " << y <<endl;
            }
            else if (attemptCount==3){
                searchLocation.theta = 3/2 *M_PI;
@@ -69,8 +69,8 @@ Result SearchController::DoWork() {
                attemptCount++;
                y=y+d;
                d=(-d)+1;               // d = 3
-               std::cout<< "Traveling to 4th waypoint";
-                std::cout<< "X: " << x << "  Y: " << y <<endl;
+               //std::cout<< "Traveling to 4th waypoint";
+               //std::cout<< "X: " << x << "  Y: " << y <<endl;
 
            }
            else{
@@ -80,8 +80,8 @@ Result SearchController::DoWork() {
                attemptCount=1;
                x=x+d;
 
-               std::cout<< "Traveling to 5th waypoint";
-                std::cout<< "X: " << x << "  Y: " << y <<endl;
+               //std::cout<< "Traveling to 5th waypoint";
+               //std::cout<< "X: " << x << "  Y: " << y <<endl;
                rotations++;
            }
 
