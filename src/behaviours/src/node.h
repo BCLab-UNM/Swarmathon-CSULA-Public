@@ -22,16 +22,22 @@ class node
         float level;
         // priority=level+remaining distance estimate
         float priority;  // smaller: higher priority
-        node(int xp, int yp, float d, float p);
+
+        int parentDirection;
+
+        node(int xp, int yp, float d, float p, int pd);
     
         int getxPos() const;
         int getyPos() const;
         float getLevel() const;
         float getPriority() const;
+        float getParentDirection() const;
 
         void addcostToPriority(float cost);
 
         void updatePriority(const int & xDest, const int & yDest);
+
+        //float addParentDirectionCost(const int parentDirection);
 
         // give better priority to going strait instead of diagonally
         void nextLevel(const float & i); // i: direction

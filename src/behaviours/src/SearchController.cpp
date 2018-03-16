@@ -144,9 +144,36 @@ void SearchController::SetSuccesfullPickup() {
 
 //  centralSpiralLocation = rs.getRandomPointInZone(zone);
 Point SearchController::GetNewSearchPoint(){
+  
   int zonetries = 25;
   int pointstries = 25;
   Point pt =  rs.getRandomPointInZone(zone);
+
+
+      if(astarCount<1){
+      Point start, end;
+      start.x=0.0;
+      start.y=0.0;
+      end.x=5.0;
+      end.y=5.2;
+
+      vector<Point> waypoints;
+
+      waypoints = findPath( start, end);
+
+      cout<<  "waypoints length: " << waypoints.size()<<endl;
+      for(int i=0;i<waypoints.size();i++){
+        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+      }
+      astarCount++;
+
+
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      }
+
+
 
   for (int i = 0; i <= zonetries; i++){
     int choosenZone = ChooseZone();
@@ -164,11 +191,11 @@ Point SearchController::GetNewSearchPoint(){
 
 
       if(waypointsDebugVerbose){
-        std::cout << "Considering point : " << pt.x  << ", "<< pt.y << std::endl;
-        std::cout << "Zone : " << zone << std::endl;
-        std::cout << "obstacle : " << obstacle << std::endl;
-        std::cout << "percent of section : " << percent << std::endl;
-        std::cout << "here2" << std::endl;
+        // std::cout << "Considering point : " << pt.x  << ", "<< pt.y << std::endl;
+        // std::cout << "Zone : " << zone << std::endl;
+        // std::cout << "obstacle : " << obstacle << std::endl;
+        // std::cout << "percent of section : " << percent << std::endl;
+        // std::cout << "here2" << std::endl;
       }
 
       if (!obstacle && percentOK){
@@ -177,10 +204,10 @@ Point SearchController::GetNewSearchPoint(){
     }
   }
 
-  std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
-  std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
-  std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
-  std::cout << "Find out why" << std::endl;
+  // std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
+  // std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
+  // std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
+  // std::cout << "Find out why" << std::endl;
   return pt;
 
 }
@@ -190,14 +217,15 @@ int SearchController::ChooseZone(){
   int tries = 100;
   int prelimCheck = 50;
 
+
   for(int i = 0; i <= tries; i++){
     bool rovercount = GridtoZone::Instance()->otherRoverInZone(zoneChecking, Position(currentLocation.x, currentLocation.y));
     double percentZone = GridtoZone::Instance()->percentOfZoneDiscovered(zoneChecking);
 
     if(waypointsDebugVerbose){
-      std::cout << "zoneChecking: " << zoneChecking  << ", prelimCheck: " << (i <= prelimCheck) << std::endl;
-      std::cout << "other rover : " << rovercount  << std::endl;
-      std::cout << "zone coverage : " << percentZone  << std::endl;
+      //std::cout << "zoneChecking: " << zoneChecking  << ", prelimCheck: " << (i <= prelimCheck) << std::endl;
+      //std::cout << "other rover : " << rovercount  << std::endl;
+      //std::cout << "zone coverage : " << percentZone  << std::endl;
     }
 
 
@@ -219,22 +247,18 @@ int SearchController::ChooseZone(){
     else{
       zoneChecking++;
     }
-    std::cout << "here1" << std::endl;
-    Point start, end;
-    start.x=0.0;
-    start.y=0.0;
-    end.x=8.0;
-    end.y=8.0;
 
 
-    findPath(start,end);
   }
 
-  std::cout << "It reached the last line at ChooseZone" << std::endl;
-  std::cout << "It reached the last line at ChooseZone" << std::endl;
-  std::cout << "It reached the last line at ChooseZone" << std::endl;
-  std::cout << "Find out why" << std::endl;
+  // std::cout << "It reached the last line at ChooseZone" << std::endl;
+  // std::cout << "It reached the last line at ChooseZone" << std::endl;
+  // std::cout << "It reached the last line at ChooseZone" << std::endl;
+  // std::cout << "Find out why" << std::endl;
   zone = zoneChecking;
+
+
+
   return 0; // <----- because I have to return something
 }
 
@@ -252,10 +276,16 @@ void SearchController::pointToIndex(Point point,int &x,int &y){
   // x=(int) point.x;
   // y=(int) point.y;  
 
+
+  cout<<"before conversion (" <<point.x<<" ," << point.y<< ") "<<endl;
   //conversion for swarm
-  const int conversionNumber=20;
-  x=(int) point.x*conversionNumber;
-  y=(int) point.y*conversionNumber;
+  const float conversionNumber=20.0;
+
+  x=(int) (point.x*conversionNumber);
+  float test =(point.y*conversionNumber);
+  y=(int) test;
+  cout<<"test: "<<test<<endl;
+  cout<<"converted (" <<x<<" ," << y<< ") "<<endl;
 }
 
 void SearchController::indexToPoint(vector<Point> &waypoints){
@@ -264,6 +294,16 @@ void SearchController::indexToPoint(vector<Point> &waypoints){
     waypoints[i].x=waypoints[i].x / conversionNumber;
     waypoints[i].y=waypoints[i].y / conversionNumber;
   }
+}
+
+void SearchController::indexAdjusttoMap(const int adjustValue,int &x,int &y){
+  x+=adjustValue;
+  y+=adjustValue;
+}
+
+void SearchController::indexRevertFromMap(const int adjustValue,int &x,int &y){
+  x-=adjustValue;
+  y-=adjustValue;
 }
 
 
@@ -344,6 +384,10 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     int i, j, x, y, xdx, ydy;
     char c;
     pqi=0;
+    int adjustedStartx, adjustedStarty, adjustedFinishx, adjustedFinishy;
+    adjustedStartx=xStart; adjustedStarty=yStart; adjustedFinishx=xFinish; adjustedFinishy=yFinish;
+
+    cout<< "Startx: " << xStart << " y " <<yStart<< "Finishx: "<< xFinish << " y "<<yFinish<< endl;
 
     //Grid map 
     GridtoZone* mapx=GridtoZone::Instance();
@@ -356,31 +400,23 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     //Eigen::Vector2d * positionPtr;
     Position positionPtr;
 
+    const int mapAdjustValue=btmn/2;
+    indexAdjusttoMap(mapAdjustValue,adjustedStartx,adjustedStarty);
+    indexAdjusttoMap(mapAdjustValue,adjustedFinishx,adjustedFinishy);
+
     const int dir=8; // number of possible directions to go at any position
     int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1};
     int dy[dir]={0, 1, 1, 1, 0, -1, -1, -1};
 
     const int n=btmn; // horizontal size of the map
     const int m=btwmn; // vertical size size of the map
-    
-    // const int n=10; // horizontal size of the map
-    // const int m=10; // vertical size size of the map
-    // static float map[n][m]={{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-    //                   {-1, 0, 0, 0, 0, 0, 0, 0, 0, -1},
-    //                   {-1, 0, 0, 0, 0, 0, 0, 0, 0, -1},
-    //                   {-1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    //                   {-1, 2, 2, 2, 2, 2, 2, 2, 2, 0},
-    //                   {-1, -1, -1, -1, 2, -1, -1, -1, -1, -2},
-    //                   {-1, -1, -1, -1, 2, -1, -1, -1, -1, -1},
-    //                   {-1, -1, -1, -1, 2, -1, -1, -1, -1, -1},
-    //                   {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-    //                   {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
-    //                  };
+
 
 
     float closed_nodes_map[n][m]; // map of closed (tried-out) nodes
     float open_nodes_map[n][m]; // map of open (not-yet-tried) nodes
     float dir_map[n][m]; // map of directions
+    int count =0;
 
     // reset the node maps
     for(y=0;y<m;y++)
@@ -393,8 +429,8 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     }
 
     // create the start node and push into list of open nodes
-    n0=new node(xStart, yStart, 0.0, 0.0);
-    n0->updatePriority(xFinish, yFinish);
+    n0=new node(adjustedStartx, adjustedStarty, 0.0, 0.0,-1);
+    n0->updatePriority(adjustedFinishx, adjustedFinishy);
     pq[pqi].push(*n0);
     open_nodes_map[x][y]=n0->getPriority(); // mark it on the open nodes map
     delete n0;
@@ -403,7 +439,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     {
         // get the current node w/ the highest prioritymap[
         // from the list of open nodes
-        n0=new node( pq[pqi].top().getxPos(), pq[pqi].top().getyPos(), pq[pqi].top().getLevel(), pq[pqi].top().getPriority());
+        n0=new node( pq[pqi].top().getxPos(), pq[pqi].top().getyPos(), pq[pqi].top().getLevel(), pq[pqi].top().getPriority(),pq[pqi].top().getParentDirection());
 
         x=n0->getxPos(); y=n0->getyPos();
 
@@ -411,6 +447,9 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
         open_nodes_map[x][y]=0;
         // mark it on the closed nodes map
         closed_nodes_map[x][y]=1;
+        count++;
+
+        //cout<<"-----current x "<<x<<" y "<<y<<endl;
 
         // quit searching when the goal state is reached
         //if((*n0).estimate(xFinish, yFinish) == 0)
@@ -418,9 +457,12 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
         {
             // generate the path from finish to start
             // by following the directions
+          cout<<"finish"<<endl;
             string path="";
-            while(!(x==xStart && y==yStart))
+            // while(!(x==xStart && y==yStart))
+            while(!(x==adjustedStartx && y==adjustedStarty))
             {
+              //cout<<"while 0"<<endl;
                 j=dir_map[x][y];
                 c='0'+(j+dir/2)%dir;
                 path=c+path;
@@ -438,21 +480,38 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
         for(i=0;i<dir;i++)
         {
             xdx=x+dx[i]; ydy=y+dy[i];
-
+            int temp_xdx=xdx;
+            int temp_ydy=ydy;
+            indexRevertFromMap(mapAdjustValue, temp_xdx,temp_ydy);
             //Todo: make adjustments since Position takes floats
-            cout<<"xdx: "<<xdx<<" ydy: "<<ydy<<endl;
-            positionPtr = Position(xdx,ydy);
+            // cout<<"LOOKING AT ("<<xdx<<","<<ydy<<")"<<endl;
+            positionPtr = Position(temp_xdx/20.0,temp_ydy/20.0);
+            // if(mapx->paperMap.isInside(positionPtr)){
+            //   cout<<"inside the map position ("<<positionPtr<<") "<<endl;
+            // }
+            // else{cout<<"not inside the map position ("<<positionPtr<<") "<<endl;
+            // }
 
-            if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || mapx->paperMap.atPosition("elevation",positionPtr)==2 || mapx->paperMap.atPosition("elevation",positionPtr)==1|| closed_nodes_map[xdx][ydy]==1))
+            //figure out how to avoid from checking outside of bounds
+            // cout<<"  Current value at "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
+
+
+            if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || mapx->paperMap.atPosition("elevation",positionPtr)==10.0 || mapx->paperMap.atPosition("elevation",positionPtr)==20.0|| closed_nodes_map[xdx][ydy]==1))
             // if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || map[xdx][ydy]==2 || map[xdx][ydy]==1|| closed_nodes_map[xdx][ydy]==1))
             {
                 // generate a child node
-                m0=new node( xdx, ydy, n0->getLevel(), n0->getPriority());
+                m0=new node( xdx, ydy, n0->getLevel(), n0->getPriority(), n0->getParentDirection());
                 m0->nextLevel(i);
                 m0->updatePriority(xFinish, yFinish);
+                if(mapx->paperMap.atPosition("elevation",positionPtr)!=-10){
+                  //cout<<"value at position( "<<positionPtr<<") is "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
+                }
 
-
-                m0->addcostToPriority(mapx->paperMap.atPosition("elevation",positionPtr));
+                if(mapx->paperMap.atPosition("elevation",positionPtr)==3){
+                  m0->addcostToPriority(-10.0);
+                } else {
+                  m0->addcostToPriority(mapx->paperMap.atPosition("elevation",positionPtr));
+                } 
                 
 
 
@@ -460,6 +519,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                 if(open_nodes_map[xdx][ydy]==0.0)
                 {
                     bool neg=false;
+
 
                     open_nodes_map[xdx][ydy]=m0->getPriority();
 
@@ -470,6 +530,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                 }
                 else if(open_nodes_map[xdx][ydy]>m0->getPriority())
                 {
+                  
                     // update the priority info
                     open_nodes_map[xdx][ydy]=m0->getPriority();
                     // update the parent direction info
@@ -481,6 +542,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                     // and the new node will be pushed in instead
                     while(!(pq[pqi].top().getxPos()==xdx && pq[pqi].top().getyPos()==ydy))
                     {                
+
                         pq[1-pqi].push(pq[pqi].top());
                         pq[pqi].pop();       
                     }
@@ -490,6 +552,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                     if(pq[pqi].size()>pq[1-pqi].size()) pqi=1-pqi;
                     while(!pq[pqi].empty())
                     {                
+
                         pq[1-pqi].push(pq[pqi].top());
                         pq[pqi].pop();       
                     }
@@ -499,9 +562,16 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                     
                 }
                 else delete m0; // garbage collection
+ 
+            }
+            else{
+              //cout<<"else value at "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
             }
         }
         delete n0; // garbage collection
+    }
+    if(pq[pqi].empty()){
+      cout<<"empty"<<endl;
     }
     return ""; // no route found
 }
@@ -522,6 +592,7 @@ vector<Point> SearchController::findPath(Point start, Point end){
   clock_t timeStart = clock();
 
   string route=Astar(xA, yA, xB, yB);
+  cout<<"after astar"<<endl;
 
   if(route=="") cout<<"An empty route generated!"<<endl;
   clock_t timeEnd = clock();
