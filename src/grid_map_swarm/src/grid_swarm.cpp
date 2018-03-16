@@ -41,13 +41,13 @@ const float CELLDIVISION = 0.05;
 const float ROVERHALF = 0.17;
 const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
 //GRID PJ NUMBERS
-const double FOG = -1.00;
-const double REVEALED = 0.00;
-const double SONAR = 0.20;
-const double MAT = 0.50;
-const double CUBES = 0.70;
-const double ROVER = 1.00;
-const double WALL = 2.00;
+const double FOG 	= -10.00;
+const double REVEALED 	= 0.00;
+const double MAT 	= 1.0;
+const double CUBES 	= 2.0;
+const double SONAR 	= 3.0;
+const double ROVER 	= 10.0;
+const double WALL 	= 20.0;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = true;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
@@ -96,6 +96,7 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 
 void roverNameHandler(const std_msgs::String& message);
 void modeHandler(const std_msgs::UInt8::ConstPtr& message);
+Polygon makebox(float size, float x, float y, float rotate);
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
   void orntnHandler(const std_msgs::Float32& message);
@@ -133,12 +134,13 @@ int main(int argc, char **argv){
   roverNameSubscriber = gNH.subscribe(("/chainName"), 1, roverNameHandler);
   modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeHandler);
 
-
+/*
 //PUBLISH
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-  
+*/
   ros::Rate rate(30.0);
+/*
   do{
   	ros::spinOnce();
   	rate.sleep();
@@ -148,9 +150,10 @@ int main(int argc, char **argv){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
 	return 0;
   }
-
+*/
   cout << publishedName << " was Listed first listed. Starting Grid-Map" <<endl;
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("/grid_map", 1);
+/*
   for(int i = 0; i < namesArrSize; i++){
 //	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop"<<endl;
 	if (namesArr[i] != "test"){
@@ -179,7 +182,7 @@ int main(int argc, char **argv){
 	}//END OF IF STATEMENT
   }//END OF FOR LOOP
   cout << " + Exit Subscriber loop -"<< "- arrCount:"<<arrCount<< endl;
-
+*/
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
@@ -187,9 +190,15 @@ int main(int argc, char **argv){
   ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
+	//ALL FLOATS makebox(size, x, y, rotation (range 0-3.14))
+	Polygon polygon = makebox(1, 2, 2, 0);
+	for(grid_map::PolygonIterator iterator(map,polygon); !iterator.isPastEnd(); ++iterator) {
+		map.at("elevation", *iterator) = WALL;
+	}
 
   while (ros::ok()) {
 	ros::Time time = ros::Time::now();
+/*
 	for(int count = arrCount; count >= 0; count--){
 		//CAMERA and ROVER cover Area
 		grid_map::Polygon polygon;
@@ -332,16 +341,20 @@ int main(int argc, char **argv){
 			map.atPosition("elevation", q) = ROVER;
 		}
 	}
+*/
 	if (firstgo == true){
 		cout << "Creating the initial FOG" << endl;
 		//CREATE FOG
 		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
 			Position position;
 			map.getPosition(*it, position);
-			map.at("elevation", *it) = FOG;
+			if (map.at("elevation", *it) != WALL){
+				map.at("elevation", *it) = REVEALED;
+			}	
 		}//END OF ITERATOR
 	}
 	firstgo = false;
+/*
 	if (noSonar == true){
 		for(int count = arrCount; count >= 0; count--){
 			float x = xpos[count];
@@ -352,6 +365,7 @@ int main(int argc, char **argv){
 			}
 		}
 	}
+*/
 	// Publish grid map.
 	map.setTimestamp(time.toNSec());
 	grid_map_msgs::GridMap message;
@@ -366,7 +380,6 @@ int main(int argc, char **argv){
 
 return 0;
 }
-
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 	std_msgs::String msg;
 	msg.data = "";
@@ -512,4 +525,33 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
 		cout<<"Wake up Man"<<endl;
 		
 	}
+}
+Polygon makebox(float size, float x, float y, float rotate) {
+		//CAMERA and ROVER cover Area
+		grid_map::Polygon polygon;
+		polygon.setFrameId("map");
+		//These points make an area of where the ROVER is
+		double botLeftX= -size, botRightX= -size;
+		double botLeftY= -size, botRightY=  size;
+		//These point create the area the CAMERA would see. Does not actually see what the camera sees, it just marks the area as seen.
+		double topLeftX =  size, topRightX= size;
+		double topLeftY = -size, topRightY= size;
+		//Do the roatation math 
+		//Bottom points
+		double rotateCamBRX = (botRightX * cos(rotate) - botRightY * sin(rotate));
+		double rotateCamBRY = (botRightX * sin(rotate) + botRightY * cos(rotate));
+		double rotateCamBLX = (botLeftX  * cos(rotate) - botLeftY  * sin(rotate));
+		double rotateCamBLY = (botLeftX  * sin(rotate) + botLeftY  * cos(rotate));
+		//Top points
+		double rotateCamTLX = (topLeftX  * cos(rotate) - topLeftY  * sin(rotate));
+		double rotateCamTLY = (topLeftX  * sin(rotate) + topLeftY  * cos(rotate));
+		double rotateCamTRX = (topRightX * cos(rotate) - topRightY * sin(rotate));
+		double rotateCamTRY = (topRightX * sin(rotate) + topRightY * cos(rotate));
+		//Add the points to a polygon
+		polygon.addVertex(Position(rotateCamBLX + x, rotateCamBLY + y));
+		polygon.addVertex(Position(rotateCamTLX + x, rotateCamTLY + y));
+		polygon.addVertex(Position(rotateCamTRX + x, rotateCamTRY + y));
+		polygon.addVertex(Position(rotateCamBRX + x, rotateCamBRY + y));
+
+	return polygon;
 }
