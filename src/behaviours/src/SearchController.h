@@ -88,13 +88,22 @@ private:
   Spiral s;
   int c = 0;
 
+  GridtoZone* mapx;
+  int mapLength;
+  int mapWidth;
+
   //bool operator<(const node & a, const node & b);
-  void pointToIndex(Point point,int &x,int &y);
-  void indexToPoint(vector<Point> &waypoints);
-  vector<Point> parseRoute(string route, int x, int y);
+  // void pointToIndex(Point point,int &x,int &y);
+  // void indexToPoint(vector<Point> &waypoints);
+  int pointToIndex(float XorY);
+  float indexToPoint(int XorY);
+
+  vector<Point> parseRoute(string route, float x, float y);
   string Astar( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish );
   void indexAdjusttoMap(const int adjustValue,int &x,int &y);
   void indexRevertFromMap(const int adjustValue,int &x,int &y);
+  Position realtogridPosition(Point point);
+  Point gridtorealPoint(float x, float y);
 };
 
 #endif /* SEARCH_CONTROLLER */

@@ -154,8 +154,8 @@ Point SearchController::GetNewSearchPoint(){
       Point start, end;
       start.x=0.0;
       start.y=0.0;
-      end.x=-5.0;
-      end.y=5.9;
+      end.x= 5.0;
+      end.y= 6.5;
 
       vector<Point> waypoints;
 
@@ -172,6 +172,162 @@ Point SearchController::GetNewSearchPoint(){
       std::cout << "---------------------------------------------------" << std::endl;
       std::cout << "---------------------------------------------------" << std::endl;
       }
+            if(astarCount<2){
+      Point start, end;
+      start.x=0.0;
+      start.y=0.0;
+      end.x= 5.0;
+      end.y= 5.0;
+
+      vector<Point> waypoints;
+
+      waypoints = findPath( start, end);
+
+      cout<<  "waypoints length: " << waypoints.size()<<endl;
+      for(int i=0;i<waypoints.size();i++){
+        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+      }
+      astarCount++;
+
+
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      }
+            if(astarCount<3){
+      Point start, end;
+      start.x=0.0;
+      start.y=0.0;
+      end.x = 0.0;
+      end.y = 5.0;
+
+      vector<Point> waypoints;
+
+      waypoints = findPath( start, end);
+
+      cout<<  "waypoints length: " << waypoints.size()<<endl;
+      for(int i=0;i<waypoints.size();i++){
+        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+      }
+      astarCount++;
+
+
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      }
+            if(astarCount<4){
+      Point start, end;
+      start.x=0.0;
+      start.y=0.0;
+      end.x = 5.0;
+      end.y = 0.0;
+
+      vector<Point> waypoints;
+
+      waypoints = findPath( start, end);
+
+      cout<<  "waypoints length: " << waypoints.size()<<endl;
+      for(int i=0;i<waypoints.size();i++){
+        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+      }
+      astarCount++;
+
+
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      }
+            if(astarCount<5){
+      Point start, end;
+      start.x=0.0;
+      start.y=0.0;
+      end.x= -5.0;
+      end.y= 0.0;
+
+      vector<Point> waypoints;
+
+      waypoints = findPath( start, end);
+
+      cout<<  "waypoints length: " << waypoints.size()<<endl;
+      for(int i=0;i<waypoints.size();i++){
+        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+      }
+      astarCount++;
+
+
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      }
+            if(astarCount<6){
+      Point start, end;
+      start.x=0.0;
+      start.y=0.0;
+      end.x= 0.0;
+      end.y= -5.0;
+
+      vector<Point> waypoints;
+
+      waypoints = findPath( start, end);
+
+      cout<<  "waypoints length: " << waypoints.size()<<endl;
+      for(int i=0;i<waypoints.size();i++){
+        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+      }
+      astarCount++;
+
+
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      }
+            if(astarCount<7){
+      Point start, end;
+      start.x=0.0;
+      start.y=0.0;
+      end.x= -5.0;
+      end.y= 5.0;
+
+      vector<Point> waypoints;
+
+      waypoints = findPath( start, end);
+
+      cout<<  "waypoints length: " << waypoints.size()<<endl;
+      for(int i=0;i<waypoints.size();i++){
+        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+      }
+      astarCount++;
+
+
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      }
+            if(astarCount<8){
+      Point start, end;
+      start.x=0.0;
+      start.y=0.0;
+      end.x= 5.0;
+      end.y= -5.0;
+
+      vector<Point> waypoints;
+
+      waypoints = findPath( start, end);
+
+      cout<<  "waypoints length: " << waypoints.size()<<endl;
+      for(int i=0;i<waypoints.size();i++){
+        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+      }
+      astarCount++;
+
+
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      std::cout << "---------------------------------------------------" << std::endl;
+      }
+
+
 
 
 
@@ -271,29 +427,36 @@ bool operator<(const node & a, const node & b){
 }
 
 
-void SearchController::pointToIndex(Point point,int &x,int &y){
-  //conversion for code testing
-  // x=(int) point.x;
-  // y=(int) point.y;  
+// void SearchController::pointToIndex(Point point,int &x,int &y){
+//   //conversion for code testing
+//   // x=(int) point.x;
+//   // y=(int) point.y;  
 
 
-  cout<<"before conversion (" <<point.x<<" ," << point.y<< ") "<<endl;
-  //conversion for swarm
-  const float conversionNumber=20.0;
+//   cout<<"before conversion (" <<point.x<<" ," << point.y<< ") "<<endl;
+//   //conversion for swarm
+//   const float conversionNumber=20.0;
 
-  x=(int) (point.x*conversionNumber);
-  float test =(point.y*conversionNumber);
-  y=(int) test;
-  cout<<"test: "<<test<<endl;
-  cout<<"converted (" <<x<<" ," << y<< ") "<<endl;
+//   x=(int) (point.x*conversionNumber);
+//   float test =(point.y*conversionNumber);
+//   y=(int) test;
+//   cout<<"test: "<<test<<endl;
+//   cout<<"converted (" <<x<<" ," << y<< ") "<<endl;
+// }
+
+// void SearchController::indexToPoint(vector<Point> &waypoints){
+//   const float conversionNumber=20.00;
+//   for(int i=0;i<waypoints.size();i++){
+//     waypoints[i].x=waypoints[i].x / conversionNumber;
+//     waypoints[i].y=waypoints[i].y / conversionNumber;
+//   }
+// }
+int SearchController::pointToIndex(float XorY){
+  return (mapLength/2 - 20*XorY);
 }
 
-void SearchController::indexToPoint(vector<Point> &waypoints){
-  const float conversionNumber=20.00;
-  for(int i=0;i<waypoints.size();i++){
-    waypoints[i].x=waypoints[i].x / conversionNumber;
-    waypoints[i].y=waypoints[i].y / conversionNumber;
-  }
+float SearchController::indexToPoint(int  XorY){
+  return (mapLength/2 - XorY)/20;
 }
 
 void SearchController::indexAdjusttoMap(const int adjustValue,int &x,int &y){
@@ -307,15 +470,18 @@ void SearchController::indexRevertFromMap(const int adjustValue,int &x,int &y){
 }
 
 
-vector<Point> SearchController::parseRoute(string route, int x, int y){
+vector<Point> SearchController::parseRoute(string route, float x, float y){
   std::vector<Point> waypoints;
   int len = route.length();
   string arr[len];
   Point point;
   point.x=x;
   point.y=y;
+  const float celldivision=0.05;
+  float routeTransform = 0.0;
 
-  // cout<< "route length: " << len << endl;
+
+  cout<< "route length: " << len << endl;
   int count=0;
   stringstream ssin(route);
   while (ssin.good() && count < len){
@@ -331,18 +497,19 @@ vector<Point> SearchController::parseRoute(string route, int x, int y){
         if(b>0){
             if(arr[b-1]!=arr[b]){
                 //cout << "new way point" << endl;
-        
-                if(arr[b-1]=="0"){point.x=point.x + (routeCount);}
-                else if(arr[b-1]=="1"){point.y=point.y + (routeCount); point.x=point.x + (routeCount);}
-                else if(arr[b-1]=="2"){point.y=point.y + (routeCount);}
-                else if(arr[b-1]=="3"){point.y=point.y - (routeCount); point.x=point.x + (routeCount);}
-                else if(arr[b-1]=="4"){point.x=point.x - (routeCount);}
-                else if(arr[b-1]=="5"){point.y=point.y - (routeCount); point.x=point.x - (routeCount);}
-                else if(arr[b-1]=="6"){point.y=point.y - (routeCount);}
-                else if(arr[b-1]=="7"){point.y=point.y + (routeCount); point.x=point.x - (routeCount);}
+                routeTransform = celldivision * routeCount;
+                if(arr[b-1]=="6"){point.x=point.x + (routeTransform);}
+                else if(arr[b-1]=="7"){point.y=point.y + (routeTransform); point.x=point.x + (routeTransform);}
+                else if(arr[b-1]=="0"){point.y=point.y + (routeTransform);}
+                else if(arr[b-1]=="1"){point.y=point.y + (routeTransform); point.x=point.x - (routeTransform);}
+                else if(arr[b-1]=="2"){point.x=point.x - (routeTransform);}
+                else if(arr[b-1]=="3"){point.y=point.y - (routeTransform); point.x=point.x - (routeTransform);}
+                else if(arr[b-1]=="4"){point.y=point.y - (routeTransform);}
+                else if(arr[b-1]=="5"){point.y=point.y - (routeTransform); point.x=point.x + (routeTransform);}
                 else {cout <<"oh oh";}
 
-                //cout << "waypoint( "<<point.y<<", "<<point.x<<")"<<endl;
+                cout << "waypoint: ( "<<point.x<<", "<<point.y<<")"<<endl;
+
                 waypoints.push_back(point);
                  routeCount=0;
 
@@ -351,30 +518,32 @@ vector<Point> SearchController::parseRoute(string route, int x, int y){
         routeCount++;
         if(b==len-1){
                 //cout << "new way point" << endl;
-        
-                if(arr[b-1]=="0"){point.x=point.x + (routeCount);}
-                else if(arr[b-1]=="1"){point.y=point.y + (routeCount); point.x=point.x + (routeCount);}
-                else if(arr[b-1]=="2"){point.y=point.y + (routeCount);}
-                else if(arr[b-1]=="3"){point.y=point.y - (routeCount); point.x=point.x + (routeCount);}
-                else if(arr[b-1]=="4"){point.x=point.x - (routeCount);}
-                else if(arr[b-1]=="5"){point.y=point.y - (routeCount); point.x=point.x - (routeCount);}
-                else if(arr[b-1]=="6"){point.y=point.y - (routeCount);}
-                else if(arr[b-1]=="7"){point.y=point.y + (routeCount); point.x=point.x - (routeCount);}
+                routeTransform = celldivision * routeCount;
+                if(arr[b-1]=="6"){point.x=point.x + (routeTransform);}
+                else if(arr[b-1]=="7"){point.y=point.y + (routeTransform); point.x=point.x + (routeTransform);}
+                else if(arr[b-1]=="0"){point.y=point.y + (routeTransform);}
+                else if(arr[b-1]=="1"){point.y=point.y + (routeTransform); point.x=point.x - (routeTransform);}
+                else if(arr[b-1]=="2"){point.x=point.x - (routeTransform);}
+                else if(arr[b-1]=="3"){point.y=point.y - (routeTransform); point.x=point.x - (routeTransform);}
+                else if(arr[b-1]=="4"){point.y=point.y - (routeTransform);}
+                else if(arr[b-1]=="5"){point.y=point.y - (routeTransform); point.x=point.x + (routeTransform);}
                 else {cout <<"oh oh";}
 
-                //cout << "waypoint( "<<point.y<<", "<<point.x<<")"<<endl;
+
+                cout << "waypoint = ( "<<point.x<<", "<<point.y<<")"<<endl;
+
                 waypoints.push_back(point);
                  routeCount=0;
 
             }
     }
     //cout<<  "waypoints length in parse: " << waypoints.size()<<endl;
-    indexToPoint(waypoints);
+    //indexToPoint(waypoints.x);
     return waypoints;
 }
 
-
 string SearchController::Astar( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish )
+// string SearchController::Astar( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish )
 {
   cout<<"In Astar"<<endl;
     priority_queue<node> pq[2]; // list of open (not-yet-tried) nodes
@@ -384,34 +553,34 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     int i, j, x, y, xdx, ydy;
     char c;
     pqi=0;
-    int adjustedStartx, adjustedStarty, adjustedFinishx, adjustedFinishy;
-    adjustedStartx=xStart; adjustedStarty=yStart; adjustedFinishx=xFinish; adjustedFinishy=yFinish;
 
-    cout<< "Startx: " << xStart << " y " <<yStart<< "Finishx: "<< xFinish << " y "<<yFinish<< endl;
+    // int adjustedStartx, adjustedStarty, adjustedFinishx, adjustedFinishy;
+    // adjustedStartx=xStart; adjustedStarty=yStart; adjustedFinishx=xFinish; adjustedFinishy=yFinish;
+
+
 
     //Grid map 
-    GridtoZone* mapx=GridtoZone::Instance();
+    // mapx = GridtoZone::Instance();
     mapx->updatePaperMap();
-    const int btmn=mapx->paperMap.getLength().y()*20; // horizontal size of the map
-    const int btwmn=mapx->paperMap.getSize()(0); // vertical size size of the map
+  
+//    const int btmn=mapx->paperMap.getLength().y()*20; // horizontal size of the map
+//    const int btwmn=mapx->paperMap.getSize()(0); // vertical size size of the map
 
-    cout<<"Map size x: "<<btmn<<endl;
-    cout<<"Map size y: "<<btwmn<<endl;
+//    cout<<"Map size x: "<<btmn<<endl;
+//    cout<<"Map size y: "<<btwmn<<endl;
     //Eigen::Vector2d * positionPtr;
     Position positionPtr;
 
-    const int mapAdjustValue=btmn/2;
-    indexAdjusttoMap(mapAdjustValue,adjustedStartx,adjustedStarty);
-    indexAdjusttoMap(mapAdjustValue,adjustedFinishx,adjustedFinishy);
+    // const int mapAdjustValue=btmn/2;
+    // indexAdjusttoMap(mapAdjustValue,adjustedStartx,adjustedStarty);
+    // indexAdjusttoMap(mapAdjustValue,adjustedFinishx,adjustedFinishy);
 
     const int dir=8; // number of possible directions to go at any position
     int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1};
     int dy[dir]={0, 1, 1, 1, 0, -1, -1, -1};
 
-    const int n=btmn; // horizontal size of the map
-    const int m=btwmn; // vertical size size of the map
-
-    
+    const int n=mapWidth; // horizontal size of the map x-axis
+    const int m=mapLength; // vertical size size of the map y-axis    
 
     float closed_nodes_map[n][m]; // map of closed (tried-out) nodes
     float open_nodes_map[n][m]; // map of open (not-yet-tried) nodes
@@ -429,11 +598,13 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     }
 
     // create the start node and push into list of open nodes
-    n0=new node(adjustedStartx, adjustedStarty, 0.0, 0.0,-1);
-    n0->updatePriority(adjustedFinishx, adjustedFinishy);
+    n0=new node(xStart, yStart, 0.0, 0.0,-1);
+    n0->updatePriority(xFinish, yFinish);
     pq[pqi].push(*n0);
     open_nodes_map[x][y]=n0->getPriority(); // mark it on the open nodes map
     delete n0;
+  
+  
     // A* search
     while(!pq[pqi].empty())
     {
@@ -441,7 +612,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
         // from the list of open nodes
         n0=new node( pq[pqi].top().getxPos(), pq[pqi].top().getyPos(), pq[pqi].top().getLevel(), pq[pqi].top().getPriority(),pq[pqi].top().getParentDirection());
 
-        x=n0->getxPos(); y=n0->getyPos();
+        x = n0->getxPos(); y = n0->getyPos();
 
         pq[pqi].pop(); // remove the node from the open list
         open_nodes_map[x][y]=0;
@@ -453,14 +624,14 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
 
         // quit searching when the goal state is reached
         //if((*n0).estimate(xFinish, yFinish) == 0)
-        if(x==adjustedFinishx && y==adjustedFinishy) 
+        if(x==xFinish && y==yFinish) 
         {
             // generate the path from finish to start
             // by following the directions
           cout<<"finish"<<endl;
             string path="";
             // while(!(x==xStart && y==yStart))
-            while(!(x==adjustedStartx && y==adjustedStarty))
+            while(!(x==xStart && y==yStart))
             {
               //cout<<"while 0"<<endl;
                 j=dir_map[x][y];
@@ -468,7 +639,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                 path=c+path;
                 x+=dx[j];
                 y+=dy[j];
-                cout<<"here"<<endl;
+                //cout<<"here"<<endl;
             }
             // garbage collection
             delete n0;
@@ -481,12 +652,11 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
         for(i=0;i<dir;i++)
         {
             xdx=x+dx[i]; ydy=y+dy[i];
-            int temp_xdx=xdx;
-            int temp_ydy=ydy;
-            indexRevertFromMap(mapAdjustValue, temp_xdx,temp_ydy);
-            //Todo: make adjustments since Position takes floats
-            cout<<"LOOKING AT ("<<xdx<<","<<ydy<<")"<<endl;
-            positionPtr = Position(temp_xdx/20.0,temp_ydy/20.0);
+          
+          
+          //Todo: make adjustments since Position takes floats
+            //cout<<"LOOKING AT ("<<xdx<<","<<ydy<<")"<<endl;
+            positionPtr = Position(indexToPoint(xdx), indexToPoint(ydy));
             // if(mapx->paperMap.isInside(positionPtr)){
             //   cout<<"inside the map position ("<<positionPtr<<") "<<endl;
             // }
@@ -496,31 +666,30 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
             //figure out how to avoid from checking outside of bounds
             // cout<<"  Current value at "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
 
+            
+            float map_value = mapx->paperMap.atPosition("elevation",positionPtr);
 
-            if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || mapx->paperMap.atPosition("elevation",positionPtr)==10.0 || mapx->paperMap.atPosition("elevation",positionPtr)==20.0|| closed_nodes_map[xdx][ydy]==1))
+            if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || map_value == 10.0 || map_value == 20.0 || closed_nodes_map[xdx][ydy]==1))
             // if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || map[xdx][ydy]==2 || map[xdx][ydy]==1|| closed_nodes_map[xdx][ydy]==1))
             {
                 // generate a child node
                 m0=new node( xdx, ydy, n0->getLevel(), n0->getPriority(), n0->getParentDirection());
                 m0->nextLevel(i);
-                m0->updatePriority(adjustedFinishx, adjustedFinishy);
-                if(mapx->paperMap.atPosition("elevation",positionPtr)!=-10){
-                  cout<<"value at position( "<<positionPtr<<") is "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
-                }
+                m0->updatePriority(xFinish, yFinish);
+                // if(mapx->paperMap.atPosition("elevation",positionPtr)!=-10){
+                //   cout<<"value at position( "<<positionPtr<<") is "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
+                // }
 
-                if(mapx->paperMap.atPosition("elevation",positionPtr)==3){
+                if(map_value == 3.0){
                   m0->addcostToPriority(-10.0);
                 } else {
-                  m0->addcostToPriority(mapx->paperMap.atPosition("elevation",positionPtr));
+                  m0->addcostToPriority(map_value);
                 } 
-                
-
 
                 // if it is not in the open list then add into that
                 if(open_nodes_map[xdx][ydy]==0.0)
                 {
                     bool neg=false;
-
 
                     open_nodes_map[xdx][ydy]=m0->getPriority();
 
@@ -531,7 +700,6 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                 }
                 else if(open_nodes_map[xdx][ydy]>m0->getPriority())
                 {
-                  
                     // update the priority info
                     open_nodes_map[xdx][ydy]=m0->getPriority();
                     // update the parent direction info
@@ -583,16 +751,41 @@ vector<Point> SearchController::findPath(Point start, Point end){
 
   vector<Point> waypoints;
 
-  int xA, yA, xB, yB;
-  pointToIndex(start, xA, yA);
-  pointToIndex(end, xB, yB);
+  cout<<"Start: "<<start.x<<","<<start.y<<endl;
+  cout<<"Finish: "<<end.x<<","<<end.y<<endl;
 
-  cout<<"Start: "<<xA<<","<<yA<<endl;
-  cout<<"Finish: "<<xB<<","<<yB<<endl;
+  float xA = -1 * start.y;
+  float yA = start.x;
+
+  float xB = -1 * end.y;
+  float yB = end.x;
+
+
+    //GridMap
+  mapx = GridtoZone::Instance();
+  mapx->updatePaperMap();
+  mapLength = mapx->paperMap.getSize()(0);
+  mapWidth = mapx->paperMap.getSize()(1);
+
+  int xStart = pointToIndex(xA);
+  int yStart = pointToIndex(yA);
+  int xFinish = pointToIndex(xB);
+  int yFinish = pointToIndex(yB);
+
+
+
+  // cout << "length" << mapLength<< endl;
+
+  // cout<<"Start: "<<xStart<<","<<yStart<<endl;
+  // cout<<"Finish: "<<xFinish<<","<<yFinish<<endl;
   // get the route
   clock_t timeStart = clock();
 
-  string route=Astar(xA, yA, xB, yB);
+
+
+  string route=Astar(xStart, yStart, xFinish, yFinish);
+
+
   cout<<"after astar"<<endl;
 
   if(route=="") cout<<"An empty route generated!"<<endl;
@@ -602,9 +795,22 @@ vector<Point> SearchController::findPath(Point start, Point end){
   cout<<"Route:"<<endl;
   cout<<route<<endl<<endl;
 
-    
 
-  waypoints=parseRoute(route, xA,yA);
+  waypoints=parseRoute(route, start.x,start.y);
 
   return waypoints;
 }
+
+Position SearchController::realtogridPosition(Point point){
+  return Position(-1 * point.y, point.x);  
+}
+
+Point SearchController::gridtorealPoint(float x, float y){
+        Point point;
+        point.x = y;
+        point.y = -x;
+
+  return point;  
+}
+
+
