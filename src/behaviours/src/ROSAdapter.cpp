@@ -72,7 +72,6 @@ random_numbers::RandomNumberGenerator* rng;
 // Create logic controller
 
 LogicController logicController;
-GridtoZone gridtozone;
 
 void humanTime();	//translates time into human time
 
@@ -115,7 +114,7 @@ const float heartbeat_publish_interval = 2;	//time between heartbeat publishes
 const float waypointTolerance = 0.1; 		//10 cm tolerance.
 
 // used for calling code once but not in main
-bool initilized = false;	//switched to true after running through state machine the first time, initializes base values
+bool initilized = false;
 
 float linearVelocity = 0;	//forward speed, POSITIVE = forward, NEGATIVE = backward
 float angularVelocity = 0;	//turning speed, POSITIVE = left, NEGATIVE = right
@@ -393,8 +392,6 @@ void behaviourStateMachine(const ros::TimerEvent&)
 
     //publishHandeling here
     //adds a blank space between sets of debugging data to easily tell one tick from the next
-    //cout << endl;
-
   }
 
   // mode is NOT auto
@@ -786,8 +783,6 @@ void humanTime() {
   if (frac > 9) {
     frac = 0;
   }
-
-  //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
 }
 
 void roverNameHandler(const std_msgs::String& message){
@@ -796,7 +791,9 @@ void roverNameHandler(const std_msgs::String& message){
 	chainNamePublisher.publish(names);
 }
 
+//GridtoZone gridtozone;
 void gridMapHandler(const grid_map_msgs::GridMap& message){
+
 	GridMap map({"elevation"});
 	map.setFrameId("map");
 	map.setGeometry(Length(15.5,15.5), 0.05);
@@ -812,5 +809,6 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 		}
 		x += 0.05;
 	}
-    gridtozone.setGridMap(map);
+  GridtoZone::Instance()->setGridMap(map);
+//    gridtozone.setGridMap(map);
 }

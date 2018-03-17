@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 
 // ROS libraries
+#define _USE_MATH_DEFINES
 #include <angles/angles.h>
 #include <random_numbers/random_numbers.h>
 #include <tf/transform_datatypes.h>
@@ -13,6 +14,7 @@
 #include <sstream>
 #include <Eigen/Dense>
 #include <unistd.h>
+#include <math.h>
 
 // ROS messages
 #include <std_msgs/Float32.h>
@@ -40,14 +42,14 @@ float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
 const float ROVERHALF = 0.17;
 const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
-//GRID PJ NUMBERS
-const double FOG = -1.00;
-const double REVEALED = 0.00;
-const double SONAR = 0.20;
-const double MAT = 0.50;
-const double CUBES = 0.70;
-const double ROVER = 1.00;
-const double WALL = 2.00;
+//GRID POINT TYPE
+const double FOG 	= -10.00;
+const double REVEALED 	= 0.00;
+const double MAT 	= 1.0;
+const double MULTICUBES	= 2.0;
+const double SONAR 	= 3.0;
+const double ROVER 	= 10.0;
+const double WALL 	= 20.0;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 /*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
@@ -56,6 +58,7 @@ const double WALL = 2.00;
 //Publisher
 ros::Publisher gridswarmPublisher;
 ros::Publisher heartbeatPublisher;
+ros::Publisher polygonPublisher;
 //Subscriber
 ros::Subscriber roverNameSubscriber;
 ros::Subscriber modeSubscriber;
@@ -87,6 +90,9 @@ std::string publishedName;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
+
+  bool cs_testing = true;
+
 using namespace std;
 using namespace grid_map;
 using namespace ros;
@@ -137,7 +143,7 @@ int main(int argc, char **argv){
 //PUBLISH
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-  
+ polygonPublisher = gNH.advertise<geometry_msgs::PolygonStamped>("/polygon", 1, true);
   ros::Rate rate(30.0);
   do{
   	ros::spinOnce();
@@ -314,7 +320,6 @@ int main(int argc, char **argv){
 		}//END OF SONAR BOOLEAN
 	}//END OF FOR LOOP
 	//CENTER MAT being Discovered
-	//cout << "Creating the Center Mat" << endl;
 	for (float length = -0.50; length <= 0.50;){
 		for(float width = -0.50; width <= 0.50;){
 			Eigen::Vector2d mat(length,width);
@@ -358,11 +363,14 @@ int main(int argc, char **argv){
 	GridMapRosConverter::toMessage(map, message);
 	gridswarmPublisher.publish(message);
 //	ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
-	
 	// Wait for next cycle.
 	ros::spinOnce();
 	rate.sleep();
   }//END OF ROS OK
+
+
+
+
 
 return 0;
 }
