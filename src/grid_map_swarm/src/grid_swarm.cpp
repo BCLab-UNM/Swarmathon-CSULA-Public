@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 
 // ROS libraries
+#define _USE_MATH_DEFINES
 #include <angles/angles.h>
 #include <random_numbers/random_numbers.h>
 #include <tf/transform_datatypes.h>
@@ -13,6 +14,7 @@
 #include <sstream>
 #include <Eigen/Dense>
 #include <unistd.h>
+#include <math.h>
 
 // ROS messages
 #include <std_msgs/Float32.h>
@@ -133,7 +135,7 @@ int main(int argc, char **argv){
 //PUBLISH
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-  polygonPublisher = gNH.advertise<geometry_msgs::PolygonStamped>("/polygon", 1, true);
+ polygonPublisher = gNH.advertise<geometry_msgs::PolygonStamped>("/polygon", 1, true);
   ros::Rate rate(30.0);
 
 
@@ -241,14 +243,38 @@ int main(int argc, char **argv){
 			double y = 5.0;
 			double lengthU = 1.0;
 			double mapValue = 5.0;
-			// TopRight, BottomRight, TopLeft, BottomLeft
-			polygonPath.addVertex(Position(rotateCamBLX, rotateCamBLY));
-			polygonPath.addVertex(Position(rotateCamTLX + xpos[count], rotateCamTLY + ypos[count]));
-			polygonPath.addVertex(Position(rotateCamTRX + xpos[count], rotateCamTRY + ypos[count]));
-			polygonPath.addVertex(Position(rotateCamBRX, rotateCamBRY));
 
+			double distX = xpos[count] * xpos[count];
+			double distY = ypos[count] * ypos[count];
+			double distTotal = sqrt(distX + distY);
+			float rad = std::atan2(0 - xpos[count], 0 - ypos[count]);
+			float angle = rad * 180/pi;
+			double botLeftX=  0			, botRightX=  0;
+			double botLeftY= -ROVERHALF	, botRightY=  ROVERHALF;
+		//These point create the area the CAMERA would see. Does not actually see what the camera sees, it just marks the area as seen.
+			double topLeftX =  distTotal, topRightX= distTotal;
+			double topLeftY = -ROVERHALF, topRightY= ROVERHALF;
 
+			double rotateCamTopAngleRX = (topRightX * cos(rad) - topRightY * sin(rad));
+			double rotateCamTopAngleRY = (topRightX * sin(rad) + topRightY * cos(rad));
 
+			double rotateCamTopAngleLX = (topLeftX * cos(rad) - topLeftY * sin(rad));
+			double rotateCamTopAngleLY = (topLeftX * sin(rad) + topLeftY * cos(rad));
+			
+
+			double rotateCamBotAngleRX = (botRightX * cos(rad) - botRightY * sin(rad));
+			double rotateCamBotAngleRY = (botRightX * sin(rad) + botRightY * cos(rad));
+
+			double rotateCamBotAngleLX = (botLeftX * cos(rad) - botLeftY * sin(rad));
+			double rotateCamBotAngleLY = (botLeftX * sin(rad) + botLeftY * cos(rad));
+			
+
+			polygonPath.addVertex(Position(rotateCamBotAngleRX, rotateCamBotAngleRY));
+			polygonPath.addVertex(Position(rotateCamTopAngleRX, rotateCamTopAngleRY));
+			polygonPath.addVertex(Position(rotateCamTopAngleLX, rotateCamTopAngleLY));
+			polygonPath.addVertex(Position(rotateCamBotAngleLX, rotateCamBotAngleLY));
+			
+			
 			geometry_msgs::PolygonStamped messagePath;
 			grid_map::PolygonRosConverter::toMessage(polygonPath, messagePath);		
 			polygonPublisher.publish(messagePath);
