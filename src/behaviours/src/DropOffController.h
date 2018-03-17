@@ -39,7 +39,7 @@ private:
 
   const float cameraOffsetCorrection = 0.020; //meters
   const float centeringTurnRate = 0.15; //radians
-  const int centerTagThreshold = 7;
+  const int centerTagThreshold = 10;
   const int lostCenterCutoff = 4; //seconds before giving up on drop off beacuse center cannot be seen anymore
   const float collectionPointVisualDistance = 0.2; //in meters
   const float initialSpinSize = 0.05; //in meters aka 10cm
@@ -75,6 +75,8 @@ private:
   //Count of tags on the left and right, respectively
   int countLeft;
   int countRight;
+//  int cubeLeft;
+//  int cubeRight;
 
   //Center and current locations as of the last call to setLocationData
   Point centerLocation;

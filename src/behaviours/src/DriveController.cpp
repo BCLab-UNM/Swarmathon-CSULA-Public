@@ -287,7 +287,7 @@ void DriveController::ProcessData()
 
 void DriveController::fastPID(float errorVel, float errorYaw , float setPointVel, float setPointYaw)
 {
-   //cout << "PID FAST" << endl; //DEBUGGING CODE
+   cout << "PID FAST" << endl; //DEBUGGING CODE
 
   float velOut = fastVelPID.PIDOut(errorVel, setPointVel); //returns PWM target to try and get error vel to 0
   float yawOut = fastYawPID.PIDOut(errorYaw, setPointYaw); //returns PWM target to try and get yaw error to 0
@@ -307,7 +307,7 @@ void DriveController::fastPID(float errorVel, float errorYaw , float setPointVel
 
 void DriveController::slowPID(float errorVel,float errorYaw, float setPointVel, float setPointYaw)
 {
-  //cout << "PID SLOW" << endl; //DEBUGGING CODE
+  cout << "PID SLOW" << endl; //DEBUGGING CODE
 
   float velOut = slowVelPID.PIDOut(errorVel, setPointVel);
   float yawOut = slowYawPID.PIDOut(errorYaw, setPointYaw);
@@ -327,7 +327,7 @@ void DriveController::slowPID(float errorVel,float errorYaw, float setPointVel, 
 
 void DriveController::constPID(float erroVel,float constAngularError, float setPointVel, float setPointYaw)
 {
-  //cout << "PID CONST" << endl; //DEBUGGING CODE
+  cout << "PID CONST" << endl; //DEBUGGING CODE
 
   float velOut = constVelPID.PIDOut(erroVel, setPointVel);
   float yawOut = constYawPID.PIDOut(constAngularError, setPointYaw);

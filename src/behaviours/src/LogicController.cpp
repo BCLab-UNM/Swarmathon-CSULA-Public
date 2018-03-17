@@ -376,7 +376,8 @@ void LogicController::SetMapVelocityData(float linearVelocity, float angularVelo
 void LogicController::SetAprilTags(vector<Tag> tags)
 {
   pickUpController.SetTagData(tags);
-  obstacleController.setTagData(tags);
+  obstacleController.setTagDataForCollectionZone(tags);
+  obstacleController.setTagDataForCube(tags);
   dropOffController.SetTargetData(tags);
 }
 
