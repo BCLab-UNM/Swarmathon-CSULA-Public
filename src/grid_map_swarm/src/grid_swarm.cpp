@@ -229,64 +229,6 @@ int main(int argc, char **argv){
 		polygon.addVertex(Position(rotateCamMRX + xpos[count], rotateCamMRY + ypos[count]));
 		polygon.addVertex(Position(rotateCamBRX + xpos[count], rotateCamBRY + ypos[count]));
 		
-
-
-
-
-	if(cs_testing)
-		{
-			
-			grid_map::Polygon polygonPath;
-			polygonPath.setFrameId(map.getFrameId());
-	
-			double x = 5.0;
-			double y = 5.0;
-			double lengthU = 1.0;
-			double mapValue = 5.0;
-
-			double distX = xpos[count] * xpos[count];
-			double distY = ypos[count] * ypos[count];
-			double distTotal = sqrt(distX + distY);
-			float rad = std::atan2(0 - xpos[count], 0 - ypos[count]);
-			float angle = rad * 180/pi;
-			double botLeftX=  0			, botRightX=  0;
-			double botLeftY= -ROVERHALF	, botRightY=  ROVERHALF;
-		//These point create the area the CAMERA would see. Does not actually see what the camera sees, it just marks the area as seen.
-			double topLeftX =  distTotal, topRightX= distTotal;
-			double topLeftY = -ROVERHALF, topRightY= ROVERHALF;
-
-			double rotateCamTopAngleRX = (topRightX * cos(rad) - topRightY * sin(rad));
-			double rotateCamTopAngleRY = (topRightX * sin(rad) + topRightY * cos(rad));
-
-			double rotateCamTopAngleLX = (topLeftX * cos(rad) - topLeftY * sin(rad));
-			double rotateCamTopAngleLY = (topLeftX * sin(rad) + topLeftY * cos(rad));
-			
-
-			double rotateCamBotAngleRX = (botRightX * cos(rad) - botRightY * sin(rad));
-			double rotateCamBotAngleRY = (botRightX * sin(rad) + botRightY * cos(rad));
-
-			double rotateCamBotAngleLX = (botLeftX * cos(rad) - botLeftY * sin(rad));
-			double rotateCamBotAngleLY = (botLeftX * sin(rad) + botLeftY * cos(rad));
-			
-
-			polygonPath.addVertex(Position(rotateCamBotAngleRX, rotateCamBotAngleRY));
-			polygonPath.addVertex(Position(rotateCamTopAngleRX, rotateCamTopAngleRY));
-			polygonPath.addVertex(Position(rotateCamTopAngleLX, rotateCamTopAngleLY));
-			polygonPath.addVertex(Position(rotateCamBotAngleLX, rotateCamBotAngleLY));
-			
-			
-			geometry_msgs::PolygonStamped messagePath;
-			grid_map::PolygonRosConverter::toMessage(polygonPath, messagePath);		
-			polygonPublisher.publish(messagePath);
- 	
-			for(grid_map::PolygonIterator iterator(map,polygonPath); !iterator.isPastEnd(); ++iterator) 
-			{
-				map.at("elevation", *iterator) = mapValue;
-			}
-		}
-
-
-
 		geometry_msgs::PolygonStamped message;
 		grid_map::PolygonRosConverter::toMessage(polygon, message);		
 		for(grid_map::PolygonIterator iterator(map,polygon); !iterator.isPastEnd(); ++iterator) 
