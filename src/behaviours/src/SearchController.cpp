@@ -23,11 +23,18 @@ void SearchController::Reset() {
   result.reset = false;
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * This code implements a 5 meter square loop starting at the center location.
+ */
+>>>>>>> SpiralSearch
 Result SearchController::DoWork() {
       // Search Here
       result.type = waypoint;
       first_waypoint = false;
 
+<<<<<<< HEAD
       GridtoZone::Instance()->updatePaperMap();
       if(gtzVerbose){
         std::cout << "Testing GTZ" << std::endl;
@@ -82,6 +89,76 @@ Result SearchController::DoWork() {
     
     return result;
   
+=======
+
+ double rotations = 0;
+           result.type = waypoint;
+           Point searchLocation;
+           if (attemptCount==0)
+           {
+               searchLocation.theta = 0;
+               searchLocation.x =(x); // x = 0
+               searchLocation.y =(y); // y = 0
+               attemptCount++;
+               x=x+d;                 // d = 1
+               std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+           }
+           else if (attemptCount==1)
+           {
+               searchLocation.theta = M_PI/2;
+               searchLocation.x = (x); // x = 1
+               searchLocation.y = (y); // y = 0
+               attemptCount++;
+               y=y+d;
+               d=(-d)-1;               // d = -2
+               std::cout<< "Traveling to 2nd waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+                std::cout<< "Traveling to 1st waypoint \n" << rotations << " completed rotations \n";
+           }
+           else if (attemptCount==2)
+           {
+               searchLocation.theta = M_PI;
+               searchLocation.x = (x); // x = 1
+               searchLocation.y = (y); // y = 1
+               attemptCount++;
+               x=x+d;
+               std::cout<< "Traveling to 3rd waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+           }
+           else if (attemptCount==3){
+               searchLocation.theta = 3/2 *M_PI;
+               searchLocation.x = (x); // x = -1
+               searchLocation.y = (y); // y = 1
+               attemptCount++;
+               y=y+d;
+               d=(-d)+1;               // d = 3
+               std::cout<< "Traveling to 4th waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+
+           }
+           else{
+               searchLocation.theta = 0;
+               searchLocation.x = (x); // x = -1
+               searchLocation.y = (y); // y = -1
+               attemptCount=1;
+               x=x+d;
+
+               std::cout<< "Traveling to 5th waypoint";
+                std::cout<< "X: " << x << "  Y: " << y <<endl;
+               rotations++;
+           }
+
+
+
+
+
+       result.wpts.waypoints.clear();
+       result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
+
+       return result;
+ 
+>>>>>>> SpiralSearch
 
 }
 
