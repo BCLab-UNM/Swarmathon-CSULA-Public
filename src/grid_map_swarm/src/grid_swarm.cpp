@@ -431,10 +431,14 @@ void orntnHandler(const std_msgs::Float32& message) {
 	double point;
 	orntn[0] = message.data;
 	if (o0once == true && SIMMODE == false){
-		for (point = 3.14; point >= -3.15; point -= pi/12){
-			//cout <<"0Point:"<<point<<endl;
-			if (orntn[0] <= point + pi/24 && orntn[0] >= point - pi/24){
-				break;
+		if (orntn[0] <= -3.14 + pi/24 && orntn[0] >= -3.14 - pi/24){
+			point = 3.14;
+		}else{
+			for (point = 3.14; point > -3.14; point -= pi/12){
+				//cout <<"0Point:"<<point<<endl;
+				if (orntn[0] <= point + pi/24 && orntn[0] >= point - pi/24){
+					break;
+				}
 			}
 		}
 		x0offset = -1.2 * cos(point);
@@ -446,10 +450,14 @@ void orntnHandler1(const std_msgs::Float32& message) {
 	double point;
 	orntn[1] = message.data;
 	if (o1once == true && SIMMODE == false){
-		for (point = 3.14; point >= -3.15; point -= pi/12){
-			//cout <<"1Point:"<<point<<endl;
-			if (orntn[1] <= point + pi/24 && orntn[1] >= point - pi/24){
-				break;
+		if (orntn[2] <= -3.14 + pi/24 && orntn[2] >= -3.14 - pi/24){
+			point = 3.14;
+		}else{
+			for (point = 3.14; point > -3.14; point -= pi/12){
+				//cout <<"1Point:"<<point<<endl;
+				if (orntn[1] <= point + pi/24 && orntn[1] >= point - pi/24){
+					break;
+				}
 			}
 		}
 		x1offset = -1.2 * cos(point);
@@ -461,10 +469,14 @@ void orntnHandler2(const std_msgs::Float32& message) {
 	double point;
 	orntn[2] = message.data;
 	if (o2once == true && SIMMODE == false){
-		for (point = 3.14; point >= -3.15; point -= pi/12){
-			//cout <<"2Point:"<<point<<endl;
-			if (orntn[2] <= point + pi/24 && orntn[2] >= point - pi/24){
-				break;
+		if (orntn[2] <= -3.14 + pi/24 && orntn[2] >= -3.14 - pi/24){
+			point = 3.14;
+		}else{
+			for (point = 3.14; point > -3.14; point -= pi/12){
+				//cout <<"2Point:"<<point<<endl;
+				if (orntn[2] <= point + pi/24 && orntn[2] >= point - pi/24){
+					break;
+				}
 			}
 		}
 		x2offset = -1.2 * cos(point);
