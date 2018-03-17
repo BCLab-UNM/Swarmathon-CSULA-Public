@@ -199,10 +199,6 @@ void ObstacleController::setTagDataForCollectionZone(vector<Tag> tags){
   count_left_collection_zone_tags = 0;
   count_right_collection_zone_tags = 0;
 
-  cube_seen = false;
-  count_left_cube_tags = 0;
-  count_right_cube_tags = 0;
-
   if (!targetHeld) {
       cout << "OBSTACLE: Target is not held" << endl;
   // this loop is to get the number of center tags
@@ -343,6 +339,7 @@ void ObstacleController::setTargetHeldClear()
   if (targetHeld)
   {
     Reset();
+    cube_seen = false;
     targetHeld = false;
     previousTargetState = false;
     ignore_center_sonar = false;
