@@ -28,12 +28,14 @@ class sbridge {
 
                 // Publishers
 		ros::Publisher skidsteerPublish;
-        ros::Publisher heartbeatPublisher;
-        ros::Publisher infoLogPublisher;
+		ros::Publisher heartbeatPublisher;
+		ros::Publisher infoLogPublisher;
+		ros::Publisher publishNamePublisher;
+    		ros::Publisher roverNamePublisher;
 
                 // Subscribers
 		ros::Subscriber driveControlSubscriber;
-        ros::Subscriber modeSubscriber;
+	        ros::Subscriber modeSubscriber;
 
         // Timer callback handler
         void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
