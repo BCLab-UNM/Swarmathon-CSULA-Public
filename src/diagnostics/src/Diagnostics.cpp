@@ -191,6 +191,7 @@ void Diagnostics::sensorCheckTimerEventHandler(const ros::TimerEvent& event) {
   checkCamera();
   checkGripper();
   checkOdometry();
+  checkGridSwarm();
   
   publishDiagnosticData();
   }

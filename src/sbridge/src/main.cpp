@@ -9,8 +9,6 @@ void sigintEventHandler(int signal);
 int main(int argc, char **argv) {
     sleep(10);
 
-
-
     char host[128];
     gethostname(host, sizeof (host));
     string hostname(host);

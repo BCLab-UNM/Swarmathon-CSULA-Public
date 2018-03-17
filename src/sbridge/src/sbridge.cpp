@@ -17,7 +17,6 @@ sbridge::sbridge(std::string publishedName) {
     // &sbridge::cmdHandler ==  callback to class method first parameter
     // this == calllback to class method second parameter
     driveControlSubscriber = sNH.subscribe((publishedName + "/driveControl"), 10, &sbridge::cmdHandler, this);
-//    driveControlSubscriber = sNH.subscribe("/roverName", 10, &sbridge::roverNameCheck, this);
 
     // Create a heatbeat publisher to show that the node is still alive and running
     // publishedName + "/sbridge/heartbeat" == topic to publish to
@@ -32,7 +31,7 @@ sbridge::sbridge(std::string publishedName) {
 
     // Create a infoLog publisher to send log information to the log box in the GUI
     infoLogPublisher = sNH.advertise<std_msgs::String>("/infoLog", 1, true);
-    roverNamePublisher = sNH.advertise<std_msgs::String>("/roverNames", 1, true);
+    roverNamePublisher = sNH.advertise<std_msgs::String>("/roverNames", 1,true);
 
 //    publishNamePublisher = sNH.advertise<std_msgs::String>("/roverName",1);
 
@@ -46,14 +45,11 @@ sbridge::sbridge(std::string publishedName) {
     // this == callback to class method second parameter
     publish_heartbeat_timer = sNH.createTimer(ros::Duration(heartbeat_publish_interval), &sbridge::publishHeartBeatTimerEventHandler, this);
 
-
    std_msgs::String nameMsg;
    nameMsg.data=publishedName;
    roverNamePublisher.publish(nameMsg);
     ROS_INFO("constructor");
 }
-// Command Handler
-// PWM (pulse with modulation) values to linear values
 void sbridge::cmdHandler(const geometry_msgs::Twist::ConstPtr& message) {
     // Gets and sets the linear PWM value
     double left = (message->linear.x);

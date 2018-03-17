@@ -51,7 +51,9 @@ private:
   Point searchLocation;
   int attemptCount = 0;
 
+
   int astarCount=0;
+
   //struct for returning data to ROS adapter
   Result result;
 
@@ -92,18 +94,17 @@ private:
   int mapLength;
   int mapWidth;
 
-  //bool operator<(const node & a, const node & b);
-  // void pointToIndex(Point point,int &x,int &y);
-  // void indexToPoint(vector<Point> &waypoints);
-  int pointToIndex(float XorY);
-  float indexToPoint(int XorY);
+
+  int pointXToIndex(float X);
+  int pointYToIndex(float Y);
+  float indexToPointX(int i);
+  float indexToPointY(int j);
 
   vector<Point> parseRoute(string route, float x, float y);
   string Astar( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish );
-  void indexAdjusttoMap(const int adjustValue,int &x,int &y);
-  void indexRevertFromMap(const int adjustValue,int &x,int &y);
+
   Position realtogridPosition(Point point);
-  Point gridtorealPoint(float x, float y);
+
 };
 
 #endif /* SEARCH_CONTROLLER */

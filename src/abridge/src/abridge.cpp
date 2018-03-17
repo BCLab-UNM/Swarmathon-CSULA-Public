@@ -38,7 +38,6 @@ sensor_msgs::Range sonarLeft;
 sensor_msgs::Range sonarCenter;
 sensor_msgs::Range sonarRight;
 USBSerial usb;
-//gridmap gmap;
 const int baud = 115200;
 char dataCmd[] = "d\n";
 char moveCmd[16];
@@ -46,7 +45,19 @@ char host[128];
 const float deltaTime = 0.1; //abridge's update interval
 int currentMode = 0;
 string publishedName;
+/////////////////////////////////////////////////////////////////////////////////////
 
+float data;
+float diff = 0.30;
+const int readings = 2;
+float center[readings];
+float centerdiff;
+bool firstreading=true;
+bool updatereadings=false;
+int counter = 0;
+
+
+/////////////////////////////////////////////////////////////////////////////////////
 // Allowing messages to be sent to the arduino too fast causes a disconnect
 // This is the minimum time between messages to the arduino in microseconds.
 // Only used with the gripper commands to fix a manual control bug.
@@ -130,7 +141,7 @@ int main(int argc, char **argv){
     sonarRightPublish = aNH.advertise<sensor_msgs::Range>((publishedName + "/sonarRight"), 10);
     infoLogPublisher = aNH.advertise<std_msgs::String>("/infoLog", 1, true);
     heartbeatPublisher = aNH.advertise<std_msgs::String>((publishedName + "/abridge/heartbeat"), 1, true);
-    roverNamePublisher = aNH.advertise<std_msgs::String>("/roverNames", 1, true);
+    roverNamePublisher = aNH.advertise<std_msgs::String>("/roverNames", 1,true);
     
     driveControlSubscriber = aNH.subscribe((publishedName + "/driveControl"), 10, driveCommandHandler);
     fingerAngleSubscriber = aNH.subscribe((publishedName + "/fingerAngle/cmd"), 1, fingerAngleHandler);
@@ -307,7 +318,46 @@ void parseData(string str) {
 			}
 			else if (dataSet.at(0) == "USC") {
 				sonarCenter.header.stamp = ros::Time::now();
-				sonarCenter.range = atof(dataSet.at(2).c_str()) / 100.0;
+				data = atof(dataSet.at(2).c_str()) / 100.0;
+				//cout << "  firstreading = " << firstreading << endl;
+				//cout << "  updatereadings = " << updatereadings << endl;
+				center[1] = data; 
+
+				if(firstreading){
+				center[0] = data;
+				firstreading=false;
+				}
+
+				if(updatereadings){
+				center[0] = data;
+				updatereadings=false;
+				}
+
+				centerdiff = abs(center[1]-center[0]);
+				//cout << "-----------------------------------------------"<<endl;
+				//cout << " center[0] = " << center[0] << endl;
+				//cout << " center[1] = " << center[1] << endl;
+				//cout << " difference = " << centerdiff<<endl; 
+			
+				if (centerdiff > diff) {
+					sonarCenter.range = center[0];
+					center[1]=center[0];
+					counter++;
+				}
+			
+				else{
+					sonarCenter.range = center[1];
+					counter=0;
+				}
+
+				if(counter == 3){
+				updatereadings = true;
+				counter=0;
+				}
+				//cout << "   counter = " << counter << endl;
+				//cout << "   sonar = " << sonarCenter.range<<endl;
+				//cout << "-----------------------------------------------"<<endl; 
+				center[0] = center[1];
 			}
 			else if (dataSet.at(0) == "USR") {
 				sonarRight.header.stamp = ros::Time::now();

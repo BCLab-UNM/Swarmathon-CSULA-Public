@@ -41,6 +41,7 @@ void SearchController::Reset() {
   result.reset = false;
 }
 
+
 Result SearchController::DoWork() {
       // Search Here
       result.type = waypoint;
@@ -100,7 +101,6 @@ Result SearchController::DoWork() {
     result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
     
     return result;
-  
 
 }
 
@@ -159,8 +159,10 @@ Point SearchController::GetNewSearchPoint(){
 
         vector<Point> waypoints;
 
+        // Gets "fastest" path from start to end point
         waypoints = findPath( start, end);
 
+        // prints waypoints
         cout<<  "waypoints length: " << waypoints.size()<<endl;
         for(int i=0;i<waypoints.size();i++){
           cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
@@ -262,133 +264,113 @@ int SearchController::ChooseZone(){
 }
 
 
-///////////////btmn
-
 // Determine priority (in the priority queue)
 bool operator<(const node & a, const node & b){
   return a.getPriority() > b.getPriority();
 }
 
-
-// void SearchController::pointToIndex(Point point,int &x,int &y){
-//   //conversion for code testing
-//   // x=(int) point.x;
-//   // y=(int) point.y;  
-
-
-//   cout<<"before conversion (" <<point.x<<" ," << point.y<< ") "<<endl;
-//   //conversion for swarm
-//   const float conversionNumber=20.0;
-
-//   x=(int) (point.x*conversionNumber);
-//   float test =(point.y*conversionNumber);
-//   y=(int) test;
-//   cout<<"test: "<<test<<endl;
-//   cout<<"converted (" <<x<<" ," << y<< ") "<<endl;
-// }
-
-// void SearchController::indexToPoint(vector<Point> &waypoints){
-//   const float conversionNumber=20.00;
-//   for(int i=0;i<waypoints.size();i++){
-//     waypoints[i].x=waypoints[i].x / conversionNumber;
-//     waypoints[i].y=waypoints[i].y / conversionNumber;
-//   }
-// }
-int SearchController::pointToIndex(float XorY){
-  return (mapLength/2 - 20*XorY);
+//converts a the x value of a Point to a row value of index
+int SearchController::pointXToIndex(float X){
+  return (mapWidth/2 - 20*X);
 }
 
-float SearchController::indexToPoint(int  XorY){
-  return (mapLength/2 - XorY)/20;
+//converts a the y value of a Point to a column value of index
+int SearchController::pointYToIndex(float Y){
+  return (mapLength/2 - 20*Y);
 }
 
-void SearchController::indexAdjusttoMap(const int adjustValue,int &x,int &y){
-  x+=adjustValue;
-  y+=adjustValue;
+//converts the row value of an index to a x value of a Point
+float SearchController::indexToPointX(int i){
+  return (mapWidth/2 - i)/20;
 }
 
-void SearchController::indexRevertFromMap(const int adjustValue,int &x,int &y){
-  x-=adjustValue;
-  y-=adjustValue;
+//converts the column value of an index to a y value of a Point
+float SearchController::indexToPointY(int j){
+  return (mapLength/2 - j)/20;
 }
 
-
+// Parses the given route in string form int waypoints
 vector<Point> SearchController::parseRoute(string route, float x, float y){
   std::vector<Point> waypoints;
-  int len = route.length();
-  string arr[len];
+
+  int routeLength = route.length();
+  string routeArray[routeLength];
+
+  // set point to the original starting Point
   Point point;
   point.x=x;
   point.y=y;
+  
   const float celldivision=0.05;
-  float routeTransform = 0.0;
+  
+  float distance = 0.0;
 
 
-  cout<< "route length: " << len << endl;
+  // Makes route into array of characters
   int count=0;
   stringstream ssin(route);
-  while (ssin.good() && count < len){
-    // ssin >> arr[count];
-    arr[count]=ssin.get();
-    ++count;
+  while (ssin.good() && count < routeLength){
+    routeArray[count]=ssin.get();
+    count++;
   }
-    
-  int routeCount=0;
-  for(int b = 0; b < len; b++){
-        //cout <<"route:"<< arr[b] << endl;
-        
-        if(b>0){
-            if(arr[b-1]!=arr[b]){
-                //cout << "new way point" << endl;
-                routeTransform = celldivision * routeCount;
-                if(arr[b-1]=="6"){point.x=point.x + (routeTransform);}
-                else if(arr[b-1]=="7"){point.y=point.y + (routeTransform); point.x=point.x + (routeTransform);}
-                else if(arr[b-1]=="0"){point.y=point.y + (routeTransform);}
-                else if(arr[b-1]=="1"){point.y=point.y + (routeTransform); point.x=point.x - (routeTransform);}
-                else if(arr[b-1]=="2"){point.x=point.x - (routeTransform);}
-                else if(arr[b-1]=="3"){point.y=point.y - (routeTransform); point.x=point.x - (routeTransform);}
-                else if(arr[b-1]=="4"){point.y=point.y - (routeTransform);}
-                else if(arr[b-1]=="5"){point.y=point.y - (routeTransform); point.x=point.x + (routeTransform);}
-                else {cout <<"oh oh";}
+ 
+  int routeCount=0; // Used to keep track of the number of steps within the same direction
 
-                cout << "waypoint: ( "<<point.x<<", "<<point.y<<")"<<endl;
+  // Iterates through all steps in route
+  for(int step = 0; step < routeLength; step++){
 
-                waypoints.push_back(point);
-                 routeCount=0;
+        // if the current step is not the first and the previos step and the current step are not in the same direction 
+        if(step>0 && routeArray[step-1]!=routeArray[step]){
+          
+          
+          distance = celldivision * routeCount; // The distance traveled in the previous direction
 
-            }
+          // Add the distance traveled in the previos direction to the point
+          if(routeArray[step-1]=="0"){point.y=point.y + (distance);}
+          else if(routeArray[step-1]=="1"){point.y=point.y + (distance); point.x=point.x - (distance);}
+          else if(routeArray[step-1]=="2"){point.x=point.x - (distance);}
+          else if(routeArray[step-1]=="3"){point.y=point.y - (distance); point.x=point.x - (distance);}
+          else if(routeArray[step-1]=="4"){point.y=point.y - (distance);}
+          else if(routeArray[step-1]=="5"){point.y=point.y - (distance); point.x=point.x + (distance);}
+          else if(routeArray[step-1]=="6"){point.x=point.x + (distance);}
+          else {point.y=point.y + (distance); point.x=point.x + (distance);} //routeArray[step-1]=="7"
+
+
+          waypoints.push_back(point);  // Add the point to collection of waypoints
+          routeCount=0;  // Reset count since new direction
+
         }
-        routeCount++;
-        if(b==len-1){
-                //cout << "new way point" << endl;
-                routeTransform = celldivision * routeCount;
-                if(arr[b-1]=="6"){point.x=point.x + (routeTransform);}
-                else if(arr[b-1]=="7"){point.y=point.y + (routeTransform); point.x=point.x + (routeTransform);}
-                else if(arr[b-1]=="0"){point.y=point.y + (routeTransform);}
-                else if(arr[b-1]=="1"){point.y=point.y + (routeTransform); point.x=point.x - (routeTransform);}
-                else if(arr[b-1]=="2"){point.x=point.x - (routeTransform);}
-                else if(arr[b-1]=="3"){point.y=point.y - (routeTransform); point.x=point.x - (routeTransform);}
-                else if(arr[b-1]=="4"){point.y=point.y - (routeTransform);}
-                else if(arr[b-1]=="5"){point.y=point.y - (routeTransform); point.x=point.x + (routeTransform);}
-                else {cout <<"oh oh";}
 
+        routeCount++; // Increment count since another step was taken in the same direction
 
-                cout << "waypoint = ( "<<point.x<<", "<<point.y<<")"<<endl;
+        // if this is the last step
+        if(step==routeLength-1){
 
-                waypoints.push_back(point);
-                 routeCount=0;
+          
+          distance = celldivision * routeCount; // The distance traveled in the previous direction
 
-            }
+          // Add the distance traveled in the previos direction to the point
+          if(routeArray[step-1]=="0"){point.y=point.y + (distance);}
+          else if(routeArray[step-1]=="1"){point.y=point.y + (distance); point.x=point.x - (distance);}
+          else if(routeArray[step-1]=="2"){point.x=point.x - (distance);}
+          else if(routeArray[step-1]=="3"){point.y=point.y - (distance); point.x=point.x - (distance);}
+          else if(routeArray[step-1]=="4"){point.y=point.y - (distance);}
+          else if(routeArray[step-1]=="5"){point.y=point.y - (distance); point.x=point.x + (distance);}
+          else if(routeArray[step-1]=="6"){point.x=point.x + (distance);}
+          else {point.y=point.y + (distance); point.x=point.x + (distance);} //routeArray[step-1]=="7"
+
+          waypoints.push_back(point);  // Add the point to collection of waypoints
+          routeCount=0;  // Reset count since new direction
+
+          }
     }
-    //cout<<  "waypoints length in parse: " << waypoints.size()<<endl;
-    //indexToPoint(waypoints.x);
+
     return waypoints;
 }
 
 string SearchController::Astar( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish )
-// string SearchController::Astar( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish )
 {
-  cout<<"In Astar"<<endl;
+
     priority_queue<node> pq[2]; // list of open (not-yet-tried) nodes
     int pqi; // pq index
     node* n0;
@@ -397,31 +379,17 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     char c;
     pqi=0;
 
-    // int adjustedStartx, adjustedStarty, adjustedFinishx, adjustedFinishy;
-    // adjustedStartx=xStart; adjustedStarty=yStart; adjustedFinishx=xFinish; adjustedFinishy=yFinish;
 
-
-
-    //Grid map 
-    // mapx = GridtoZone::Instance();
-    mapx->updatePaperMap();
-  
-//    const int btmn=mapx->paperMap.getLength().y()*20; // horizontal size of the map
-//    const int btwmn=mapx->paperMap.getSize()(0); // vertical size size of the map
-
-//    cout<<"Map size x: "<<btmn<<endl;
-//    cout<<"Map size y: "<<btwmn<<endl;
-    //Eigen::Vector2d * positionPtr;
-    Position positionPtr;
-
-    // const int mapAdjustValue=btmn/2;
-    // indexAdjusttoMap(mapAdjustValue,adjustedStartx,adjustedStarty);
-    // indexAdjusttoMap(mapAdjustValue,adjustedFinishx,adjustedFinishy);
+    Position currentPosition; // This is Position is used to check the value of the current Position we are on GridMap
 
     const int dir=8; // number of possible directions to go at any position
-    int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1};
+    int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1}; // Easy was to acces all directions
     int dy[dir]={0, 1, 1, 1, 0, -1, -1, -1};
 
+
+
+    mapx->updatePaperMap(); // Updates Grid map 
+  
     const int n=mapWidth; // horizontal size of the map x-axis
     const int m=mapLength; // vertical size size of the map y-axis    
 
@@ -459,35 +427,30 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
 
         pq[pqi].pop(); // remove the node from the open list
         open_nodes_map[x][y]=0;
-        // mark it on the closed nodes map
-        closed_nodes_map[x][y]=1;
+        
+        closed_nodes_map[x][y]=1;// mark it on the closed nodes map
         count++;
 
-        //cout<<"-----current x "<<x<<" y "<<y<<endl;
 
         // quit searching when the goal state is reached
-        //if((*n0).estimate(xFinish, yFinish) == 0)
         if(x==xFinish && y==yFinish) 
         {
             // generate the path from finish to start
             // by following the directions
-          cout<<"finish"<<endl;
             string path="";
-            // while(!(x==xStart && y==yStart))
             while(!(x==xStart && y==yStart))
             {
-              //cout<<"while 0"<<endl;
+
                 j=dir_map[x][y];
                 c='0'+(j+dir/2)%dir;
                 path=c+path;
                 x+=dx[j];
                 y+=dy[j];
-                //cout<<"here"<<endl;
+
             }
-            // garbage collection
-            delete n0;
-            // empty the leftover nodes
-            while(!pq[pqi].empty()) pq[pqi].pop();           
+            
+            delete n0; // garbage collection
+            while(!pq[pqi].empty()) pq[pqi].pop(); // empty the leftover nodes        
             return path;
         }
 
@@ -495,32 +458,31 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
         for(i=0;i<dir;i++)
         {
             xdx=x+dx[i]; ydy=y+dy[i];
-          
-          
-          //Todo: make adjustments since Position takes floats
-            //cout<<"LOOKING AT ("<<xdx<<","<<ydy<<")"<<endl;
-            positionPtr = Position(indexToPoint(xdx), indexToPoint(ydy));
-            // if(mapx->paperMap.isInside(positionPtr)){
-            //   cout<<"inside the map position ("<<positionPtr<<") "<<endl;
+            // Transfroms index to matching point in Gridmap
+            currentPosition = Position(indexToPointX(xdx), indexToPointY(ydy));
+
+            // Used to check wether given Point is outside of bounds
+            // if(mapx->paperMap.isInside(currentPosition)){
+            //   cout<<"inside the map position ("<<currentPosition<<") "<<endl;
             // }
-            // else{cout<<"not inside the map position ("<<positionPtr<<") "<<endl;
+            // else{cout<<"not inside the map position ("<<currentPosition<<") "<<endl;
             // }
 
-            //figure out how to avoid from checking outside of bounds
-            // cout<<"  Current value at "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
 
-            
-            float map_value = mapx->paperMap.atPosition("elevation",positionPtr);
+
+            // Gets the value of Gridmap at current Position
+            float map_value = mapx->paperMap.atPosition("elevation",currentPosition);
 
             if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || map_value == 10.0 || map_value == 20.0 || closed_nodes_map[xdx][ydy]==1))
-            // if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || map[xdx][ydy]==2 || map[xdx][ydy]==1|| closed_nodes_map[xdx][ydy]==1))
             {
                 // generate a child node
                 m0=new node( xdx, ydy, n0->getLevel(), n0->getPriority(), n0->getParentDirection());
                 m0->nextLevel(i);
                 m0->updatePriority(xFinish, yFinish);
-                // if(mapx->paperMap.atPosition("elevation",positionPtr)!=-10){
-                //   cout<<"value at position( "<<positionPtr<<") is "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
+
+                //used for debugging
+                // if(mapx->paperMap.atPosition("elevation",currentPosition)!=-10){
+                //   cout<<"value at position( "<<currentPosition<<") is "<<mapx->paperMap.atPosition("elevation",currentPosition)<<endl;
                 // }
 
                 if(map_value == 3.0){
@@ -538,15 +500,15 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
 
                     pq[pqi].push(*m0);
                     delete m0;
-                    // mark its parent node direction
-                    dir_map[xdx][ydy]=(i+dir/2)%dir;
+                    
+                    dir_map[xdx][ydy]=(i+dir/2)%dir; // mark its parent node direction
                 }
                 else if(open_nodes_map[xdx][ydy]>m0->getPriority())
                 {
-                    // update the priority info
-                    open_nodes_map[xdx][ydy]=m0->getPriority();
-                    // update the parent direction info
-                    dir_map[xdx][ydy]=(i+dir/2)%dir;
+                    
+                    open_nodes_map[xdx][ydy]=m0->getPriority();// update the priority info
+                    
+                    dir_map[xdx][ydy]=(i+dir/2)%dir;// update the parent direction info
 
                     // replace the node
                     // by emptying one pq to the other one
@@ -576,9 +538,6 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                 else delete m0; // garbage collection
  
             }
-            else{
-              //cout<<"else value at "<<mapx->paperMap.atPosition("elevation",positionPtr)<<endl;
-            }
         }
         delete n0; // garbage collection
     }
@@ -590,13 +549,11 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
 
 vector<Point> SearchController::findPath(Point start, Point end){
 
-  srand(time(NULL));
 
   vector<Point> waypoints;
 
-  cout<<"Start: "<<start.x<<","<<start.y<<endl;
-  cout<<"Finish: "<<end.x<<","<<end.y<<endl;
-
+  // Switches x and y values as well as multiplies y value by -1
+  // This is done to account for Gridmap's switched Y axis
   float xA = -1 * start.y;
   float yA = start.x;
 
@@ -604,56 +561,52 @@ vector<Point> SearchController::findPath(Point start, Point end){
   float yB = end.x;
 
 
-    //GridMap
+  // Sets GridMap to map and updates it to most recent map.
   mapx = GridtoZone::Instance();
   mapx->updatePaperMap();
+
+  // Gets the length and width of the Gridmap
   mapLength = mapx->paperMap.getSize()(0);
   mapWidth = mapx->paperMap.getSize()(1);
 
-  int xStart = pointToIndex(xA);
-  int yStart = pointToIndex(yA);
-  int xFinish = pointToIndex(xB);
-  int yFinish = pointToIndex(yB);
+  // Converts x and y float values of Points to int appropriate index values
+  // This is done because a star uses arrays
+  int xStart = pointXToIndex(xA);
+  int yStart = pointYToIndex(yA);
+  int xFinish = pointXToIndex(xB);
+  int yFinish = pointYToIndex(yB);
 
 
-
-  // cout << "length" << mapLength<< endl;
-
-  // cout<<"Start: "<<xStart<<","<<yStart<<endl;
-  // cout<<"Finish: "<<xFinish<<","<<yFinish<<endl;
-  // get the route
-  clock_t timeStart = clock();
+  // Used to time astar
+  //clock_t timeStart = clock();
 
 
-
+  // Give Astar start indexes and finish indexes
+  // Returned will be the fastest route astar found put together as a string
   string route=Astar(xStart, yStart, xFinish, yFinish);
 
 
-  cout<<"after astar"<<endl;
-
   if(route=="") cout<<"An empty route generated!"<<endl;
-  clock_t timeEnd = clock();
-  float time_elapsed = float(timeEnd - timeStart);
-  cout<<"Time to calculate the route (ms): "<<time_elapsed<<endl;
-  cout<<"Route:"<<endl;
-  cout<<route<<endl<<endl;
+  
+  //used to time astar
+  // clock_t timeEnd = clock();
+  // float time_elapsed = float(timeEnd - timeStart);
+  // cout<<"Time to calculate the route (ms): "<<time_elapsed<<endl;
 
+  //kept for debuging purposes prints the route string returned from astar
+  // cout<<"Route:"<<endl;
+  // cout<<route<<endl<<endl;
 
+  // Parse the route and get waypoints 
   waypoints=parseRoute(route, start.x,start.y);
 
   return waypoints;
 }
 
-Position SearchController::realtogridPosition(Point point){
-  return Position(-1 * point.y, point.x);  
-}
+// Position SearchController::realtogridPosition(Point point){
+//   return Position(-1 * point.y, point.x);  
+// }
 
-Point SearchController::gridtorealPoint(float x, float y){
-        Point point;
-        point.x = y;
-        point.y = -x;
 
-  return point;  
-}
 
 
