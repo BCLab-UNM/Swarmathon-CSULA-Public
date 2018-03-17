@@ -151,184 +151,27 @@ Point SearchController::GetNewSearchPoint(){
 
 
       if(astarCount<1){
-      Point start, end;
-      start.x=0.0;
-      start.y=0.0;
-      end.x= 5.0;
-      end.y= 6.5;
+        Point start, end;
+        start.x=0.0;
+        start.y=0.0;
+        end.x= 5.0;
+        end.y= 6.5;
 
-      vector<Point> waypoints;
+        vector<Point> waypoints;
 
-      waypoints = findPath( start, end);
+        waypoints = findPath( start, end);
 
-      cout<<  "waypoints length: " << waypoints.size()<<endl;
-      for(int i=0;i<waypoints.size();i++){
-        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+        cout<<  "waypoints length: " << waypoints.size()<<endl;
+        for(int i=0;i<waypoints.size();i++){
+          cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+        }
+        astarCount++;
+
+
+        std::cout << "---------------------------------------------------" << std::endl;
+        std::cout << "---------------------------------------------------" << std::endl;
+        std::cout << "---------------------------------------------------" << std::endl;
       }
-      astarCount++;
-
-
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      }
-            if(astarCount<2){
-      Point start, end;
-      start.x=0.0;
-      start.y=0.0;
-      end.x= 5.0;
-      end.y= 5.0;
-
-      vector<Point> waypoints;
-
-      waypoints = findPath( start, end);
-
-      cout<<  "waypoints length: " << waypoints.size()<<endl;
-      for(int i=0;i<waypoints.size();i++){
-        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
-      }
-      astarCount++;
-
-
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      }
-            if(astarCount<3){
-      Point start, end;
-      start.x=0.0;
-      start.y=0.0;
-      end.x = 0.0;
-      end.y = 5.0;
-
-      vector<Point> waypoints;
-
-      waypoints = findPath( start, end);
-
-      cout<<  "waypoints length: " << waypoints.size()<<endl;
-      for(int i=0;i<waypoints.size();i++){
-        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
-      }
-      astarCount++;
-
-
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      }
-            if(astarCount<4){
-      Point start, end;
-      start.x=0.0;
-      start.y=0.0;
-      end.x = 5.0;
-      end.y = 0.0;
-
-      vector<Point> waypoints;
-
-      waypoints = findPath( start, end);
-
-      cout<<  "waypoints length: " << waypoints.size()<<endl;
-      for(int i=0;i<waypoints.size();i++){
-        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
-      }
-      astarCount++;
-
-
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      }
-            if(astarCount<5){
-      Point start, end;
-      start.x=0.0;
-      start.y=0.0;
-      end.x= -5.0;
-      end.y= 0.0;
-
-      vector<Point> waypoints;
-
-      waypoints = findPath( start, end);
-
-      cout<<  "waypoints length: " << waypoints.size()<<endl;
-      for(int i=0;i<waypoints.size();i++){
-        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
-      }
-      astarCount++;
-
-
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      }
-            if(astarCount<6){
-      Point start, end;
-      start.x=0.0;
-      start.y=0.0;
-      end.x= 0.0;
-      end.y= -5.0;
-
-      vector<Point> waypoints;
-
-      waypoints = findPath( start, end);
-
-      cout<<  "waypoints length: " << waypoints.size()<<endl;
-      for(int i=0;i<waypoints.size();i++){
-        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
-      }
-      astarCount++;
-
-
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      }
-            if(astarCount<7){
-      Point start, end;
-      start.x=0.0;
-      start.y=0.0;
-      end.x= -5.0;
-      end.y= 5.0;
-
-      vector<Point> waypoints;
-
-      waypoints = findPath( start, end);
-
-      cout<<  "waypoints length: " << waypoints.size()<<endl;
-      for(int i=0;i<waypoints.size();i++){
-        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
-      }
-      astarCount++;
-
-
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      }
-            if(astarCount<8){
-      Point start, end;
-      start.x=0.0;
-      start.y=0.0;
-      end.x= 5.0;
-      end.y= -5.0;
-
-      vector<Point> waypoints;
-
-      waypoints = findPath( start, end);
-
-      cout<<  "waypoints length: " << waypoints.size()<<endl;
-      for(int i=0;i<waypoints.size();i++){
-        cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
-      }
-      astarCount++;
-
-
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      std::cout << "---------------------------------------------------" << std::endl;
-      }
-
-
-
 
 
   for (int i = 0; i <= zonetries; i++){
