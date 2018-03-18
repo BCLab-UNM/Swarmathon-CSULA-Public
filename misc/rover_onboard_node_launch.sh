@@ -17,9 +17,9 @@ export GAZEBO_PLUGIN_PATH="../build/gazebo_plugins"
 
 #Point to ROS master on the network
 echo "point to ROS master on the network"
-if [ -z "$1" ]
+if [ -z "$2" ]
 then
-    echo "Error: ROS_MASTER_URI hostname was not provided"
+    echo "Usage: ./rover_onboard_node_launch.sh master_hostname calibration_location"
     exit 1
 else
     export ROS_MASTER_URI=http://$1:11311
@@ -51,9 +51,13 @@ findDevicePath() {
     )
     done
 }
-
+echo "******************************************************************************************************Loading calibration values************************************************************************************************************************"
+./load_calibration_values.sh
 
 #Startup ROS packages/processes
+echo "Loading calibration data and swarmie_control sketch"
+./load_swarmie_control_sketch.sh $2
+
 echo "rosrun tf static_transform_publisher"
 nohup > logs/$HOSTNAME"_transform_log.txt" rosrun tf static_transform_publisher __name:=$HOSTNAME\_BASE2CAM 0.12 -0.03 0.195 -1.57 0 -2.22 /$HOSTNAME/base_link /$HOSTNAME/camera_link 100 &
 echo "rosrun video_stream_opencv"
@@ -83,7 +87,7 @@ if [ -z "$microcontrollerDevicePath" ]
 then
     echo "Error: Microcontroller device not found"
 else
-    nohup > logs/$HOSTNAME"_abridge_log.txt" rosrun abridge abridge _device:=/dev/$microcontrollerDevicePath &
+    nohup > logs/$HOSTNAME"_abridge_log.txt" rosrun abridge abridge _device:=/dev/$microcontrollerDevicePath & 
 fi
 
 gpsDevicePath=$(findDevicePath u-blox)
@@ -94,7 +98,7 @@ else
     nohup > logs/$HOSTNAME"_ublox_log.txt" rosrun ublox_gps ublox_gps __name:=$HOSTNAME\_UBLOX /$HOSTNAME\_UBLOX/fix:=/$HOSTNAME/fix /$HOSTNAME\_UBLOX/fix_velocity:=/$HOSTNAME/fix_velocity /$HOSTNAME\_UBLOX/navposllh:=/$HOSTNAME/navposllh /$HOSTNAME\_UBLOX/navsol:=/$HOSTNAME/navsol /$HOSTNAME\_UBLOX/navstatus:=/$HOSTNAME/navstatus /$HOSTNAME\_UBLOX/navvelned:=/$HOSTNAME/navvelned _device:=/dev/$gpsDevicePath _frame_id:=$HOSTNAME/base_link &
 fi
 
-nohup > logs/$HOSTNAME"_localization_navsat_log.txt" rosrun robot_localization navsat_transform_node __name:=$HOSTNAME\_NAVSAT _world_frame:=map _frequency:=10 _magnetic_declination_radians:=0.1530654 _yaw_offset:=0 /imu/data:=/$HOSTNAME/imu /gps/fix:=/$HOSTNAME/fix /odometry/filtered:=/$HOSTNAME/odom/ekf /odometry/gps:=/$HOSTNAME/odom/navsat &
+nohup > logs/$HOSTNAME"_localization_navsat_log.txt" rosrun robot_localization navsat_transform_node __name:=$HOSTNAME\_NAVSAT _world_frame:=map _frequency:=10 _magnetic_declination_radians:=-0.1192642 _yaw_offset:=0 /imu/data:=/$HOSTNAME/imu /gps/fix:=/$HOSTNAME/fix /odometry/filtered:=/$HOSTNAME/odom/ekf /odometry/gps:=/$HOSTNAME/odom/navsat &
 
 rosparam set /$HOSTNAME\_ODOM/odom0 /$HOSTNAME/odom
 rosparam set /$HOSTNAME\_ODOM/imu0 /$HOSTNAME/imu

@@ -344,9 +344,9 @@ void behaviourStateMachine(const ros::TimerEvent&)
 
     //ask logic controller for the next set of actuator commands
     result = logicController.DoWork();
-    
-    bool wait = false;	//a variable created to check if we are in a waiting state
-    
+
+    bool wait = false;
+
     //if a wait behaviour is thrown sit and do nothing untill logicController is ready
     if (result.type == behavior)
     {
@@ -371,9 +371,9 @@ void behaviourStateMachine(const ros::TimerEvent&)
     //normally interpret logic controllers actuator commands and deceminate them over the appropriate ROS topics
     else
     {
-      
-      sendDriveCommand(result.pd.left,result.pd.right);	//uses the results struct with data sent back from logic controller to send motor commands
-      
+
+      sendDriveCommand(result.pd.left,result.pd.right);
+
       //Alter finger and wrist angle is told to reset with last stored value if currently has -1 value
       std_msgs::Float32 angle;
       if (result.fingerAngle != -1)
@@ -657,7 +657,7 @@ void joyCmdHandler(const sensor_msgs::Joy::ConstPtr& message) {
 
 void publishStatusTimerEventHandler(const ros::TimerEvent&) {
   std_msgs::String msg;
-  msg.data = "online";		//change this with team name
+  msg.data = "Cal State LA - Not Last!!+";		//change this with team name
   status_publisher.publish(msg);
 }
 
@@ -730,8 +730,8 @@ void transformMapCentertoOdom()
     tfListener->waitForTransform(publishedName + "/map", publishedName + "/odom", ros::Time::now(), ros::Duration(1.0));
     tfListener->transformPose(publishedName + "/odom", mapPose, odomPose);
   }
-  
-  catch(tf::TransformException& ex) {  //bad transform
+
+  catch(tf::TransformException& ex) {
     ROS_INFO("Received an exception trying to transform a point from \"map\" to \"odom\": %s", ex.what());
     x = "Exception thrown " + (string)ex.what();
     std_msgs::String msg;
