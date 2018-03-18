@@ -72,8 +72,8 @@ double d=1;
   float firsttravel = 0.4;
   float sectionlength = 1.2; // <- double check if true
 
-  bool waypointsVerbose = false;
-  bool gtzVerbose = false;
+  bool waypointsVerbose = true;
+  bool gtzVerbose = true;
   bool rovercountverbose = false;
   bool waypointsDebugVerbose = true;
 

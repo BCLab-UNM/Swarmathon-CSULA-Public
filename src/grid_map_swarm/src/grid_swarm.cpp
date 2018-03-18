@@ -49,6 +49,7 @@ const double MAT 	= 1.0;
 const double MULTICUBES	= 2.0;
 const double SONAR 	= 3.0;
 const double ROVER 	= 10.0;
+const double BUFFER 	= 15.0;
 const double WALL 	= 20.0;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
@@ -270,6 +271,19 @@ int main(int argc, char **argv){
 					}
 				}
 				if (map.isInside(c) && overlap == false){
+					grid_map::Polygon polc;
+					double botLeftX= cx-0.15, botRightX= cx+0.15;
+					double botLeftY= cy-0.15, botRightY= cy-0.15;
+					double topLeftX= cx-0.15, topRightX= cx+0.15;
+					double topLeftY= cy+0.15, topRightY= cy+0.15;
+					polc.addVertex(Position(botLeftX, botLeftY));
+					polc.addVertex(Position(topLeftX, topLeftY));
+					polc.addVertex(Position(topRightX,topRightY));
+					polc.addVertex(Position(botRightX,botRightY));
+					
+					for(grid_map::PolygonIterator iterator(map, polc); !iterator.isPastEnd(); ++iterator) {
+						map.at("elevation", *iterator) = BUFFER;
+					}	
 					map.atPosition("elevation", c) = WALL;
 				}
 			}
@@ -292,6 +306,19 @@ int main(int argc, char **argv){
 					}
 				}
 				if (map.isInside(l) && overlap == false){
+					grid_map::Polygon poll;
+					double botLeftX= lx-0.15, botRightX= lx+0.15;
+					double botLeftY= ly-0.15, botRightY= ly-0.15;
+					double topLeftX= lx-0.15, topRightX= lx+0.15;
+					double topLeftY= ly+0.15, topRightY= ly+0.15;
+					poll.addVertex(Position(botLeftX, botLeftY));
+					poll.addVertex(Position(topLeftX, topLeftY));
+					poll.addVertex(Position(topRightX,topRightY));
+					poll.addVertex(Position(botRightX,botRightY));
+					
+					for(grid_map::PolygonIterator iterator(map, poll); !iterator.isPastEnd(); ++iterator) {
+						map.at("elevation", *iterator) = BUFFER;
+					}	
 					map.atPosition("elevation", l) = WALL;
 				}
 			}
@@ -314,11 +341,42 @@ int main(int argc, char **argv){
 					}
 				}
 				if (map.isInside(r) && overlap == false){
+					grid_map::Polygon polr;
+					double botLeftX= rx-0.15, botRightX= rx+0.15;
+					double botLeftY= ry-0.15, botRightY= ry-0.15;
+					double topLeftX= rx-0.15, topRightX= rx+0.15;
+					double topLeftY= ry+0.15, topRightY= ry+0.15;
+					polr.addVertex(Position(botLeftX, botLeftY));
+					polr.addVertex(Position(topLeftX, topLeftY));
+					polr.addVertex(Position(topRightX,topRightY));
+					polr.addVertex(Position(botRightX,botRightY));
+					
+					for(grid_map::PolygonIterator iterator(map, polr); !iterator.isPastEnd(); ++iterator) {
+						map.at("elevation", *iterator) = BUFFER;
+					}	
 					map.atPosition("elevation", r) = WALL;
 				}
 			}
 		}//END OF SONAR BOOLEAN
 	}//END OF FOR LOOP
+	if (firstgo == true){
+		cout << "Creating the initial FOG" << endl;
+		//CREATE FOG
+		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
+			Position position;
+			map.getPosition(*it, position);
+			map.at("elevation", *it) = FOG;
+		}//END OF ITERATOR
+		for (float length = -1.00; length <= 1.00;){
+			for(float width = -1.00; width <= 1.00;){
+				Eigen::Vector2d mat(length,width);
+				map.atPosition("elevation", mat) = REVEALED;
+				width += CELLDIVISION;
+			}
+			length += CELLDIVISION;
+		}
+	}
+	firstgo = false;
 	//CENTER MAT being Discovered
 	for (float length = -0.50; length <= 0.50;){
 		for(float width = -0.50; width <= 0.50;){
@@ -337,21 +395,11 @@ int main(int argc, char **argv){
 			map.atPosition("elevation", q) = ROVER;
 		}
 	}
-	if (firstgo == true){
-		cout << "Creating the initial FOG" << endl;
-		//CREATE FOG
-		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
-			Position position;
-			map.getPosition(*it, position);
-			map.at("elevation", *it) = FOG;
-		}//END OF ITERATOR
-	}
-	firstgo = false;
 	if (noSonar == true){
 		for(int count = arrCount; count >= 0; count--){
 			float x = xpos[count];
 			float y = ypos[count];
-			cout<<count<<"("<<x<<","<<y<<")"<<endl;
+			//cout<<count<<"("<<x<<","<<y<<")"<<endl;
 			if (x > 2.00 || x < -2.00 || y > 2.00 || y < -2.00){
 				noSonar = false;
 			}
@@ -528,8 +576,6 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
 	int currentMode = message->data;
 	if(currentMode == 2 || currentMode == 3) {
 		modeAuto = true;
-		cout<<"Sleep for a bit"<<endl;
-		cout<<"Wake up Man"<<endl;
 		
 	}
 }

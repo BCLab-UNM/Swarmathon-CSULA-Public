@@ -81,7 +81,7 @@ private:
 
 	// Ask Port
 	string layer = "elevation";
-	const float celldivision 	= 0.05;
+	const float celldivision= 0.05;
 	const float ROVERHALF 	= 0.20;
 	const float pi = std::acos(-1);
 
@@ -91,6 +91,7 @@ private:
 	const float CUBES	= 2.0;
 	const float SONAR 	= 3.0;
 	const float ROVER 	= 10.0;
+	const float BUFFER 	= 15.0;
 	const float WALL 	= 20.0;
 
 
