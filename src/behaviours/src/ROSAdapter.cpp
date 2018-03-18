@@ -108,6 +108,7 @@ float y_component[numreadings];
     float ave = 0;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int currentMode = 0;
+bool gmapRan = false;
 const float behaviourLoopTimeStep = 0.1; 	//time between the behaviour loop calls
 const float status_publish_interval = 1;	//time between publishes
 const float heartbeat_publish_interval = 2;	//time between heartbeat publishes
@@ -489,7 +490,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
   currentMode = message->data;
-  if(currentMode == 2 || currentMode == 3) {
+  if((currentMode == 2 || currentMode == 3) && gmapRan == true) {
     //sleep(5);
     logicController.SetModeAuto();
   }
@@ -797,7 +798,7 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 	GridMap map({"elevation"});
 	map.setFrameId("map");
 	map.setGeometry(Length(15.5,15.5), 0.05);
-//	cout << "ROSAdapter Map Test" << endl;
+	//cout << "ROSAdapter Map Test" << endl;
 	int row = 0;
 	for (double x = -7.70; x <= 7.75; row++){
 		int col = 0;
@@ -809,6 +810,10 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 		}
 		x += 0.05;
 	}
-  GridtoZone::Instance()->setGridMap(map);
-//    gridtozone.setGridMap(map);
+	GridtoZone::Instance()->setGridMap(map);
+	//    gridtozone.setGridMap(map);
+	if (gmapRan == false){
+		logicController.SetModeAuto();
+	}
+	gmapRan = true;
 }
