@@ -1,7 +1,6 @@
 #include "LogicController.h"
 
 LogicController::LogicController() {
-
   logicState = LOGIC_STATE_INTERRUPT;
   processState = PROCCESS_STATE_SEARCHING;
 
@@ -236,8 +235,10 @@ void LogicController::ProcessData()
   {
     prioritizedControllers = {
       PrioritizedController{0, (Controller*)(&searchController)},
-      PrioritizedController{10, (Controller*)(&obstacleController)},
-      PrioritizedController{15, (Controller*)(&pickUpController)},
+      //obstacle controller was turned off because testing was done in a
+      //spot that had many objects that would cause the rover to change course
+      PrioritizedController{-1, (Controller*)(&obstacleController)},
+      PrioritizedController{-1, (Controller*)(&pickUpController)},
       PrioritizedController{5, (Controller*)(&range_controller)},
       PrioritizedController{-1, (Controller*)(&dropOffController)},
       PrioritizedController{-1, (Controller*)(&manualWaypointController)}

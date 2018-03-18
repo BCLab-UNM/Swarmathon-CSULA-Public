@@ -49,7 +49,8 @@ findDevicePath() {
     )
     done
 }
-
+echo "******************************************************************************************************Loading calibration values************************************************************************************************************************"
+./load_calibration_values.sh
 
 #Startup ROS packages/processes
 echo "Loading calibration data and swarmie_control sketch"
@@ -71,6 +72,8 @@ echo "rosrun obstacle_detection"
 nohup rosrun obstacle_detection obstacle &
 echo "rosrun diagnostics"
 nohup > logs/$HOSTNAME"_diagnostics_log.txt" rosrun diagnostics diagnostics &
+echo "rosrun grid"
+nohup > logs/$HOSTNAME"_grid_map_log.txt" rosrun grid_map_swarm grid_map_swarm  &
 
 rosparam set /$HOSTNAME\_TARGET/sensor_frame_id /$HOSTNAME/camera_link
 rosparam set /$HOSTNAME\_TARGET/tag_family 36h11
@@ -82,7 +85,7 @@ if [ -z "$microcontrollerDevicePath" ]
 then
     echo "Error: Microcontroller device not found"
 else
-    nohup > logs/$HOSTNAME"_abridge_log.txt" rosrun abridge abridge _device:=/dev/$microcontrollerDevicePath &
+    nohup > logs/$HOSTNAME"_abridge_log.txt" rosrun abridge abridge _device:=/dev/$microcontrollerDevicePath & 
 fi
 
 gpsDevicePath=$(findDevicePath u-blox)
@@ -93,7 +96,7 @@ else
     nohup > logs/$HOSTNAME"_ublox_log.txt" rosrun ublox_gps ublox_gps __name:=$HOSTNAME\_UBLOX /$HOSTNAME\_UBLOX/fix:=/$HOSTNAME/fix /$HOSTNAME\_UBLOX/fix_velocity:=/$HOSTNAME/fix_velocity /$HOSTNAME\_UBLOX/navposllh:=/$HOSTNAME/navposllh /$HOSTNAME\_UBLOX/navsol:=/$HOSTNAME/navsol /$HOSTNAME\_UBLOX/navstatus:=/$HOSTNAME/navstatus /$HOSTNAME\_UBLOX/navvelned:=/$HOSTNAME/navvelned _device:=/dev/$gpsDevicePath _frame_id:=$HOSTNAME/base_link &
 fi
 
-nohup > logs/$HOSTNAME"_localization_navsat_log.txt" rosrun robot_localization navsat_transform_node __name:=$HOSTNAME\_NAVSAT _world_frame:=map _frequency:=10 _magnetic_declination_radians:=0.1530654 _yaw_offset:=0 /imu/data:=/$HOSTNAME/imu /gps/fix:=/$HOSTNAME/fix /odometry/filtered:=/$HOSTNAME/odom/ekf /odometry/gps:=/$HOSTNAME/odom/navsat &
+nohup > logs/$HOSTNAME"_localization_navsat_log.txt" rosrun robot_localization navsat_transform_node __name:=$HOSTNAME\_NAVSAT _world_frame:=map _frequency:=10 _magnetic_declination_radians:=-0.1192642 _yaw_offset:=0 /imu/data:=/$HOSTNAME/imu /gps/fix:=/$HOSTNAME/fix /odometry/filtered:=/$HOSTNAME/odom/ekf /odometry/gps:=/$HOSTNAME/odom/navsat &
 
 rosparam set /$HOSTNAME\_ODOM/odom0 /$HOSTNAME/odom
 rosparam set /$HOSTNAME\_ODOM/imu0 /$HOSTNAME/imu
@@ -162,6 +165,7 @@ while true; do
 	rosnode kill $HOSTNAME\_DIAGNOSTICS
 	rosnode kill $HOSTNAME\_BASE2CAM
 	rosnode kill $HOSTNAME\_UBLOX
+	rosnode kill $HOSTNAME\_GRID
 
 	exit 1
     fi

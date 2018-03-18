@@ -29,6 +29,7 @@ Diagnostics::Diagnostics(std::string name) {
   abdridgeNodeSubscribe = nodeHandle.subscribe(publishedName + "/abridge/heartbeat", 1, &Diagnostics::abridgeNode,this);
   sbdridgeNodeSubscribe = nodeHandle.subscribe(publishedName + "/sbridge/heartbeat", 1, &Diagnostics::sbridgeNode,this);
   behaviourNodeSubscribe = nodeHandle.subscribe(publishedName + "/behaviour/heartbeat", 1, &Diagnostics::behaviourNode,this);
+  gridSwarmNodeSubscribe = nodeHandle.subscribe(publishedName + "/gridSwarm/heartbeat", 1, &Diagnostics::gridSwarmNode,this);
   ubloxNodeSubscribe = nodeHandle.subscribe(publishedName + "/fix" , 1, &Diagnostics::ubloxNode,this);
 
   // Initialize the variables we use to track the simulation update rate
@@ -158,6 +159,10 @@ void Diagnostics::behaviourNode(std_msgs::String msg) {
     behaviourNodeTimestamp = ros::Time::now();
 }
 
+void Diagnostics::gridSwarmNode(std_msgs::String msg) {
+    gridSwarmNodeTimestamp = ros::Time::now();
+}
+
 void Diagnostics::ubloxNode(const sensor_msgs::NavSatFix::ConstPtr& message) {
     ubloxNodeTimestamp = ros::Time::now();
 }
@@ -206,6 +211,7 @@ void Diagnostics::nodeCheckTimerEventHandler(const ros::TimerEvent& event) {
     }
 
     checkBehaviour();
+    checkGridSwarm();
 
 }
 
@@ -394,6 +400,20 @@ void Diagnostics::checkBehaviour() {
     else if (behaviourRunning) {
         behaviourRunning = false;
         publishErrorLogMessage("the behaviour node is not running");
+    }
+}
+
+void Diagnostics::checkGridSwarm() {
+
+    if (ros::Time::now() - gridSwarmNodeTimestamp <= ros::Duration(node_heartbeat_timeout)) {
+        if (!gridSwarmRunning) {
+            gridSwarmRunning = true;
+            publishInfoLogMessage("the gridSwarm node is now running");
+        }
+    }
+    else if (gridSwarmRunning) {
+        gridSwarmRunning = false;
+        publishErrorLogMessage("the gridSwarm node is not running");
     }
 }
 

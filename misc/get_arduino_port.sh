@@ -6,7 +6,7 @@ for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
         syspath="${sysdevpath%/dev}"
         devname="$(udevadm info -q name -p $syspath)"
         [[ "$devname" == "bus/"* ]] && continue
-        eval "$(udevadm info -q property --export -p $syspath)"
+        eval "$(udevadm info -q property --export -p $syspath)"       
         [[ -z "$ID_SERIAL" ]] && continue
 
         if [[ "$ID_SERIAL" = *"Arduino"* ]]; then
@@ -16,4 +16,10 @@ for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
 done
 }
 get_arduino_port
+<<<<<<< HEAD
 # END OF GET ARDUINO PORT FUNTION 
+=======
+
+# START OF LOAD CALIBRATION
+
+>>>>>>> mergeTeoJSsearch
