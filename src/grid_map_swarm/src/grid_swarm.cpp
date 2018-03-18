@@ -272,17 +272,19 @@ int main(int argc, char **argv){
 				}
 				if (map.isInside(c) && overlap == false){
 					grid_map::Polygon polc;
-					double botLeftX= cx-0.15, botRightX= cx+0.15;
-					double botLeftY= cy-0.15, botRightY= cy-0.15;
-					double topLeftX= cx-0.15, topRightX= cx+0.15;
-					double topLeftY= cy+0.15, topRightY= cy+0.15;
+					double botLeftX= cx-0.30, botRightX= cx+0.30;
+					double botLeftY= cy-0.30, botRightY= cy-0.30;
+					double topLeftX= cx-0.30, topRightX= cx+0.30;
+					double topLeftY= cy+0.30, topRightY= cy+0.30;
 					polc.addVertex(Position(botLeftX, botLeftY));
 					polc.addVertex(Position(topLeftX, topLeftY));
 					polc.addVertex(Position(topRightX,topRightY));
 					polc.addVertex(Position(botRightX,botRightY));
 					
 					for(grid_map::PolygonIterator iterator(map, polc); !iterator.isPastEnd(); ++iterator) {
-						map.at("elevation", *iterator) = BUFFER;
+						if (map.at("elevation", *iterator) != WALL){
+							map.at("elevation", *iterator) = BUFFER;
+						}
 					}	
 					map.atPosition("elevation", c) = WALL;
 				}
@@ -307,17 +309,19 @@ int main(int argc, char **argv){
 				}
 				if (map.isInside(l) && overlap == false){
 					grid_map::Polygon poll;
-					double botLeftX= lx-0.15, botRightX= lx+0.15;
-					double botLeftY= ly-0.15, botRightY= ly-0.15;
-					double topLeftX= lx-0.15, topRightX= lx+0.15;
-					double topLeftY= ly+0.15, topRightY= ly+0.15;
+					double botLeftX= lx-0.30, botRightX= lx+0.30;
+					double botLeftY= ly-0.30, botRightY= ly-0.30;
+					double topLeftX= lx-0.30, topRightX= lx+0.30;
+					double topLeftY= ly+0.30, topRightY= ly+0.30;
 					poll.addVertex(Position(botLeftX, botLeftY));
 					poll.addVertex(Position(topLeftX, topLeftY));
 					poll.addVertex(Position(topRightX,topRightY));
 					poll.addVertex(Position(botRightX,botRightY));
 					
 					for(grid_map::PolygonIterator iterator(map, poll); !iterator.isPastEnd(); ++iterator) {
-						map.at("elevation", *iterator) = BUFFER;
+						if (map.at("elevation", *iterator) != WALL){
+							map.at("elevation", *iterator) = BUFFER;
+						}
 					}	
 					map.atPosition("elevation", l) = WALL;
 				}
@@ -342,17 +346,19 @@ int main(int argc, char **argv){
 				}
 				if (map.isInside(r) && overlap == false){
 					grid_map::Polygon polr;
-					double botLeftX= rx-0.15, botRightX= rx+0.15;
-					double botLeftY= ry-0.15, botRightY= ry-0.15;
-					double topLeftX= rx-0.15, topRightX= rx+0.15;
-					double topLeftY= ry+0.15, topRightY= ry+0.15;
+					double botLeftX= rx-0.30, botRightX= rx+0.30;
+					double botLeftY= ry-0.30, botRightY= ry-0.30;
+					double topLeftX= rx-0.30, topRightX= rx+0.30;
+					double topLeftY= ry+0.30, topRightY= ry+0.30;
 					polr.addVertex(Position(botLeftX, botLeftY));
 					polr.addVertex(Position(topLeftX, topLeftY));
 					polr.addVertex(Position(topRightX,topRightY));
 					polr.addVertex(Position(botRightX,botRightY));
 					
 					for(grid_map::PolygonIterator iterator(map, polr); !iterator.isPastEnd(); ++iterator) {
-						map.at("elevation", *iterator) = BUFFER;
+						if (map.at("elevation", *iterator) != WALL){
+							map.at("elevation", *iterator) = BUFFER;
+						}
 					}	
 					map.atPosition("elevation", r) = WALL;
 				}
@@ -366,7 +372,7 @@ int main(int argc, char **argv){
 			Position position;
 			map.getPosition(*it, position);
 			map.at("elevation", *it) = FOG;
-		}//END OF ITERATOR
+		}//AREA AROUND MAT
 		for (float length = -1.00; length <= 1.00;){
 			for(float width = -1.00; width <= 1.00;){
 				Eigen::Vector2d mat(length,width);
