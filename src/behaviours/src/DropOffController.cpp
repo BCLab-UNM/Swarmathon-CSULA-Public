@@ -174,11 +174,11 @@ Result DropOffController::DoWork() {
 
     if (seenEnoughCenterTags) //if we have seen enough tags
         {
-          if ((countLeft-8) > countRight) //if there are too many on the left
+          if ((countLeft-5) > countRight) //if there are too many on the left
           {
               right = false; //then we say none on the right to cause us to turn right
           }
-          else if ((countRight-8) > countLeft)
+          else if ((countRight-5) > countLeft)
           {
               left = false; //or left in this case
           }
@@ -316,9 +316,6 @@ void DropOffController::SetTargetData(vector<Tag> tags) {
   countRight = 0;
   countLeft = 0;
 
-//  cubeRight = 0;
-//  cubeLeft = 0;
-
   if(targetHeld) {
     // if a target is detected and we are looking for center tags
     if (tags.size() > 0 && !reachedCollectionPoint) {
@@ -335,16 +332,6 @@ void DropOffController::SetTargetData(vector<Tag> tags) {
             countLeft++;
           }
         }
-
-//        else if (tags[i].getID() == 0) {
-//            // checks if tag is on the right or left side of the image
-//            if (tags[i].getPositionX() + cameraOffsetCorrection > 0) {
-//              cubeRight++;
-
-//            } else {
-//              cubeLeft++;
-//        }
-//        }
       }
     }
   }

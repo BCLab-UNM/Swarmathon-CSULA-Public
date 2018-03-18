@@ -63,24 +63,15 @@ void ObstacleController::avoidCube() {
 
     result.type = precisionDriving;
 
-    // Decide which side of the rover sees the most april tags and turn away
-    // from that side
-    if(count_left_cube_tags < count_right_cube_tags) {
-       cout << "OBSTACLE: Turning right to AVOID CUBE" << endl;
-       result.pd.cmdAngular = K_angular;
-       result.pd.cmdVel = 100.0;
-    } else {
-       cout << "OBSTACLE: Turning right to AVOID CUBE" << endl;
-       result.pd.cmdAngular = -K_angular;
-       result.pd.cmdVel = 100.0;
-    }
+    //Rotates left away from the cube, drives forward, and rotates back to the center location
+    cout << "OBSTACLE: Turning to AVOID CUBE" << endl;
+    result.pd.cmdAngular = -K_angular;
+    result.pd.cmdVel = 150.0;
 
     result.pd.setPointVel = 0.0;
     result.pd.cmdVel = 0.0;
     result.pd.setPointYaw = 0;
 }
-
-
 
 Result ObstacleController::DoWork() {
 
@@ -91,11 +82,10 @@ Result ObstacleController::DoWork() {
   // The obstacle is an april tag marking the collection zone
   if(collection_zone_seen)
       avoidCollectionZone();
+  else if (cube_seen)
+      avoidCube();
   else
       avoidObstacle();
-
-  if (cube_seen)
-      avoidCube();
 
   //if an obstacle has been avoided
   if (can_set_waypoint) {
@@ -200,8 +190,8 @@ void ObstacleController::setTagDataForCollectionZone(vector<Tag> tags){
   count_right_collection_zone_tags = 0;
 
   if (!targetHeld) {
-      cout << "OBSTACLE: Target is not held" << endl;
-  // this loop is to get the number of center tags
+    cout << "OBSTACLE: Target is not held" << endl;
+    // this loop is to get the number of center tags
     for (int i = 0; i < tags.size(); i++) { //redundant for loop
         if (tags[i].getID() == 256) {
             collection_zone_seen = checkForCollectionZoneTags( tags );
@@ -213,17 +203,20 @@ void ObstacleController::setTagDataForCollectionZone(vector<Tag> tags){
 }
 
 void ObstacleController::setTagDataForCube(vector<Tag> tags){
+  int counter = 0;
   cube_seen = false;
-  count_left_cube_tags = 0;
-  count_right_cube_tags = 0;
 
   if (targetHeld) {
       cout << "OBSTACLE: Target is held" << endl;
       for (int i = 0; i < tags.size(); i++) { //redundant for loop
           if (tags[i].getID() == 0) {
-              cube_seen = checkForCubeTags( tags );
-              timeSinceTags = current_time;
-              cout << "OBSTACLE: Cube seen: " << cube_seen << endl;
+              counter++;
+              cout << "OBSTACLE: Cube count: " << counter << endl;
+              if (counter >= 2) {
+                cube_seen = true;
+                timeSinceTags = current_time;
+                cout << "OBSTACLE: Cubes seen: " << cube_seen << endl;
+             }
       }
     }
   }
@@ -249,33 +242,8 @@ bool ObstacleController::checkForCollectionZoneTags( vector<Tag> tags ) {
     
   }
 
-    cout << "OBSTACLE: Collection zone tags count: " << count_left_collection_zone_tags + count_right_collection_zone_tags << endl;
-
   // Did any tags indicate that the robot is inside the collection zone?
   return count_left_collection_zone_tags + count_right_collection_zone_tags > 0;
-
-}
-
-bool ObstacleController::checkForCubeTags( vector<Tag> tags ) {
-
-  for ( auto & tag : tags ) {
-    if ( tag.calcYaw() > 0 )
-      {
-    // checks if tag is on the right or left side of the image
-    if (tag.getPositionX() + camera_offset_correction > 0) {
-      count_right_cube_tags++;
-
-    } else {
-      count_left_cube_tags++;
-    }
-      }
-
-  }
-
-  cout << "OBSTACLE: Cube tag count: " << count_left_cube_tags + count_right_cube_tags << endl;
-
-  // Did the robot detected another cube while picking up the cube?
-  return count_left_cube_tags + count_right_cube_tags > 1;
 
 }
 
@@ -339,7 +307,6 @@ void ObstacleController::setTargetHeldClear()
   if (targetHeld)
   {
     Reset();
-    cube_seen = false;
     targetHeld = false;
     previousTargetState = false;
     ignore_center_sonar = false;

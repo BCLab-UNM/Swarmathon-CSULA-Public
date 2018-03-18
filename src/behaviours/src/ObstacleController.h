@@ -52,7 +52,7 @@ private:
   const float obstacleDistancePivot = 0.2526; ///unused variable
   const float triggerDistance = 0.8;
 
-  /*
+    /*
      * Member variables
      */
 
@@ -68,8 +68,6 @@ private:
 
   unsigned int count_left_collection_zone_tags;
   unsigned int count_right_collection_zone_tags;
-  unsigned int count_left_cube_tags;
-  unsigned int count_right_cube_tags;
 
   // Ignore the center sonar because we are carrying a target
   bool ignore_center_sonar = false;
