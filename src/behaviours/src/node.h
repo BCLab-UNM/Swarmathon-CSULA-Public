@@ -37,15 +37,13 @@ class node
 
         void updatePriority(const int & xDest, const int & yDest);
 
-        //float addParentDirectionCost(const int parentDirection);
-
-        // give better priority to going strait instead of diagonally
+        // give better priority to going in the same direction instead of changing direction.
+        // This is done since the fewer waypoints and turns will lead to less errors
         void nextLevel(const float & i); // i: direction
         
         // Estimation function for the remaining distance to the goal.
         float & estimate (const int & xDest, const int & yDest) ;
 
-        // bool operator<(const node & b);
 };
 
 #endif // NODE_H

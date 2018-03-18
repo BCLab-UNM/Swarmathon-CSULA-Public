@@ -37,6 +37,16 @@ public:
 
   vector<Point> findPath(Point start, Point end);
 
+  //GRID POINT TYPE
+  const double FOG  = -10.00;
+  const double REVEALED   = 0.00;
+  const double MAT  = 1.0;
+  const double MULTICUBES = 2.0;
+  const double SONAR  = 3.0;
+  const double ROVER  = 10.0;
+  const double BUFFER   = 15.0;
+  const double WALL   = 20.0;
+
 
 
 protected:

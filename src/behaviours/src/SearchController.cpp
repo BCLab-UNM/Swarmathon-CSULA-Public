@@ -149,33 +149,6 @@ Point SearchController::GetNewSearchPoint(){
   int pointstries = 25;
   Point pt =  rs.getRandomPointInZone(zone);
 
-
-      if(astarCount<1){
-        Point start, end;
-        start.x=0.0;
-        start.y=0.0;
-        end.x= 5.0;
-        end.y= 6.5;
-
-        vector<Point> waypoints;
-
-        // Gets "fastest" path from start to end point
-        waypoints = findPath( start, end);
-
-        // prints waypoints
-        cout<<  "waypoints length: " << waypoints.size()<<endl;
-        for(int i=0;i<waypoints.size();i++){
-          cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
-        }
-        astarCount++;
-
-
-        std::cout << "---------------------------------------------------" << std::endl;
-        std::cout << "---------------------------------------------------" << std::endl;
-        std::cout << "---------------------------------------------------" << std::endl;
-      }
-
-
   for (int i = 0; i <= zonetries; i++){
     int choosenZone = ChooseZone();
     for (int j = 0; j <= pointstries; j++){
@@ -372,18 +345,18 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
 {
 
     priority_queue<node> pq[2]; // list of open (not-yet-tried) nodes
-    int pqi; // pq index
-    node* n0;
-    node* m0;
+    int pqi; // priority queue, pq, index 
+    node* currentNode;
+    node* childNode;
     int i, j, x, y, xdx, ydy;
-    char c;
+    char directionCharacter;
     pqi=0;
 
 
     Position currentPosition; // This is Position is used to check the value of the current Position we are on GridMap
 
     const int dir=8; // number of possible directions to go at any position
-    int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1}; // Easy was to acces all directions
+    int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1}; // Easy way to acces all directions
     int dy[dir]={0, 1, 1, 1, 0, -1, -1, -1};
 
 
@@ -409,11 +382,11 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     }
 
     // create the start node and push into list of open nodes
-    n0=new node(xStart, yStart, 0.0, 0.0,-1);
-    n0->updatePriority(xFinish, yFinish);
-    pq[pqi].push(*n0);
-    open_nodes_map[x][y]=n0->getPriority(); // mark it on the open nodes map
-    delete n0;
+    currentNode=new node(xStart, yStart, 0.0, 0.0,-1);
+    currentNode->updatePriority(xFinish, yFinish);
+    pq[pqi].push(*currentNode);
+    open_nodes_map[x][y]=currentNode->getPriority(); // mark it on the open nodes map
+    delete currentNode;
   
   
     // A* search
@@ -421,9 +394,9 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
     {
         // get the current node w/ the highest prioritymap[
         // from the list of open nodes
-        n0=new node( pq[pqi].top().getxPos(), pq[pqi].top().getyPos(), pq[pqi].top().getLevel(), pq[pqi].top().getPriority(),pq[pqi].top().getParentDirection());
+        currentNode=new node( pq[pqi].top().getxPos(), pq[pqi].top().getyPos(), pq[pqi].top().getLevel(), pq[pqi].top().getPriority(),pq[pqi].top().getParentDirection());
 
-        x = n0->getxPos(); y = n0->getyPos();
+        x = currentNode->getxPos(); y = currentNode->getyPos();
 
         pq[pqi].pop(); // remove the node from the open list
         open_nodes_map[x][y]=0;
@@ -440,16 +413,16 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
             string path="";
             while(!(x==xStart && y==yStart))
             {
-
+                
                 j=dir_map[x][y];
-                c='0'+(j+dir/2)%dir;
-                path=c+path;
+                directionCharacter='0'+(j+dir/2)%dir;
+                path=directionCharacter+path;
                 x+=dx[j];
                 y+=dy[j];
 
             }
             
-            delete n0; // garbage collection
+            delete currentNode; // garbage collection
             while(!pq[pqi].empty()) pq[pqi].pop(); // empty the leftover nodes        
             return path;
         }
@@ -457,56 +430,69 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
         // generate moves (child nodes) in all possible directions
         for(i=0;i<dir;i++)
         {
-            xdx=x+dx[i]; ydy=y+dy[i];
-            // Transfroms index to matching point in Gridmap
-            currentPosition = Position(indexToPointX(xdx), indexToPointY(ydy));
+            xdx=x+dx[i]; ydy=y+dy[i]; // Sets the indexes of one othe child nodes to xdy and ydy
+            
+            currentPosition = Position(indexToPointX(xdx), indexToPointY(ydy)); // Transfroms index to matching point in Gridmap
 
             // Used to check wether given Point is outside of bounds
+            //
             // if(mapx->paperMap.isInside(currentPosition)){
             //   cout<<"inside the map position ("<<currentPosition<<") "<<endl;
             // }
             // else{cout<<"not inside the map position ("<<currentPosition<<") "<<endl;
             // }
-
-
-
-            // Gets the value of Gridmap at current Position
-            float map_value = mapx->paperMap.atPosition("elevation",currentPosition);
-
-            if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || map_value == 10.0 || map_value == 20.0 || closed_nodes_map[xdx][ydy]==1))
+            
+            float map_value = mapx->paperMap.atPosition("elevation",currentPosition);// Gets the value of Gridmap at current Position
+            cout<<map_value<< endl;
+            if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || map_value == ROVER || map_value == WALL || closed_nodes_map[xdx][ydy]==1))
             {
                 // generate a child node
-                m0=new node( xdx, ydy, n0->getLevel(), n0->getPriority(), n0->getParentDirection());
-                m0->nextLevel(i);
-                m0->updatePriority(xFinish, yFinish);
+                childNode=new node( xdx, ydy, currentNode->getLevel(), currentNode->getPriority(), currentNode->getParentDirection());
+                childNode->nextLevel(i);
+                childNode->updatePriority(xFinish, yFinish);
 
-                //used for debugging
+                // Used for debugging
                 // if(mapx->paperMap.atPosition("elevation",currentPosition)!=-10){
                 //   cout<<"value at position( "<<currentPosition<<") is "<<mapx->paperMap.atPosition("elevation",currentPosition)<<endl;
                 // }
 
-                if(map_value == 3.0){
-                  m0->addcostToPriority(-10.0);
-                } else {
-                  m0->addcostToPriority(map_value);
+                // Adjusts the value recieved from map to better fit how cost is being interpreted 
+                if(map_value == SONAR){
+                  childNode->addcostToPriority(-10.0); // Gives sonar higher priority: -10
+                } 
+                else if(map_value == REVEALED){
+                  childNode->addcostToPriority(-10.0); // Gives revealed higher priority: -10
+                }
+                else if(map_value == FOG){
+                  childNode->addcostToPriority(0.0); // Gives Fog lower priority : 0
+                }
+                else if(map_value == MAT){
+                  childNode->addcostToPriority(9.0); // Gives MAT lower priority : 9
+                }
+                else if(map_value == BUFFER){
+                  childNode->addcostToPriority(20.0); // Gives BUFFER lower priority : 20
+                }
+                else {
+                  childNode->addcostToPriority(map_value); // All other values stay as is
                 } 
 
                 // if it is not in the open list then add into that
                 if(open_nodes_map[xdx][ydy]==0.0)
                 {
-                    bool neg=false;
 
-                    open_nodes_map[xdx][ydy]=m0->getPriority();
+                    open_nodes_map[xdx][ydy]=childNode->getPriority();
 
-                    pq[pqi].push(*m0);
-                    delete m0;
+                    pq[pqi].push(*childNode);
+                    delete childNode;
                     
                     dir_map[xdx][ydy]=(i+dir/2)%dir; // mark its parent node direction
                 }
-                else if(open_nodes_map[xdx][ydy]>m0->getPriority())
+                //else the node is in the open list and if the current priority in the open nodes is larger 
+                //than the priority of the node that is currently being observed
+                else if(open_nodes_map[xdx][ydy]>childNode->getPriority())
                 {
                     
-                    open_nodes_map[xdx][ydy]=m0->getPriority();// update the priority info
+                    open_nodes_map[xdx][ydy]=childNode->getPriority();// update the priority info
                     
                     dir_map[xdx][ydy]=(i+dir/2)%dir;// update the parent direction info
 
@@ -531,15 +517,16 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                         pq[pqi].pop();       
                     }
                     pqi=1-pqi;
-                    pq[pqi].push(*m0); // add the better node instead
-                    delete m0;
+                    pq[pqi].push(*childNode); // add the better node instead
+                    delete childNode;
                     
                 }
-                else delete m0; // garbage collection
+                // Else the current node has already been observed and it has a higher path cost so delete it.
+                else delete childNode; // garbage collection
  
             }
         }
-        delete n0; // garbage collection
+        delete currentNode; // garbage collection
     }
     if(pq[pqi].empty()){
       cout<<"empty"<<endl;

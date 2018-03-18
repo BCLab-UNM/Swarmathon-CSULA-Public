@@ -23,29 +23,23 @@ void node::updatePriority(const int & xDest, const int & yDest)
 }
 
 
-// float node::addParentDirectionCost(const int parentDirection, const int currentDirection){
-//     if(parentDirection==currentDirection){
-//         return -1.0;
-//     }
-//     else{
-//         return 0.0;
-//     }
-// }
-
-// give better priority to going strait instead of diagonally
+// give better priority to going in the same direction instead of changing direction.
+// This is done since the fewer waypoints and turns will lead to less errors
 void node::nextLevel(const float & i) // i: direction
 {   
-    //commented out is what gave better priority to going strait instead of diagonally
+    //commented out is what gave better priority to going straight instead of diagonally
     // const float dir=8; // number of possible directions to go at any position
     // level+=(dir==8?(i%2==0?10:14):10);
+
 
     if(i==parentDirection){
         level-=10.0;
     }
+    else if(parentDirection==-1){level-=10.0;}
     else{level+=0;}
 }
         
-        // Estimation function for the remaining distance to the goal.
+// Estimation function for the remaining distance to the goal.
 float & node::estimate(const int & xDest, const int & yDest) 
 {
     static int xd, yd;
@@ -55,6 +49,7 @@ float & node::estimate(const int & xDest, const int & yDest)
 
     // Euclidian Distance
     d=static_cast<float>(sqrt(xd*xd+yd*yd));
+
     // Manhattan distance
     //d=abs(xd)+abs(yd);
             
@@ -64,17 +59,3 @@ float & node::estimate(const int & xDest, const int & yDest)
     return(d);
 }
 
-
-
-// // Determine priority (in the priority queue)
-// bool node::operator<(const node & b)
-// {
-//     return priority > b.getPriority();
-// }
-
-// bool node::operator> (const ){
-//     return  priority < b.getPriority();
-// }
-
-// bool node::operator== (const node & b){
-//     return priority == b.getPriority();

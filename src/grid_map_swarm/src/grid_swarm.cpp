@@ -191,10 +191,13 @@ int main(int argc, char **argv){
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
 	//ALL FLOATS makebox(size, x, y, rotation (range 0-3.14))
+
+  	// Makes ann obstacle
 	Polygon polygon = makebox(1, 2, 2, 0);
 	for(grid_map::PolygonIterator iterator(map,polygon); !iterator.isPastEnd(); ++iterator) {
 		map.at("elevation", *iterator) = WALL;
 	}
+
 
   while (ros::ok()) {
 	ros::Time time = ros::Time::now();
