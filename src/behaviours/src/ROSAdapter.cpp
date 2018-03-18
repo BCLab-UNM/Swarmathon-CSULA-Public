@@ -99,8 +99,6 @@ geometry_msgs::Pose2D centerLocationOdom;	//The centers location based on ODOM
 geometry_msgs::Pose2D centerLocationMapRef;	//Variable used in TransformMapCenterToOdom, can be moved to make it local instead of global
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 const int numreadings = 7;
 float x_component[numreadings];
 float y_component[numreadings];
@@ -108,12 +106,9 @@ float y_component[numreadings];
     float x_total = 0;
     float y_total = 0;
     float ave = 0;
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 int currentMode = 0;
+bool gmapRan = false;
 const float behaviourLoopTimeStep = 0.1; 	//time between the behaviour loop calls
 const float status_publish_interval = 1;	//time between publishes
 const float heartbeat_publish_interval = 2;	//time between heartbeat publishes
@@ -136,9 +131,9 @@ float drift_tolerance = 0.5; // the perceived difference between ODOM and GPS va
 Result result;		//result struct for passing and storing values to drive robot
 
 std_msgs::String msg;
-
 std_msgs::String names;
-std::string n = "";
+std::string lastnames;
+std::string nam = "";
 std_msgs::Float32 filtered_orientation;
 
 geometry_msgs::Twist velocity;
@@ -147,29 +142,24 @@ string publishedName;	//published hostname
 char prev_state_machine[128];
 
 // Publishers
-ros::Publisher stateMachinePublish;		//publishes state machine status
-ros::Publisher status_publisher;		//publishes rover status
-ros::Publisher fingerAnglePublish;		//publishes gripper angle to move gripper fingers
-ros::Publisher wristAnglePublish;		//publishes wrist angle to move wrist
-ros::Publisher infoLogPublisher;		//publishes a message to the infolog box on GUI
-ros::Publisher driveControlPublish;		//publishes motor commands to the motors
-ros::Publisher heartbeatPublisher;		//publishes ROSAdapters status via its "heartbeat"
-// Publishes swarmie_msgs::Waypoint messages on "/<robot>/waypooints"
-// to indicate when waypoints have been reached.
-ros::Publisher chainNamePublisher;
+ros::Publisher stateMachinePublish;
+ros::Publisher status_publisher;
+ros::Publisher fingerAnglePublish;
+ros::Publisher wristAnglePublish;
+ros::Publisher infoLogPublisher;
+ros::Publisher driveControlPublish;
+ros::Publisher heartbeatPublisher;
 ros::Publisher waypointFeedbackPublisher;
+ros::Publisher chainNamePublisher;
 ros::Publisher filtered_orientationPublish;
 
 // Subscribers
-ros::Subscriber joySubscriber;			//receives joystick information
-ros::Subscriber modeSubscriber; 		//receives mode from GUI
-ros::Subscriber targetSubscriber;		//receives tag data
-ros::Subscriber odometrySubscriber;		//receives ODOM data
-ros::Subscriber mapSubscriber;			//receives GPS data
-ros::Subscriber virtualFenceSubscriber;		//receives data for vitrual boundaries
-
-// manualWaypointSubscriber listens on "/<robot>/waypoints/cmd" for
-// swarmie_msgs::Waypoint messages.
+ros::Subscriber joySubscriber;
+ros::Subscriber modeSubscriber;
+ros::Subscriber targetSubscriber;
+ros::Subscriber odometrySubscriber;
+ros::Subscriber mapSubscriber;
+ros::Subscriber virtualFenceSubscriber;
 ros::Subscriber manualWaypointSubscriber;
 ros::Subscriber roverNameSubscriber;
 ros::Subscriber gridMapSubscriber;
@@ -208,12 +198,10 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 void roverNameHandler(const std_msgs::String& message);
 void gridMapHandler(const grid_map_msgs::GridMap& message);
 
-
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
 
 int main(int argc, char **argv) {
-
   gethostname(host, sizeof (host));
   string hostname(host);
 
@@ -241,7 +229,7 @@ int main(int argc, char **argv) {
   virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
   manualWaypointSubscriber = mNH.subscribe((publishedName + "/waypoints/cmd"), 10, manualWaypointHandler);
   roverNameSubscriber = mNH.subscribe(("/roverNames"), 1, roverNameHandler);
-  gridMapSubscriber = mNH.subscribe(("//grid_map"), 1, gridMapHandler);
+  gridMapSubscriber = mNH.subscribe(("/grid_map"), 1, gridMapHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
@@ -386,7 +374,6 @@ void behaviourStateMachine(const ros::TimerEvent&)
 
       sendDriveCommand(result.pd.left,result.pd.right);
 
-
       //Alter finger and wrist angle is told to reset with last stored value if currently has -1 value
       std_msgs::Float32 angle;
       if (result.fingerAngle != -1)
@@ -406,8 +393,6 @@ void behaviourStateMachine(const ros::TimerEvent&)
 
     //publishHandeling here
     //adds a blank space between sets of debugging data to easily tell one tick from the next
-    
-    //cout << endl;
   }
 
   // mode is NOT auto
@@ -505,7 +490,8 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
   currentMode = message->data;
-  if(currentMode == 2 || currentMode == 3) {
+  if((currentMode == 2 || currentMode == 3) && gmapRan == true) {
+    //sleep(5);
     logicController.SetModeAuto();
   }
   else {
@@ -552,7 +538,7 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
   currentLocation.theta = ave;// }///////////////////////////////updated orientation with the filtered yaw
   /////currentLocation.theta = yaw;
   filtered_orientation.data = ave;
-   cout << " currentLocation.theta : " << currentLocation.theta << endl; //DEBUGGING CODE
+//   cout << " currentLocation.theta : " << currentLocation.theta << endl; //DEBUGGING CODE
   filtered_orientationPublish.publish(filtered_orientation);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -798,13 +784,11 @@ void humanTime() {
   if (frac > 9) {
     frac = 0;
   }
-
-  //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
 }
 
 void roverNameHandler(const std_msgs::String& message){
-	n += message.data + ",";
-	names.data=n;
+	nam += message.data + ",";
+	names.data=nam;
 	chainNamePublisher.publish(names);
 }
 
@@ -814,7 +798,7 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 	GridMap map({"elevation"});
 	map.setFrameId("map");
 	map.setGeometry(Length(15.5,15.5), 0.05);
-//	cout << "ROSAdapter Map Test" << endl;
+	//cout << "ROSAdapter Map Test" << endl;
 	int row = 0;
 	for (double x = -7.70; x <= 7.75; row++){
 		int col = 0;
@@ -826,6 +810,10 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 		}
 		x += 0.05;
 	}
-  GridtoZone::Instance()->setGridMap(map);
-//    gridtozone.setGridMap(map);
+	GridtoZone::Instance()->setGridMap(map);
+	//    gridtozone.setGridMap(map);
+	if (gmapRan == false){
+		logicController.SetModeAuto();
+	}
+	gmapRan = true;
 }

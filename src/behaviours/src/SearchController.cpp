@@ -81,10 +81,7 @@ Result SearchController::DoWork() {
     result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
     
     return result;
-  
 }
-
-
 
 void SearchController::SetCenterLocation(Point centerLocation) {
   

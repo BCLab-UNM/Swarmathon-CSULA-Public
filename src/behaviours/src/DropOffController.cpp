@@ -90,6 +90,8 @@ Result DropOffController::DoWork() {
     return result;
   }
 
+
+
   // Calculates the shortest distance to the center location from the current location
   double distanceToCenter = hypot(this->centerLocation.x - this->currentLocation.x, this->centerLocation.y - this->currentLocation.y);
 

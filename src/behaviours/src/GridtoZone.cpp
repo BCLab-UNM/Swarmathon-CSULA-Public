@@ -6,8 +6,10 @@
 #include <geometry_msgs/PolygonStamped.h>
 
 #include <math.h>
+#include <cmath>
 
 using namespace Eigen;
+using namespace grid_map;
 
 GridtoZone::GridtoZone() { }
 
@@ -15,6 +17,7 @@ GridtoZone* GridtoZone::m_pInstance = NULL;
 
 // OK //
 GridtoZone* GridtoZone::Instance(){
+	//cout << "Grid Instance Made" << endl;
 	if (!m_pInstance){
 		m_pInstance = new GridtoZone;
 	}
@@ -316,25 +319,6 @@ double GridtoZone::percentOfSectionExplored(Position center, double length){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 double GridtoZone::percentOfZoneDiscovered(int zoneindex){
 	return percentOfSectionDiscovered(getZonePosition(zoneindex),zonesize);
 }
@@ -357,15 +341,6 @@ double GridtoZone::percentOfSectionDiscovered(Position center, double length){
 
 	return per;
 }
-
-
-
-
-
-
-
-
-
 
 // Ambrosio do this
 vector<Point> GridtoZone::shortestPath(Point start, Point end){
@@ -416,3 +391,42 @@ bool GridtoZone::obstaclesInZone(Position pos, float sectionlength){
 	return countInSection(pos, sectionlength, wallvalues, 3) > 0;
 }
 
+bool GridtoZone::pathClear(float x1, float y1, float x2, float y2){
+	grid_map::Polygon polygonPath;
+	polygonPath.setFrameId(paperMap.getFrameId());
+
+	double mapValue = -10.00;
+
+	double distX = x2 - x1;
+	double distY = y2 - y1;
+	double distTotal = sqrt((distX*distX) + (distY*distY));
+	float rad = std::atan2(x2 - x1, y2 - y1);
+	float angle = rad * 180/pi;
+	double botLeftX=  0			, botRightX=  0;
+	double botLeftY= -ROVERHALF	, botRightY=  ROVERHALF;
+	double topLeftX =  distTotal, topRightX= distTotal;
+	double topLeftY = -ROVERHALF, topRightY= ROVERHALF;
+
+	double rotateCamTopAngleRX = (topRightX * cos(rad) - topRightY * sin(rad));
+	double rotateCamTopAngleRY = (topRightX * sin(rad) + topRightY * cos(rad));
+	double rotateCamTopAngleLX = (topLeftX * cos(rad) - topLeftY * sin(rad));
+	double rotateCamTopAngleLY = (topLeftX * sin(rad) + topLeftY * cos(rad));
+			
+	double rotateCamBotAngleRX = (botRightX * cos(rad) - botRightY * sin(rad));
+	double rotateCamBotAngleRY = (botRightX * sin(rad) + botRightY * cos(rad));
+	double rotateCamBotAngleLX = (botLeftX * cos(rad) - botLeftY * sin(rad));
+	double rotateCamBotAngleLY = (botLeftX * sin(rad) + botLeftY * cos(rad));	
+
+	polygonPath.addVertex(Position(rotateCamBotAngleRX + x1, rotateCamBotAngleRY + y1));
+	polygonPath.addVertex(Position(rotateCamTopAngleRX + x2, rotateCamTopAngleRY + y2));
+	polygonPath.addVertex(Position(rotateCamTopAngleLX + x2, rotateCamTopAngleLY + y2));
+	polygonPath.addVertex(Position(rotateCamBotAngleLX + x1, rotateCamBotAngleLY + y1));
+	
+	for(grid_map::PolygonIterator iterator(paperMap, polygonPath); !iterator.isPastEnd(); ++iterator) {
+		mapValue = paperMap.at("elevation", *iterator);
+		if(mapValue == WALL){
+			return false;
+		}
+	}	
+	return true;
+}
