@@ -8,6 +8,8 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <grid_map_ros/grid_map_ros.hpp>
+#include <Eigen/Dense>
 
 // ROS messages
 #include <std_msgs/Float32.h>
@@ -22,9 +24,13 @@
 #include <apriltags_ros/AprilTagDetectionArray.h>
 #include <std_msgs/Float32MultiArray.h>
 #include "swarmie_msgs/Waypoint.h"
+#include <grid_map_msgs/GridMap.h>
 
 // Include Controllers
+
+
 #include "LogicController.h"
+#include "GridtoZone.h"
 #include <vector>
 
 #include "Point.h"
@@ -38,6 +44,7 @@
 #include <exception> // For exception handling
 
 using namespace std;
+using namespace grid_map;
 
 // Define Exceptions
 // Define an exception to be thrown if the user tries to create
@@ -98,7 +105,7 @@ const float heartbeat_publish_interval = 2;	//time between heartbeat publishes
 const float waypointTolerance = 0.1; 		//10 cm tolerance.
 
 // used for calling code once but not in main
-bool initilized = false;	//switched to true after running through state machine the first time, initializes base values
+bool initilized = false;
 
 float linearVelocity = 0;	//forward speed, POSITIVE = forward, NEGATIVE = backward
 float angularVelocity = 0;	//turning speed, POSITIVE = left, NEGATIVE = right
@@ -113,8 +120,9 @@ float drift_tolerance = 0.5; // the perceived difference between ODOM and GPS va
 
 Result result;		//result struct for passing and storing values to drive robot
 
-std_msgs::String msg;	//used for passing messages to the GUI
-
+std_msgs::String msg;
+std_msgs::String names;
+std::string n = "";
 
 geometry_msgs::Twist velocity;
 char host[128];		//rovers hostname
@@ -131,7 +139,9 @@ ros::Publisher driveControlPublish;		//publishes motor commands to the motors
 ros::Publisher heartbeatPublisher;		//publishes ROSAdapters status via its "heartbeat"
 // Publishes swarmie_msgs::Waypoint messages on "/<robot>/waypooints"
 // to indicate when waypoints have been reached.
-ros::Publisher waypointFeedbackPublisher;	//publishes a waypoint to travel to if the rover is given a waypoint in manual mode
+ros::Publisher waypointFeedbackPublisher;
+ros::Publisher chainNamePublisher;
+
 
 // Subscribers
 ros::Subscriber joySubscriber;			//receives joystick information
@@ -142,7 +152,9 @@ ros::Subscriber mapSubscriber;			//receives GPS data
 ros::Subscriber virtualFenceSubscriber;		//receives data for vitrual boundaries
 // manualWaypointSubscriber listens on "/<robot>/waypoints/cmd" for
 // swarmie_msgs::Waypoint messages.
-ros::Subscriber manualWaypointSubscriber; 	//receives manual waypoints given from GUI
+ros::Subscriber manualWaypointSubscriber;
+ros::Subscriber roverNameSubscriber;
+ros::Subscriber gridMapSubscriber;
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -164,23 +176,25 @@ tf::TransformListener *tfListener;
 void sigintEventHandler(int signal);
 
 //Callback handlers
-void joyCmdHandler(const sensor_msgs::Joy::ConstPtr& message);				//for joystick control
-void modeHandler(const std_msgs::UInt8::ConstPtr& message);				//for detecting which mode the robot needs to be in
-void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& tagInfo);	//receives and stores April Tag Data using the TAG class
-void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);			//receives and stores ODOM information
-void mapHandler(const nav_msgs::Odometry::ConstPtr& message);				//receives and stores GPS information
-void virtualFenceHandler(const std_msgs::Float32MultiArray& message);			//Used to set an invisible boundary for robots to keep them from traveling outside specific bounds
-void manualWaypointHandler(const swarmie_msgs::Waypoint& message);			//Receives a waypoint (from GUI) and sets the coordinates
-void behaviourStateMachine(const ros::TimerEvent&);					//Upper most state machine, calls logic controller to perform all actions
-void publishStatusTimerEventHandler(const ros::TimerEvent& event);			//Publishes "ONLINE" when rover is successfully connected
-void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);			
-void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);	//handles ultrasound data and stores data
+void joyCmdHandler(const sensor_msgs::Joy::ConstPtr& message);
+void modeHandler(const std_msgs::UInt8::ConstPtr& message);
+void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& tagInfo);
+void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
+void mapHandler(const nav_msgs::Odometry::ConstPtr& message);
+void virtualFenceHandler(const std_msgs::Float32MultiArray& message);
+void manualWaypointHandler(const swarmie_msgs::Waypoint& message);
+void behaviourStateMachine(const ros::TimerEvent&);
+void publishStatusTimerEventHandler(const ros::TimerEvent& event);
+void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
+void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);
+void roverNameHandler(const std_msgs::String& message);
+void gridMapHandler(const grid_map_msgs::GridMap& message);
+
 
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
 
 int main(int argc, char **argv) {
-  
   gethostname(host, sizeof (host));
   string hostname(host);
   
@@ -200,27 +214,29 @@ int main(int argc, char **argv) {
   // Register the SIGINT event handler so the node can shutdown properly
   signal(SIGINT, sigintEventHandler);
   
-  //subscribers
-  joySubscriber = mNH.subscribe((publishedName + "/joystick"), 10, joyCmdHandler);					//receives joystick information
-  modeSubscriber = mNH.subscribe((publishedName + "/mode"), 1, modeHandler);						//receives mode from GUI
-  targetSubscriber = mNH.subscribe((publishedName + "/targets"), 10, targetHandler);					//receives tag data
-  odometrySubscriber = mNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);				//receives ODOM data
-  mapSubscriber = mNH.subscribe((publishedName + "/odom/ekf"), 10, mapHandler);						//receives GPS data
-  virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);					//receives data for vitrual boundaries
-  manualWaypointSubscriber = mNH.subscribe((publishedName + "/waypoints/cmd"), 10, manualWaypointHandler);		//receives manual waypoints given from GUI
+
+  joySubscriber = mNH.subscribe((publishedName + "/joystick"), 10, joyCmdHandler);
+  modeSubscriber = mNH.subscribe((publishedName + "/mode"), 1, modeHandler);
+  targetSubscriber = mNH.subscribe((publishedName + "/targets"), 10, targetHandler);
+  odometrySubscriber = mNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
+  mapSubscriber = mNH.subscribe((publishedName + "/odom/ekf"), 10, mapHandler);
+  virtualFenceSubscriber = mNH.subscribe(("/virtualFence"), 10, virtualFenceHandler);
+  manualWaypointSubscriber = mNH.subscribe((publishedName + "/waypoints/cmd"), 10, manualWaypointHandler);
+  roverNameSubscriber = mNH.subscribe(("/roverNames"), 1, roverNameHandler);
+  gridMapSubscriber = mNH.subscribe(("//grid_map"), 1, gridMapHandler);
   message_filters::Subscriber<sensor_msgs::Range> sonarLeftSubscriber(mNH, (publishedName + "/sonarLeft"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarCenterSubscriber(mNH, (publishedName + "/sonarCenter"), 10);
   message_filters::Subscriber<sensor_msgs::Range> sonarRightSubscriber(mNH, (publishedName + "/sonarRight"), 10);
 
-  //publishers
-  status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);				//publishes rover status
-  stateMachinePublish = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);			//publishes state machine status
-  fingerAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/fingerAngle/cmd"), 1, true);			//publishes gripper angle to move gripper finger
-  wristAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/wristAngle/cmd"), 1, true);			//publishes wrist angle to move wrist
-  infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);						//publishes a message to the infolog box on GUI
-  driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);			//publishes motor commands to the motors
-  heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);		//publishes ROSAdapters status via its "heartbeat"
-  waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);		//publishes a waypoint to travel to if the rover is given a waypoint in manual mode
+  status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);
+  stateMachinePublish = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);
+  fingerAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/fingerAngle/cmd"), 1, true);
+  wristAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/wristAngle/cmd"), 1, true);
+  infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
+  driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
+  heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/behaviour/heartbeat"), 1, true);
+  waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
+  chainNamePublisher = mNH.advertise<std_msgs::String>(("/chainName"), 1, true);
 
   //timers
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
@@ -239,7 +255,7 @@ int main(int argc, char **argv) {
   infoLogPublisher.publish(msg);
   
   stringstream ss;
-  ss << "Rover start delay set to " << startDelayInSeconds << " seconds";
+  ss << publishedName << " Rover start delay set to " << startDelayInSeconds << " seconds";
   msg.data = ss.str();
   infoLogPublisher.publish(msg);
 
@@ -375,7 +391,8 @@ void behaviourStateMachine(const ros::TimerEvent&)
     
     
     //adds a blank space between sets of debugging data to easily tell one tick from the next
-    cout << endl;
+    
+    //cout << endl;
     
   }
   
@@ -454,14 +471,14 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
       // Pass the position of the AprilTag
       geometry_msgs::PoseStamped tagPose = message->detections[i].pose;
       loc.setPosition( make_tuple( tagPose.pose.position.x,
-				   tagPose.pose.position.y,
-				   tagPose.pose.position.z ) );
+           tagPose.pose.position.y,
+           tagPose.pose.position.z ) );
 
       // Pass the orientation of the AprilTag
       loc.setOrientation( ::boost::math::quaternion<float>( tagPose.pose.orientation.x,
-							    tagPose.pose.orientation.y,
-							    tagPose.pose.orientation.z,
-							    tagPose.pose.orientation.w ) );
+                  tagPose.pose.orientation.y,
+                  tagPose.pose.orientation.z,
+                  tagPose.pose.orientation.w ) );
       tags.push_back(loc);
     }
     
@@ -738,6 +755,33 @@ void humanTime() {
   if (frac > 9) {
     frac = 0;
   }
-  
-  //cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
+//cout << "System has been Running for :: " << hoursTime << " : hours " << minutesTime << " : minutes " << timeDiff << "." << frac << " : seconds" << endl; //you can remove or comment this out it just gives indication something is happening to the log file
+}
+
+void roverNameHandler(const std_msgs::String& message){
+	n += message.data + ",";
+	names.data=n;
+	chainNamePublisher.publish(names);
+}
+
+//GridtoZone gridtozone;
+void gridMapHandler(const grid_map_msgs::GridMap& message){
+
+	GridMap map({"elevation"});
+	map.setFrameId("map");
+	map.setGeometry(Length(15.5,15.5), 0.05);
+//	cout << "ROSAdapter Map Test" << endl;
+	int row = 0;
+	for (double x = -7.70; x <= 7.75; row++){
+		int col = 0;
+		for(double y = 7.70; y >= -7.75; col++){
+			Eigen::Vector2d position(x,y);
+			double value = message.data[0].data[(row*310)+col];
+			map.atPosition("elevation", position) = value;
+			y -= 0.05;
+		}
+		x += 0.05;
+	}
+  GridtoZone::Instance()->setGridMap(map);
+//    gridtozone.setGridMap(map);
 }

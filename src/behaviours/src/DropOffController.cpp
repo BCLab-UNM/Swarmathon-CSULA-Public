@@ -42,7 +42,7 @@ DropOffController::~DropOffController() {
 }
 
 Result DropOffController::DoWork() {
-
+  GridtoZone::Instance()->updatePaperMap();
   //cout << "8" << endl; //Debugging statement
   // Getting the total tag count from the left and the right side of the rover
   int count = countLeft + countRight;
@@ -95,6 +95,7 @@ Result DropOffController::DoWork() {
 
   //check to see if we are driving to the center location or if we need to drive in a circle and look.
   if (distanceToCenter > collectionPointVisualDistance && !circularCenterSearching && (count == 0)) {
+    bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.y, this->currentLocation.x);
     // Sets driving mode to waypoint
     result.type = waypoint;
     // Clears all the waypoints in the vector
@@ -108,7 +109,17 @@ Result DropOffController::DoWork() {
     // Reset elapsed time
     timerTimeElapsed = 0;
 
-    return result;
+    if(pathClear)
+    {
+      return result;
+    }
+    //else do A* search here
+    else
+    {
+      //insert A* here
+      return result;
+    }
+    
 
   }
   else if (timerTimeElapsed >= 2)//spin search for center
