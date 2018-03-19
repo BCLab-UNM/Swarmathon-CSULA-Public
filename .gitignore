@@ -1,7 +1,6 @@
 *~
 \#*#
 build
-arduino
 devel
 **/CMakeLists.txt.user*
 *.swp
