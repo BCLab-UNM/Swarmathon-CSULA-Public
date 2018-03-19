@@ -42,8 +42,6 @@ DropOffController::~DropOffController() {
 }
 
 Result DropOffController::DoWork() {
-
-  //cout << "8" << endl; //Debugging statement
   // Getting the total tag count from the left and the right side of the rover
   int count = countLeft + countRight;
 
@@ -59,7 +57,7 @@ Result DropOffController::DoWork() {
   //to resart our search.
   if(reachedCollectionPoint)
   {
-    //cout << "2" << endl; //Debugging statement
+    cout << "DROPOFF: Reached collection point" << endl;
     if (timerTimeElapsed >= 5)
     {
       if (finalInterrupt)
@@ -72,7 +70,7 @@ Result DropOffController::DoWork() {
       else
       {
         finalInterrupt = true;
-        //cout << "1" << endl; //Debugging statement
+        cout << "DROPOFF: Final Interrupt" << endl;
       }
     }
     else if (timerTimeElapsed >= 0.1)
@@ -155,10 +153,16 @@ Result DropOffController::DoWork() {
 
   if (count > 0 || seenEnoughCenterTags || prevCount > 0) //if we have a target and the center is located drive towards it.
   {
-
-    //cout << "9" << endl; //Debugging statement
+    if (seenEnoughCenterTags) { //if the rover sees enough center tags
+        cout << "DROPOFF: Driving into the center" << endl;
+    }
+    else
+    {
+        cout << "DROPOFF: Center Seen" << endl;
+    }
     centerSeen = true;
 
+    cout <<  "DROPOFF: Count: " << count << "\tLeft: " << countLeft << "\tRight: " << countRight << endl;
 
     if (first_center && isPrecisionDriving)
     {
@@ -171,15 +175,15 @@ Result DropOffController::DoWork() {
     isPrecisionDriving = true;
 
     if (seenEnoughCenterTags) //if we have seen enough tags
-    {
-      if ((countLeft-5) > countRight) //and there are too many on the left
-      {
-        right = false; //then we say none on the right to cause us to turn right
-      }
-      else if ((countRight-5) > countLeft)
-      {
-        left = false; //or left in this case
-      }
+        {
+          if ((countLeft-5) > countRight) //if there are too many on the left
+          {
+              right = false; //then we say none on the right to cause us to turn right
+          }
+          else if ((countRight-5) > countLeft)
+          {
+              left = false; //or left in this case
+          }
     }
 
     float turnDirection = 1;
@@ -241,8 +245,7 @@ Result DropOffController::DoWork() {
     float timeSinceSeeingEnoughCenterTags = elapsed/1e3; // Convert from milliseconds to seconds
     if (timeSinceSeeingEnoughCenterTags > lostCenterCutoff)
     {
-      //cout << "4" << endl;
-      //go back to drive to center base location instead of drop off attempt
+      cout << "DROPOFF: Going to center base location instead of drop off attempt" << endl;  //go back to drive to center base location instead of drop off attempt
       reachedCollectionPoint = false;
       seenEnoughCenterTags = false;
       centerApproach = false;
@@ -307,8 +310,7 @@ void DropOffController::Reset() {
   targetHeld = false;
   startWaypoint = false;
   first_center = true;
-  //cout << "6" << endl;
-
+  cout << "DROPOFF: Reset" << endl;
 }
 
 // Individually calculates and sets the number of tags seen on the right and the left of the rover

@@ -52,7 +52,7 @@ findDevicePath() {
     done
 }
 echo "******************************************************************************************************Loading calibration values************************************************************************************************************************"
-./load_calibration_values.sh
+#./load_calibration_values.sh
 
 #Startup ROS packages/processes
 echo "Loading calibration data and swarmie_control sketch"
