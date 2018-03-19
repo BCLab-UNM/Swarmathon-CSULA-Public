@@ -113,6 +113,10 @@ const float behaviourLoopTimeStep = 0.1; 	//time between the behaviour loop call
 const float status_publish_interval = 1;	//time between publishes
 const float heartbeat_publish_interval = 2;	//time between heartbeat publishes
 const float waypointTolerance = 0.1; 		//10 cm tolerance.
+const float pi = std::acos(-1);
+float xoffset = 0.0;
+float yoffset = 0.0;
+bool orntnOnce= true;
 
 // used for calling code once but not in main
 bool initilized = false;
@@ -304,14 +308,14 @@ void behaviourStateMachine(const ros::TimerEvent&)
       initilized = true;
       //TODO: this just sets center to 0 over and over and needs to change
       Point centerOdom;
-      centerOdom.x = 1.3 * cos(currentLocation.theta);
-      centerOdom.y = 1.3 * sin(currentLocation.theta);
+      centerOdom.x = 0;//1.3 * cos(currentLocation.theta);
+      centerOdom.y = 0;//1.3 * sin(currentLocation.theta);
       centerOdom.theta = centerLocation.theta;
       logicController.SetCenterLocationOdom(centerOdom);
 
       Point centerMap;
-      centerMap.x = currentLocationMap.x + (1.3 * cos(currentLocationMap.theta));
-      centerMap.y = currentLocationMap.y + (1.3 * sin(currentLocationMap.theta));
+      centerMap.x = currentLocationMap.x + 0;//(1.3 * cos(currentLocationMap.theta));
+      centerMap.y = currentLocationMap.y + 0;//(1.3 * sin(currentLocationMap.theta));
       centerMap.theta = centerLocationMap.theta;
       logicController.SetCenterLocationMap(centerMap);
 
@@ -507,10 +511,6 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 }
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
-  //Get (x,y) location directly from pose
-  currentLocation.x = message->pose.pose.position.x;
-  currentLocation.y = message->pose.pose.position.y;
-
   //Get theta rotation by converting quaternion orientation to pitch/roll/yaw
   tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
   tf::Matrix3x3 m(q);
@@ -541,7 +541,25 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 //   cout << " currentLocation.theta : " << currentLocation.theta << endl; //DEBUGGING CODE
   filtered_orientationPublish.publish(filtered_orientation);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+  double point = 0.0;
+  if (orntnOnce == true){
+  	if (ave <= -3.14 + pi/24 && ave >= -3.14 - pi/24){
+  		point = 3.14;
+  	}else{
+  		for (point = 3.14; point > -3.14; point -= pi/12){
+  			//cout <<"2Point:"<<point<<endl;
+  			if (ave <= point + pi/24 && ave >= point - pi/24){
+  				break;
+  			}
+  		}
+  	}
+  	xoffset = -1.2 * cos(point);
+  	yoffset = -1.2 * sin(point);
+  	orntnOnce = false;
+  }
+  //Get (x,y) location directly from pose
+  currentLocation.x = message->pose.pose.position.x + xoffset;
+  currentLocation.y = message->pose.pose.position.y + yoffset;
 
 
 

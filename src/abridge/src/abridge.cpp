@@ -51,10 +51,20 @@ float data;
 float diff = 0.30;
 const int readings = 2;
 float center[readings];
+float leftR[readings];
+float rightR[readings];
 float centerdiff;
-bool firstreading=true;
-bool updatereadings=false;
-int counter = 0;
+float leftdiff;
+float rightdiff;
+bool fcreading=true;
+bool flreading=true;
+bool frreading=true;
+bool ucreadings=false;
+bool ulreadings=false;
+bool urreadings=false;
+int centercounter = 0;
+int leftcounter = 0;
+int rightcounter = 0;
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -314,61 +324,89 @@ void parseData(string str) {
 			}
 			else if (dataSet.at(0) == "USL") {
 				sonarLeft.header.stamp = ros::Time::now();
-				sonarLeft.range = atof(dataSet.at(2).c_str()) / 100.0;
+				data = atof(dataSet.at(2).c_str()) / 100.0;
+				leftR[1] = data; 
+				if(flreading){
+					leftR[0] = data;
+					flreading=false;
+				}
+				if(ulreadings){
+					leftR[0] = data;
+					ulreadings=false;
+				}
+				leftdiff = abs(leftR[1]-leftR[0]);
+				if (leftdiff > diff) {
+					sonarLeft.range = leftR[0];
+					leftR[1]=leftR[0];
+					leftcounter++;
+				}else{
+					sonarLeft.range = leftR[1];
+					leftcounter=0;
+				}
+				if(leftcounter == 3){
+					ulreadings = true;
+					leftcounter=0;
+				}
+				leftR[0] = leftR[1];
 			}
 			else if (dataSet.at(0) == "USC") {
 				sonarCenter.header.stamp = ros::Time::now();
 				data = atof(dataSet.at(2).c_str()) / 100.0;
-				//cout << "  firstreading = " << firstreading << endl;
-				//cout << "  updatereadings = " << updatereadings << endl;
 				center[1] = data; 
-
-				if(firstreading){
-				center[0] = data;
-				firstreading=false;
+				if(fcreading){
+					center[0] = data;
+					fcreading=false;
 				}
-
-				if(updatereadings){
-				center[0] = data;
-				updatereadings=false;
+				if(ucreadings){
+					center[0] = data;
+					ucreadings=false;
 				}
-
 				centerdiff = abs(center[1]-center[0]);
-				//cout << "-----------------------------------------------"<<endl;
-				//cout << " center[0] = " << center[0] << endl;
-				//cout << " center[1] = " << center[1] << endl;
-				//cout << " difference = " << centerdiff<<endl; 
-			
 				if (centerdiff > diff) {
 					sonarCenter.range = center[0];
 					center[1]=center[0];
-					counter++;
-				}
-			
-				else{
+					centercounter++;
+				}else{
 					sonarCenter.range = center[1];
-					counter=0;
+					centercounter=0;
 				}
-
-				if(counter == 3){
-				updatereadings = true;
-				counter=0;
+				if(centercounter == 3){
+					ucreadings = true;
+					centercounter=0;
 				}
-				//cout << "   counter = " << counter << endl;
-				//cout << "   sonar = " << sonarCenter.range<<endl;
-				//cout << "-----------------------------------------------"<<endl; 
 				center[0] = center[1];
 			}
 			else if (dataSet.at(0) == "USR") {
 				sonarRight.header.stamp = ros::Time::now();
-				sonarRight.range = atof(dataSet.at(2).c_str()) / 100.0;
+				data = atof(dataSet.at(2).c_str()) / 100.0;
+				rightR[1] = data; 
+				if(frreading){
+					rightR[0] = data;
+					frreading=false;
+				}
+				if(urreadings){
+					rightR[0] = data;
+					urreadings=false;
+				}
+				rightdiff = abs(rightR[1]-rightR[0]);
+				if (rightdiff > diff) {
+					sonarRight.range = rightR[0];
+					rightR[1]=rightR[0];
+					rightcounter++;
+				}else{
+					sonarRight.range = rightR[1];
+					rightcounter=0;
+				}
+				if(rightcounter == 3){
+					urreadings = true;
+					rightcounter=0;
+				}
+				rightR[0] = rightR[1];
 			}
 
 		}
 	}
 }
-
-
 
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
 	currentMode = message->data;
