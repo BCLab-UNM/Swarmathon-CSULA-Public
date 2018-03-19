@@ -34,21 +34,10 @@ public:
   int ChooseZone();
   Point GetNewSearchPoint();
 
-  vector<Point> findPath(Point start, Point end);
+  
 
-  //GRID POINT TYPE
-  const double FOG  = -10.00;
-  const double REVEALED   = 0.00;
-  const double MAT  = 1.0;
-  const double MULTICUBES = 2.0;
-  const double SONAR  = 3.0;
-  const double ROVER  = 10.0;
-  const double BUFFER   = 15.0;
-  const double WALL   = 20.0;
 
   // Position realtogridPosition(Point point);
-
-
 
 protected:
 
@@ -62,8 +51,6 @@ private:
   Point searchLocation;
   int attemptCount = 0;
 
-
-  int astarCount=0;
 
   //struct for returning data to ROS adapter
   Result result;
@@ -100,18 +87,6 @@ private:
   Spiral s;
   int c = 0;
 
-  GridtoZone* mapx;
-  int mapLength;
-  int mapWidth;
-
-
-  int pointXToIndex(float X);
-  int pointYToIndex(float Y);
-  float indexToPointX(int i);
-  float indexToPointY(int j);
-
-  vector<Point> parseRoute(string route, float x, float y);
-  string Astar( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish );
 
   Position realtogridPosition(Point point);
 

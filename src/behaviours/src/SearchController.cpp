@@ -46,6 +46,35 @@ Result SearchController::DoWork() {
       result.type = waypoint;
       first_waypoint = false;
 
+      
+      // if(btmn<1){
+      //   Point start, end;
+      //   start.x= 0.0;
+      //   start.y= 0.0;
+      //   end.x= 5.0;
+      //   end.y= 5.0;  
+      //   // end.x= 5.0;
+      //   // end.y= 6.5;
+
+      //   vector<Point> waypoints;
+
+      //   // Gets "fastest" path from start to end point
+      //   // waypoints = findPath( start, end);
+      //   waypoints = GridtoZone::Instance()->shortestPath( start, end);
+
+      //   // prints waypoints
+      //   cout<<  "waypoints length: " << waypoints.size()<<endl;
+      //   for(int i=0;i<waypoints.size();i++){
+      //     cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
+      //   }
+      //   btmn++;
+
+
+      //   std::cout << "---------------------------------------------------" << std::endl;
+      //   std::cout << "---------------------------------------------------" << std::endl;
+      //   std::cout << "---------------------------------------------------" << std::endl;
+      // }
+
       GridtoZone::Instance()->updatePaperMap();
       if(gtzVerbose){
         std::cout << "Testing GTZ" << std::endl;
@@ -75,6 +104,12 @@ Result SearchController::DoWork() {
         GridtoZone::Instance()->updatePaperMap();
         centralSpiralLocation = GetNewSearchPoint();
         //centralSpiralLocation = rs.getRandomPointInZone(zone);
+
+
+
+ std::cout<<  "centralSpiralLocation: (" << centralSpiralLocation.x<< " , " << centralSpiralLocation.y<<") "<<std::endl; 
+
+ std::cout<<  "currentLocation: (" << currentLocation.x<< " , " << currentLocation.y<<") "<<std::endl; 
 
         Direction direction = Direction(rng->uniformInteger(0,3));
         bool clockwise = rng->uniformInteger(0,1);
@@ -247,349 +282,6 @@ int SearchController::ChooseZone(){
 }
 
 
-// Determine priority (in the priority queue)
-bool operator<(const node & a, const node & b){
-  return a.getPriority() > b.getPriority();
-}
-
-//converts a the x value of a Point to a row value of index
-int SearchController::pointXToIndex(float X){
-  return (mapWidth/2 - 20*X);
-}
-
-//converts a the y value of a Point to a column value of index
-int SearchController::pointYToIndex(float Y){
-  return (mapLength/2 - 20*Y);
-}
-
-//converts the row value of an index to a x value of a Point
-float SearchController::indexToPointX(int i){
-  return (mapWidth/2 - i)/20;
-}
-
-//converts the column value of an index to a y value of a Point
-float SearchController::indexToPointY(int j){
-  return (mapLength/2 - j)/20;
-}
-
-// Parses the given route in string form int waypoints
-vector<Point> SearchController::parseRoute(string route, float x, float y){
-  std::vector<Point> waypoints;
-
-  int routeLength = route.length();
-  string routeArray[routeLength];
-
-  // set point to the original starting Point
-  Point point;
-  point.x=x;
-  point.y=y;
-  
-  const float celldivision=0.05;
-  
-  float distance = 0.0;
-
-
-  // Makes route into array of characters
-  int count=0;
-  stringstream ssin(route);
-  while (ssin.good() && count < routeLength){
-    routeArray[count]=ssin.get();
-    count++;
-  }
- 
-  int routeCount=0; // Used to keep track of the number of steps within the same direction
-
-  // Iterates through all steps in route
-  for(int step = 0; step < routeLength; step++){
-
-        // if the current step is not the first and the previos step and the current step are not in the same direction 
-        if(step>0 && routeArray[step-1]!=routeArray[step]){
-          
-          
-          distance = celldivision * routeCount; // The distance traveled in the previous direction
-
-          // Add the distance traveled in the previos direction to the point
-          if(routeArray[step-1]=="0"){point.y=point.y + (distance);}
-          else if(routeArray[step-1]=="1"){point.y=point.y + (distance); point.x=point.x - (distance);}
-          else if(routeArray[step-1]=="2"){point.x=point.x - (distance);}
-          else if(routeArray[step-1]=="3"){point.y=point.y - (distance); point.x=point.x - (distance);}
-          else if(routeArray[step-1]=="4"){point.y=point.y - (distance);}
-          else if(routeArray[step-1]=="5"){point.y=point.y - (distance); point.x=point.x + (distance);}
-          else if(routeArray[step-1]=="6"){point.x=point.x + (distance);}
-          else {point.y=point.y + (distance); point.x=point.x + (distance);} //routeArray[step-1]=="7"
-
-
-          waypoints.push_back(point);  // Add the point to collection of waypoints
-          routeCount=0;  // Reset count since new direction
-
-        }
-
-        routeCount++; // Increment count since another step was taken in the same direction
-
-        // if this is the last step
-        if(step==routeLength-1){
-
-          
-          distance = celldivision * routeCount; // The distance traveled in the previous direction
-
-          // Add the distance traveled in the previos direction to the point
-          if(routeArray[step-1]=="0"){point.y=point.y + (distance);}
-          else if(routeArray[step-1]=="1"){point.y=point.y + (distance); point.x=point.x - (distance);}
-          else if(routeArray[step-1]=="2"){point.x=point.x - (distance);}
-          else if(routeArray[step-1]=="3"){point.y=point.y - (distance); point.x=point.x - (distance);}
-          else if(routeArray[step-1]=="4"){point.y=point.y - (distance);}
-          else if(routeArray[step-1]=="5"){point.y=point.y - (distance); point.x=point.x + (distance);}
-          else if(routeArray[step-1]=="6"){point.x=point.x + (distance);}
-          else {point.y=point.y + (distance); point.x=point.x + (distance);} //routeArray[step-1]=="7"
-
-          waypoints.push_back(point);  // Add the point to collection of waypoints
-          routeCount=0;  // Reset count since new direction
-
-          }
-    }
-
-    return waypoints;
-}
-
-string SearchController::Astar( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish )
-{
-
-    priority_queue<node> pq[2]; // list of open (not-yet-tried) nodes
-    int pqi; // priority queue, pq, index 
-    node* currentNode;
-    node* childNode;
-    int i, j, x, y, xdx, ydy;
-    char directionCharacter;
-    pqi=0;
-
-
-    Position currentPosition; // This is Position is used to check the value of the current Position we are on GridMap
-
-    const int dir=8; // number of possible directions to go at any position
-    int dx[dir]={1, 1, 0, -1, -1, -1, 0, 1}; // Easy way to acces all directions
-    int dy[dir]={0, 1, 1, 1, 0, -1, -1, -1};
-
-
-
-    mapx->updatePaperMap(); // Updates Grid map 
-  
-    const int n=mapWidth; // horizontal size of the map x-axis
-    const int m=mapLength; // vertical size size of the map y-axis    
-
-    float closed_nodes_map[n][m]; // map of closed (tried-out) nodes
-    float open_nodes_map[n][m]; // map of open (not-yet-tried) nodes
-    float dir_map[n][m]; // map of directions
-    int count =0;
-
-    // reset the node maps
-    for(y=0;y<m;y++)
-    {
-        for(x=0;x<n;x++)
-        {
-            closed_nodes_map[x][y]=0.0;
-            open_nodes_map[x][y]=0.0;
-        }
-    }
-
-    // create the start node and push into list of open nodes
-    currentNode=new node(xStart, yStart, 0.0, 0.0,-1);
-    currentNode->updatePriority(xFinish, yFinish);
-    pq[pqi].push(*currentNode);
-    open_nodes_map[x][y]=currentNode->getPriority(); // mark it on the open nodes map
-    delete currentNode;
-  
-  
-    // A* search
-    while(!pq[pqi].empty())
-    {
-        // get the current node w/ the highest prioritymap[
-        // from the list of open nodes
-        currentNode=new node( pq[pqi].top().getxPos(), pq[pqi].top().getyPos(), pq[pqi].top().getLevel(), pq[pqi].top().getPriority(),pq[pqi].top().getParentDirection());
-
-        x = currentNode->getxPos(); y = currentNode->getyPos();
-
-        pq[pqi].pop(); // remove the node from the open list
-        open_nodes_map[x][y]=0;
-        
-        closed_nodes_map[x][y]=1;// mark it on the closed nodes map
-        count++;
-
-
-        // quit searching when the goal state is reached
-        if(x==xFinish && y==yFinish) 
-        {
-            // generate the path from finish to start
-            // by following the directions
-            string path="";
-            while(!(x==xStart && y==yStart))
-            {
-                
-                j=dir_map[x][y];
-                directionCharacter='0'+(j+dir/2)%dir;
-                path=directionCharacter+path;
-                x+=dx[j];
-                y+=dy[j];
-
-            }
-            
-            delete currentNode; // garbage collection
-            while(!pq[pqi].empty()) pq[pqi].pop(); // empty the leftover nodes        
-            return path;
-        }
-
-        // generate moves (child nodes) in all possible directions
-        for(i=0;i<dir;i++)
-        {
-            xdx=x+dx[i]; ydy=y+dy[i]; // Sets the indexes of one othe child nodes to xdy and ydy
-            
-            currentPosition = Position(indexToPointX(xdx), indexToPointY(ydy)); // Transfroms index to matching point in Gridmap
-
-            // Used to check wether given Point is outside of bounds
-            //
-            // if(mapx->paperMap.isInside(currentPosition)){
-            //   cout<<"inside the map position ("<<currentPosition<<") "<<endl;
-            // }
-            // else{cout<<"not inside the map position ("<<currentPosition<<") "<<endl;
-            // }
-            
-            float map_value = mapx->paperMap.atPosition("elevation",currentPosition);// Gets the value of Gridmap at current Position
-            cout<<map_value<< endl;
-            if(!(xdx<0 || xdx>n-1 || ydy<0 || ydy>m-1 || map_value == ROVER || map_value == WALL || closed_nodes_map[xdx][ydy]==1))
-            {
-                // generate a child node
-                childNode=new node( xdx, ydy, currentNode->getLevel(), currentNode->getPriority(), currentNode->getParentDirection());
-                childNode->nextLevel(i);
-                childNode->updatePriority(xFinish, yFinish);
-
-                // Used for debugging
-                // if(mapx->paperMap.atPosition("elevation",currentPosition)!=-10){
-                //   cout<<"value at position( "<<currentPosition<<") is "<<mapx->paperMap.atPosition("elevation",currentPosition)<<endl;
-                // }
-
-                // Adjusts the value recieved from map to better fit how cost is being interpreted 
-                if(map_value == SONAR){
-                  childNode->addcostToPriority(-10.0); // Gives sonar higher priority: -10
-                } 
-                else if(map_value == REVEALED){
-                  childNode->addcostToPriority(-10.0); // Gives revealed higher priority: -10
-                }
-                else if(map_value == FOG){
-                  childNode->addcostToPriority(0.0); // Gives Fog lower priority : 0
-                }
-                else if(map_value == MAT){
-                  childNode->addcostToPriority(9.0); // Gives MAT lower priority : 9
-                }
-                else if(map_value == BUFFER){
-                  childNode->addcostToPriority(21.0); // Gives BUFFER lower priority : 21
-                }
-                else {
-                  childNode->addcostToPriority(map_value); // All other values stay as is
-                } 
-
-                // if it is not in the open list then add into that
-                if(open_nodes_map[xdx][ydy]==0.0)
-                {
-
-                    open_nodes_map[xdx][ydy]=childNode->getPriority();
-
-                    pq[pqi].push(*childNode);
-                    delete childNode;
-                    
-                    dir_map[xdx][ydy]=(i+dir/2)%dir; // mark its parent node direction
-                }
-                //else the node is in the open list and if the current priority in the open nodes is larger 
-                //than the priority of the node that is currently being observed
-                else if(open_nodes_map[xdx][ydy]>childNode->getPriority())
-                {
-                    
-                    open_nodes_map[xdx][ydy]=childNode->getPriority();// update the priority info
-                    
-                    dir_map[xdx][ydy]=(i+dir/2)%dir;// update the parent direction info
-
-                    // replace the node
-                    // by emptying one pq to the other one
-                    // except the node to be replaced will be ignored
-                    // and the new node will be pushed in instead
-                    while(!(pq[pqi].top().getxPos()==xdx && pq[pqi].top().getyPos()==ydy))
-                    {                
-
-                        pq[1-pqi].push(pq[pqi].top());
-                        pq[pqi].pop();       
-                    }
-                    pq[pqi].pop(); // remove the wanted node
-                    
-                    // empty the larger size pq to the smaller one
-                    if(pq[pqi].size()>pq[1-pqi].size()) pqi=1-pqi;
-                    while(!pq[pqi].empty())
-                    {                
-
-                        pq[1-pqi].push(pq[pqi].top());
-                        pq[pqi].pop();       
-                    }
-                    pqi=1-pqi;
-                    pq[pqi].push(*childNode); // add the better node instead
-                    delete childNode;
-                    
-                }
-                // Else the current node has already been observed and it has a higher path cost so delete it.
-                else delete childNode; // garbage collection
- 
-            }
-        }
-        delete currentNode; // garbage collection
-    }
-    if(pq[pqi].empty()){
-      cout<<"empty"<<endl;
-    }
-    return ""; // no route found
-}
-
-vector<Point> SearchController::findPath(Point start, Point end){
-
-
-  vector<Point> waypoints;
-
-  // Switches x and y values as well as multiplies y value by -1
-  // This is done to account for Gridmap's switched Y axis
-  float xA = -1 * start.y;
-  float yA = start.x;
-
-  float xB = -1 * end.y;
-  float yB = end.x;
-
-
-  // Sets GridMap to map and updates it to most recent map.
-  mapx = GridtoZone::Instance();
-  mapx->updatePaperMap();
-
-  // Gets the length and width of the Gridmap
-  mapLength = mapx->paperMap.getSize()(0);
-  mapWidth = mapx->paperMap.getSize()(1);
-
-  // Converts x and y float values of Points to int appropriate index values
-  // This is done because a star uses arrays
-  int xStart = pointXToIndex(xA);
-  int yStart = pointYToIndex(yA);
-  int xFinish = pointXToIndex(xB);
-  int yFinish = pointYToIndex(yB);
-
-
-  // Give Astar start indexes and finish indexes
-  // Returned will be the fastest route astar found put together as a string
-  string route=Astar(xStart, yStart, xFinish, yFinish);
-
-
-  if(route=="") cout<<"An empty route generated!"<<endl;
-  
-  //kept for debuging purposes prints the route string returned from astar
-  // cout<<"Route:"<<endl;
-  // cout<<route<<endl<<endl;
-
-  // Parse the route and get waypoints 
-  waypoints=parseRoute(route, start.x,start.y);
-
-  return waypoints;
-}
 
 
 Position SearchController::realtogridPosition(Point point){
