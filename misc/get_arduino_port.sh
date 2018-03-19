@@ -16,6 +16,4 @@ for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
 done
 }
 get_arduino_port
-
-# START OF LOAD CALIBRATION
-
+# END OF GET ARDUINO PORT FUNTION 

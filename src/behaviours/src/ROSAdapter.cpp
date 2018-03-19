@@ -535,8 +535,8 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
       }
     ave = atan2(y_total,x_total);
 
-  currentLocation.theta = ave;// }///////////////////////////////updated orientation with the filtered yaw
-  /////currentLocation.theta = yaw;
+  //currentLocation.theta = ave;// }///////////////////////////////updated orientation with the filtered yaw
+  currentLocation.theta = yaw;
   filtered_orientation.data = ave;
 //   cout << " currentLocation.theta : " << currentLocation.theta << endl; //DEBUGGING CODE
   filtered_orientationPublish.publish(filtered_orientation);
