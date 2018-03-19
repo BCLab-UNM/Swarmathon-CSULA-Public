@@ -15,7 +15,8 @@ public:
   Result DoWork() override;
   void setSonarData(float left, float center, float right);
   void setCurrentLocation(Point currentLocation);
-  void setTagData(vector<Tag> tags);
+  void setTagDataForCollectionZone(vector<Tag> tags);
+  void setTagDataForCube(vector<Tag> tags);
   bool ShouldInterrupt() override;
   bool HasWork() override;
   void setIgnoreCenterSonar();
@@ -38,10 +39,12 @@ private:
 
   // Try not to run into a physical object
   void avoidObstacle();
+  void avoidCube();
 
   // Are there AprilTags in the camera view that mark the collection zone
   // and are those AprilTags oriented towards or away from the camera.
   bool checkForCollectionZoneTags( vector<Tag> );
+  bool checkForCubeTags(vector<Tag>);
   
   const float K_angular = 1.0; //radians a second turn rate to avoid obstacles
   const float reactivate_center_sonar_threshold = 0.8; //reactive center sonar if it goes back above this distance, assuming it is deactivated
@@ -49,7 +52,7 @@ private:
   const float obstacleDistancePivot = 0.2526; ///unused variable
   const float triggerDistance = 0.8;
 
-  /*
+    /*
      * Member variables
      */
 
@@ -80,6 +83,7 @@ private:
 
   bool phys = false; // Physical obstacle
   bool collection_zone_seen = false; // The obstacle is the collection zone
+  bool cube_seen = false; //Another cube is seen when picking up a cube
   
   bool set_waypoint = false;
   bool can_set_waypoint = false;
