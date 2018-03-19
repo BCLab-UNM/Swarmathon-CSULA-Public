@@ -25,7 +25,10 @@ void ObstacleController::avoidObstacle() {
     if (right < 0.8 || center < 0.8 || left < 0.8) {
       result.type = precisionDriving;
 
+      cout << "OBSTACLE: Turning left to AVOID OBSTACLE/ANOTHER ROVER" << endl;
+
       result.pd.cmdAngular = -K_angular;
+
 
       result.pd.setPointVel = 0.0;
       result.pd.cmdVel = 0.0;
@@ -39,13 +42,13 @@ void ObstacleController::avoidCollectionZone() {
   
     result.type = precisionDriving;
 
-    result.pd.cmdVel = 0.0;
-
     // Decide which side of the rover sees the most april tags and turn away
     // from that side
     if(count_left_collection_zone_tags < count_right_collection_zone_tags) {
+      cout << "OBSTACLE: Turning right to AVOID COLLECTION ZONE" << endl;
       result.pd.cmdAngular = K_angular;
     } else {
+      cout << "OBSTACLE: Turning left to AVOID COLLECTION ZONE" << endl;
       result.pd.cmdAngular = -K_angular;
     }
 
@@ -54,6 +57,18 @@ void ObstacleController::avoidCollectionZone() {
     result.pd.setPointYaw = 0;
 }
 
+void ObstacleController::avoidCube() {
+
+    result.type = precisionDriving;
+
+    //Rotates left away from the cube, drives forward, and rotates back to the center location
+    cout << "OBSTACLE: Turning to AVOID CUBE" << endl;
+    result.pd.cmdAngular = -K_angular;
+    result.pd.cmdVel = 150.0;
+
+    result.pd.setPointVel = 0.0;
+    result.pd.setPointYaw = 0;
+}
 
 Result ObstacleController::DoWork() {
 
@@ -62,12 +77,12 @@ Result ObstacleController::DoWork() {
   result.PIDMode = CONST_PID;
 
   // The obstacle is an april tag marking the collection zone
-  if(collection_zone_seen){
-    avoidCollectionZone();
-  }
-  else {
-    avoidObstacle();
-  }
+  if(collection_zone_seen)
+      avoidCollectionZone();
+  else if (cube_seen)
+      avoidCube();
+  else
+      avoidObstacle();
 
   //if an obstacle has been avoided
   if (can_set_waypoint) {
@@ -110,6 +125,7 @@ void ObstacleController::ProcessData() {
   float Td = Tdifference/1e3;
   if (Td >= 0.5) {
     collection_zone_seen = false;
+    cube_seen = false;
     phys= false;
     if (!obstacleAvoided)
     {
@@ -148,7 +164,7 @@ void ObstacleController::ProcessData() {
   }
 
   //if physical obstacle or collection zone visible
-  if (collection_zone_seen || phys)
+  if (collection_zone_seen || cube_seen || phys)
   {
     obstacleDetected = true;
     obstacleAvoided = false;
@@ -165,18 +181,39 @@ void ObstacleController::ProcessData() {
 // Added relative pose information so we know whether the
 // top of the AprilTag is pointing towards the rover or away.
 // If the top of the tags are away from the rover then treat them as obstacles. 
-void ObstacleController::setTagData(vector<Tag> tags){
+void ObstacleController::setTagDataForCollectionZone(vector<Tag> tags){
   collection_zone_seen = false;
   count_left_collection_zone_tags = 0;
   count_right_collection_zone_tags = 0;
 
-  // this loop is to get the number of center tags
   if (!targetHeld) {
+    cout << "OBSTACLE: Target is not held" << endl;
+    // this loop is to get the number of center tags
     for (int i = 0; i < tags.size(); i++) { //redundant for loop
-      if (tags[i].getID() == 256) {
+        if (tags[i].getID() == 256) {
+            collection_zone_seen = checkForCollectionZoneTags( tags );
+            timeSinceTags = current_time;
+            cout << "OBSTACLE: Collection zone seen: " << collection_zone_seen << endl;
+      }
+    }
+  }
+}
 
-	collection_zone_seen = checkForCollectionZoneTags( tags );
-        timeSinceTags = current_time;
+void ObstacleController::setTagDataForCube(vector<Tag> tags){
+  int counter = 0;
+  cube_seen = false;
+
+  if (targetHeld) {
+      cout << "OBSTACLE: Target is held" << endl;
+      for (int i = 0; i < tags.size(); i++) { //redundant for loop
+          if (tags[i].getID() == 0) {
+              counter++;
+              cout << "OBSTACLE: Cube count: " << counter << endl;
+              if (counter >= 2) {
+                cube_seen = true;
+                timeSinceTags = current_time;
+                cout << "OBSTACLE: Cubes seen: " << cube_seen << endl;
+             }
       }
     }
   }
@@ -201,7 +238,6 @@ bool ObstacleController::checkForCollectionZoneTags( vector<Tag> tags ) {
       }
     
   }
-
 
   // Did any tags indicate that the robot is inside the collection zone?
   return count_left_collection_zone_tags + count_right_collection_zone_tags > 0;

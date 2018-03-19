@@ -81,11 +81,7 @@ Result SearchController::DoWork() {
     result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
     
     return result;
-  
-
 }
-
-
 
 void SearchController::SetCenterLocation(Point centerLocation) {
   
@@ -226,19 +222,6 @@ int SearchController::ChooseZone(){
   return 0; // <----- because I have to return something
 }
 
-
-
-
-
-
 Position SearchController::realtogridPosition(Point point){
   return Position(-1 * point.y, point.x);  
 }
-
-/*This is broken
-Point gridtorealPosition(Position position){
-  float x = -1 * position(0,0);
-  float y = 1 * position(0,1);
-  return Point(y, x);
-}
-*/

@@ -48,6 +48,9 @@ private:
   Point centerLocation;
   Point searchLocation;
   int attemptCount = 0;
+double x=0;
+double y=0;
+double d=1;
   //struct for returning data to ROS adapter
   Result result;
 
@@ -72,7 +75,7 @@ private:
   bool waypointsVerbose = false;
   bool gtzVerbose = false;
   bool rovercountverbose = false;
-  bool waypointsDebugVerbose = true;
+  bool waypointsDebugVerbose = false;
 
   Point centralSpiralLocation;
 

@@ -287,8 +287,7 @@ void DriveController::ProcessData()
 
 void DriveController::fastPID(float errorVel, float errorYaw , float setPointVel, float setPointYaw)
 {
-
-  // cout << "PID FAST" << endl; //DEBUGGING CODE
+  //cout << "PID FAST" << endl; //DEBUGGING CODE
 
   float velOut = fastVelPID.PIDOut(errorVel, setPointVel); //returns PWM target to try and get error vel to 0
   float yawOut = fastYawPID.PIDOut(errorYaw, setPointYaw); //returns PWM target to try and get yaw error to 0
@@ -308,7 +307,7 @@ void DriveController::fastPID(float errorVel, float errorYaw , float setPointVel
 
 void DriveController::slowPID(float errorVel,float errorYaw, float setPointVel, float setPointYaw)
 {
-  //cout << "PID SLOW" << endl; //DEBUGGING CODE
+  cout << "PID SLOW" << endl; //DEBUGGING CODE
 
   float velOut = slowVelPID.PIDOut(errorVel, setPointVel);
   float yawOut = slowYawPID.PIDOut(errorYaw, setPointYaw);
@@ -328,8 +327,7 @@ void DriveController::slowPID(float errorVel,float errorYaw, float setPointVel, 
 
 void DriveController::constPID(float erroVel,float constAngularError, float setPointVel, float setPointYaw)
 {
-
-  //cout << "PID CONST" << endl; //DEBUGGING CODE
+  cout << "PID CONST" << endl; //DEBUGGING CODE
 
   float velOut = constVelPID.PIDOut(erroVel, setPointVel);
   float yawOut = constYawPID.PIDOut(constAngularError, setPointYaw);
@@ -360,10 +358,10 @@ void DriveController::SetVelocityData(float linearVelocity,float angularVelocity
 PIDConfig DriveController::fastVelConfig()
 {
   PIDConfig config;
-
-  config.Kp = 60; //proportional constant
-  config.Ki = 10; //integral constant
-  config.Kd = 2; //derivative constant
+		//First value defult - second Teo Values
+  config.Kp = 60; //60-50  proportional constant
+  config.Ki = 10; //10-6  integral constant
+  config.Kd = 2; //2-8  derivative constant
   config.satUpper = 255; //upper limit for PID output
   config.satLower = -255; //lower limit for PID output
   config.antiWindup = config.satUpper; //prevent integral from acruing error untill proportional output drops below a certain limit
@@ -382,10 +380,10 @@ PIDConfig DriveController::fastVelConfig()
 
 PIDConfig DriveController::fastYawConfig() {
   PIDConfig config;
-
-  config.Kp = 60;
-  config.Ki = 15;
-  config.Kd = 5;
+		//First value defult - second Teo Values
+  config.Kp = 60; //60-50
+  config.Ki = 15;   //15-5
+  config.Kd = 5;    //5-10
   config.satUpper = 255;
   config.satLower = -255;
   config.antiWindup = config.satUpper/6;
@@ -405,9 +403,9 @@ PIDConfig DriveController::fastYawConfig() {
 PIDConfig DriveController::slowVelConfig() {
   PIDConfig config;
 
-  config.Kp = 100;
-  config.Ki = 8;
-  config.Kd = 1.1;
+  config.Kp = 70;  //original value is 100  70
+  config.Ki = 10;    //original value is 8  1
+  config.Kd = 8;  //original value is 1.1   3
   config.satUpper = 255;
   config.satLower = -255;
   config.antiWindup = config.satUpper/2;
@@ -427,9 +425,9 @@ PIDConfig DriveController::slowVelConfig() {
 PIDConfig DriveController::slowYawConfig() {
   PIDConfig config;
 
-  config.Kp = 70;
-  config.Ki = 16;
-  config.Kd = 10;
+  config.Kp = 70;   //original value is 70  70
+  config.Ki = 4;   //original value is 16   5
+  config.Kd = 3;   //original value is 10   2
   config.satUpper = 255;
   config.satLower = -255;
   config.antiWindup = config.satUpper/4;
