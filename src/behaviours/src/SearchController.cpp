@@ -480,7 +480,7 @@ string SearchController::Astar( const int & xStart, const int & yStart, const in
                   childNode->addcostToPriority(9.0); // Gives MAT lower priority : 9
                 }
                 else if(map_value == BUFFER){
-                  childNode->addcostToPriority(20.0); // Gives BUFFER lower priority : 20
+                  childNode->addcostToPriority(21.0); // Gives BUFFER lower priority : 21
                 }
                 else {
                   childNode->addcostToPriority(map_value); // All other values stay as is
