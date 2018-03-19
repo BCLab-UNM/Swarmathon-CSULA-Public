@@ -42,8 +42,6 @@ void ObstacleController::avoidCollectionZone() {
   
     result.type = precisionDriving;
 
-    result.pd.cmdVel = 0.0;
-
     // Decide which side of the rover sees the most april tags and turn away
     // from that side
     if(count_left_collection_zone_tags < count_right_collection_zone_tags) {
@@ -69,7 +67,6 @@ void ObstacleController::avoidCube() {
     result.pd.cmdVel = 150.0;
 
     result.pd.setPointVel = 0.0;
-    result.pd.cmdVel = 0.0;
     result.pd.setPointYaw = 0;
 }
 
