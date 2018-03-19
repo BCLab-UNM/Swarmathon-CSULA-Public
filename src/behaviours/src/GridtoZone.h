@@ -6,6 +6,9 @@
 #include <vector>
 #include "Point.h"
 
+#include <math.h>
+#include <cmath>
+
 using namespace std;
 using namespace grid_map;
 using namespace Eigen;
@@ -56,6 +59,7 @@ public:
 	bool otherRoverInZone(int zone, Position pos);
 
 	bool obstaclesInZone(Position pos, float sectionlength);
+	bool pathClear(float x1, float y1, float x2, float y2);
 
 
 private:
@@ -77,7 +81,9 @@ private:
 
 	// Ask Port
 	string layer = "elevation";
-	const float celldivision 	= 0.05;
+	const float celldivision= 0.05;
+	const float ROVERHALF 	= 0.20;
+	const float pi = std::acos(-1);
 
 	const float FOG 	= -10.00;
 	const float REVEALED 	= 0.00;
@@ -85,9 +91,11 @@ private:
 	const float CUBES	= 2.0;
 	const float SONAR 	= 3.0;
 	const float ROVER 	= 10.0;
+	const float BUFFER 	= 15.0;
 	const float WALL 	= 20.0;
 
-	float wallvalues[2] = {WALL, ROVER};
+
+	float wallvalues[3] = {WALL, ROVER, MAT};
 	float floorvalues[3] = {REVEALED, SONAR, MAT};
 	float discorvedvalues[2] = {REVEALED, MAT};
 	float allvalues[7] = {FOG, REVEALED, MAT, CUBES, SONAR, ROVER, WALL};

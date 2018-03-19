@@ -42,16 +42,16 @@ class RandomSelector {
     }
 
     RandomSelector() { 
-        rng = new random_numbers::RandomNumberGenerator(0); 
-//        rng = new random_numbers::RandomNumberGenerator(); 
+//        rng = new random_numbers::RandomNumberGenerator(0); 
+        rng = new random_numbers::RandomNumberGenerator(); 
     }
 
     RandomSelector(float acc, float size, float margin){
         accuracy = acc;
         areasize = size;
         areamargin = margin;
-        rng = new random_numbers::RandomNumberGenerator(0); 
-//        rng = new random_numbers::RandomNumberGenerator(); 
+//        rng = new random_numbers::RandomNumberGenerator(0); 
+        rng = new random_numbers::RandomNumberGenerator(); 
     }
 
     Point getZone(int index){
@@ -121,6 +121,14 @@ class RandomSelector {
 
         }
         return position;
+    }
+
+    Point getZoneCenter(int index){
+        Point zonepoint = getZone(index);
+        double diff = areasize/2;
+        zonepoint.x = zonepoint.x - diff;
+        zonepoint.y = zonepoint.y - diff;
+        return zonepoint;
     }
 
     Point getRandomPoint(Point zone){

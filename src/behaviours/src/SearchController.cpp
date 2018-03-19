@@ -41,7 +41,6 @@ void SearchController::Reset() {
   result.reset = false;
 }
 
-
 Result SearchController::DoWork() {
       // Search Here
       result.type = waypoint;
@@ -56,7 +55,7 @@ Result SearchController::DoWork() {
 
       //int zone, Position rover
       if(rovercountverbose){
-        std::cout << "check for other rover in zone 0: " << GridtoZone::Instance()->otherRoverInZone(0, Position(currentLocation.x, currentLocation.y)) << std::endl;
+        std::cout << "check for other rover in zone 0: " << GridtoZone::Instance()->otherRoverInZone(0, realtogridPosition(currentLocation)) << std::endl;
       }
 
       if(spiralTurnsCompleted == spiralTurnsGoal){
@@ -73,8 +72,7 @@ Result SearchController::DoWork() {
 
         =============================*/
 
-
-
+        GridtoZone::Instance()->updatePaperMap();
         centralSpiralLocation = GetNewSearchPoint();
         //centralSpiralLocation = rs.getRandomPointInZone(zone);
 
@@ -82,7 +80,7 @@ Result SearchController::DoWork() {
         bool clockwise = rng->uniformInteger(0,1);
 
         s.reset(centralSpiralLocation, direction , clockwise , firsttravel);
-        zone++;
+//        zone++;
 
 
         searchLocation = centralSpiralLocation;
@@ -103,8 +101,6 @@ Result SearchController::DoWork() {
     return result;
 
 }
-
-
 
 void SearchController::SetCenterLocation(Point centerLocation) {
   
@@ -146,7 +142,7 @@ void SearchController::SetSuccesfullPickup() {
 Point SearchController::GetNewSearchPoint(){
   
   int zonetries = 25;
-  int pointstries = 25;
+  int pointstries = 50;
   Point pt =  rs.getRandomPointInZone(zone);
 
   for (int i = 0; i <= zonetries; i++){
@@ -156,24 +152,27 @@ Point SearchController::GetNewSearchPoint(){
 
       pt =  rs.getRandomPointInZone(choosenZone);
 
-
-      Position pos = Position(pt.x, pt.y);
+      Position pos = realtogridPosition(pt);
 
       bool obstacle = GridtoZone::Instance()->obstaclesInZone(pos, sectionlength);
       double percent = GridtoZone::Instance()->percentOfSectionDiscovered(pos, sectionlength);
       bool percentOK = percent <= sectionCoverageWanted;
 
-
       if(waypointsDebugVerbose){
-        // std::cout << "Considering point : " << pt.x  << ", "<< pt.y << std::endl;
-        // std::cout << "Zone : " << zone << std::endl;
-        // std::cout << "obstacle : " << obstacle << std::endl;
-        // std::cout << "percent of section : " << percent << std::endl;
-        // std::cout << "here2" << std::endl;
+        std::cout << "========= GetNewSearchPoint =========" << std::endl;
+        std::cout << "Considering point : " << pt.x  << ", "<< pt.y << std::endl;
+        std::cout << "Zone : " << zone << std::endl;
+        std::cout << "obstacle : " << obstacle << std::endl;
+        std::cout << "percent of section : " << percent << std::endl;
       }
 
       if (!obstacle && percentOK){
         return pt;
+      }
+
+      if(i == 24){
+        // force a new zone
+        zone++;
       }
     }
   }
@@ -183,23 +182,34 @@ Point SearchController::GetNewSearchPoint(){
   // std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
   // std::cout << "Find out why" << std::endl;
   return pt;
-
 }
 
 int SearchController::ChooseZone(){
+  GridtoZone::Instance()->updatePaperMap();
+
   int zoneChecking = zone;
   int tries = 100;
   int prelimCheck = 50;
 
 
   for(int i = 0; i <= tries; i++){
-    bool rovercount = GridtoZone::Instance()->otherRoverInZone(zoneChecking, Position(currentLocation.x, currentLocation.y));
-    double percentZone = GridtoZone::Instance()->percentOfZoneDiscovered(zoneChecking);
+
+    Position position = realtogridPosition(currentLocation);
+
+    bool rovercount = GridtoZone::Instance()->otherRoverInZone(zoneChecking, position);
+    rovercount = false;
+
+    Point zonepoint = rs.getZoneCenter(zoneChecking);
+
+    double percentZone = GridtoZone::Instance()->percentOfSectionDiscovered(realtogridPosition(zonepoint), areasize);
+
+//    double percentZone = GridtoZone::Instance()->percentOfZoneDiscovered(zoneChecking);
 
     if(waypointsDebugVerbose){
-      //std::cout << "zoneChecking: " << zoneChecking  << ", prelimCheck: " << (i <= prelimCheck) << std::endl;
-      //std::cout << "other rover : " << rovercount  << std::endl;
-      //std::cout << "zone coverage : " << percentZone  << std::endl;
+      std::cout << "========= ChooseZone ======================" << std::endl;
+      std::cout << "zoneChecking: " << zoneChecking  << ", prelimCheck: " << (i <= prelimCheck) << std::endl;
+      std::cout << "zonepoint: " << zonepoint.x  << ", " << zonepoint.y << std::endl;
+      std::cout << "other rover : " << rovercount  << std::endl;
     }
 
 
@@ -207,7 +217,7 @@ int SearchController::ChooseZone(){
       zoneChecking = zoneChecking % 16; // ((15-1)/3.5)^2
     }
     else{
-     zoneChecking = zoneChecking % 36; // ((22-1)/3.5)^2
+      zoneChecking = zoneChecking % 36; // ((22-1)/3.5)^2
     }
 
     if (rovercount){
@@ -564,10 +574,6 @@ vector<Point> SearchController::findPath(Point start, Point end){
   int yFinish = pointYToIndex(yB);
 
 
-  // Used to time astar
-  //clock_t timeStart = clock();
-
-
   // Give Astar start indexes and finish indexes
   // Returned will be the fastest route astar found put together as a string
   string route=Astar(xStart, yStart, xFinish, yFinish);
@@ -575,11 +581,6 @@ vector<Point> SearchController::findPath(Point start, Point end){
 
   if(route=="") cout<<"An empty route generated!"<<endl;
   
-  //used to time astar
-  // clock_t timeEnd = clock();
-  // float time_elapsed = float(timeEnd - timeStart);
-  // cout<<"Time to calculate the route (ms): "<<time_elapsed<<endl;
-
   //kept for debuging purposes prints the route string returned from astar
   // cout<<"Route:"<<endl;
   // cout<<route<<endl<<endl;
@@ -590,10 +591,8 @@ vector<Point> SearchController::findPath(Point start, Point end){
   return waypoints;
 }
 
-// Position SearchController::realtogridPosition(Point point){
-//   return Position(-1 * point.y, point.x);  
-// }
 
-
-
+Position SearchController::realtogridPosition(Point point){
+  return Position(-1 * point.y, point.x);  
+}
 

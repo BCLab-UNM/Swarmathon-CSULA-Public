@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 
 // ROS libraries
+#define _USE_MATH_DEFINES
 #include <angles/angles.h>
 #include <random_numbers/random_numbers.h>
 #include <tf/transform_datatypes.h>
@@ -13,6 +14,7 @@
 #include <sstream>
 #include <Eigen/Dense>
 #include <unistd.h>
+#include <math.h>
 
 // ROS messages
 #include <std_msgs/Float32.h>
@@ -47,15 +49,17 @@ const double MAT 	= 1.0;
 const double MULTICUBES	= 2.0;
 const double SONAR 	= 3.0;
 const double ROVER 	= 10.0;
+const double BUFFER 	= 15.0;
 const double WALL 	= 20.0;
 
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
-/*->->->->->->->->->*/	bool SIMMODE = true;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
+/*->->->->->->->->->*/	bool SIMMODE = false;	/*<-<-<-<-<-<-<-<-<-<-<-<-<-<-*/
 /*----------------MAKE SURE TO TURN FALSE WHEN YOU ARE NOT RUNNING THE SIMULATION----------------*/
 
 //Publisher
 ros::Publisher gridswarmPublisher;
 ros::Publisher heartbeatPublisher;
+ros::Publisher polygonPublisher;
 //Subscriber
 ros::Subscriber roverNameSubscriber;
 ros::Subscriber modeSubscriber;
@@ -87,6 +91,9 @@ std::string publishedName;
   bool o0once = true, o1once = true, o2once = true;
   float x0offset = 0, x1offset = 0, x2offset = 0;
   float y0offset = 0, y1offset = 0, y2offset = 0;
+
+  bool cs_testing = true;
+
 using namespace std;
 using namespace grid_map;
 using namespace ros;
@@ -96,7 +103,6 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
 
 void roverNameHandler(const std_msgs::String& message);
 void modeHandler(const std_msgs::UInt8::ConstPtr& message);
-Polygon makebox(float size, float x, float y, float rotate);
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message);
   void orntnHandler(const std_msgs::Float32& message);
@@ -134,13 +140,12 @@ int main(int argc, char **argv){
   roverNameSubscriber = gNH.subscribe(("/chainName"), 1, roverNameHandler);
   modeSubscriber = gNH.subscribe((publishedName + "/mode"), 1, modeHandler);
 
-/*
+
 //PUBLISH
   heartbeatPublisher = gNH.advertise<std_msgs::String>((publishedName + "/gridSwarm/heartbeat"), 1,true);
   publish_heartbeat_timer = gNH.createTimer(ros::Duration(heartbeat_publish_interval),publishHeartBeatTimerEventHandler);
-*/
+ polygonPublisher = gNH.advertise<geometry_msgs::PolygonStamped>("/polygon", 1, true);
   ros::Rate rate(30.0);
-/*
   do{
   	ros::spinOnce();
   	rate.sleep();
@@ -150,10 +155,9 @@ int main(int argc, char **argv){
 	cout << publishedName << " not first listed. Ending Grid-Map" <<endl;
 	return 0;
   }
-*/
+
   cout << publishedName << " was Listed first listed. Starting Grid-Map" <<endl;
   gridswarmPublisher = gNH.advertise<grid_map_msgs::GridMap>("/grid_map", 1);
-/*
   for(int i = 0; i < namesArrSize; i++){
 //	cout << "namesArr[" << i << "] =" << namesArr[i] <<":Start Loop"<<endl;
 	if (namesArr[i] != "test"){
@@ -182,7 +186,7 @@ int main(int argc, char **argv){
 	}//END OF IF STATEMENT
   }//END OF FOR LOOP
   cout << " + Exit Subscriber loop -"<< "- arrCount:"<<arrCount<< endl;
-*/
+
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
@@ -190,18 +194,9 @@ int main(int argc, char **argv){
   ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
-	//ALL FLOATS makebox(size, x, y, rotation (range 0-3.14))
-
-  	// Makes ann obstacle
-	Polygon polygon = makebox(1, 2, 2, 0);
-	for(grid_map::PolygonIterator iterator(map,polygon); !iterator.isPastEnd(); ++iterator) {
-		map.at("elevation", *iterator) = WALL;
-	}
-
 
   while (ros::ok()) {
 	ros::Time time = ros::Time::now();
-/*
 	for(int count = arrCount; count >= 0; count--){
 		//CAMERA and ROVER cover Area
 		grid_map::Polygon polygon;
@@ -276,6 +271,21 @@ int main(int argc, char **argv){
 					}
 				}
 				if (map.isInside(c) && overlap == false){
+					grid_map::Polygon polc;
+					double botLeftX= cx-0.30, botRightX= cx+0.30;
+					double botLeftY= cy-0.30, botRightY= cy-0.30;
+					double topLeftX= cx-0.30, topRightX= cx+0.30;
+					double topLeftY= cy+0.30, topRightY= cy+0.30;
+					polc.addVertex(Position(botLeftX, botLeftY));
+					polc.addVertex(Position(topLeftX, topLeftY));
+					polc.addVertex(Position(topRightX,topRightY));
+					polc.addVertex(Position(botRightX,botRightY));
+					
+					for(grid_map::PolygonIterator iterator(map, polc); !iterator.isPastEnd(); ++iterator) {
+						if (map.at("elevation", *iterator) != WALL){
+							map.at("elevation", *iterator) = BUFFER;
+						}
+					}	
 					map.atPosition("elevation", c) = WALL;
 				}
 			}
@@ -298,6 +308,21 @@ int main(int argc, char **argv){
 					}
 				}
 				if (map.isInside(l) && overlap == false){
+					grid_map::Polygon poll;
+					double botLeftX= lx-0.30, botRightX= lx+0.30;
+					double botLeftY= ly-0.30, botRightY= ly-0.30;
+					double topLeftX= lx-0.30, topRightX= lx+0.30;
+					double topLeftY= ly+0.30, topRightY= ly+0.30;
+					poll.addVertex(Position(botLeftX, botLeftY));
+					poll.addVertex(Position(topLeftX, topLeftY));
+					poll.addVertex(Position(topRightX,topRightY));
+					poll.addVertex(Position(botRightX,botRightY));
+					
+					for(grid_map::PolygonIterator iterator(map, poll); !iterator.isPastEnd(); ++iterator) {
+						if (map.at("elevation", *iterator) != WALL){
+							map.at("elevation", *iterator) = BUFFER;
+						}
+					}	
 					map.atPosition("elevation", l) = WALL;
 				}
 			}
@@ -320,13 +345,45 @@ int main(int argc, char **argv){
 					}
 				}
 				if (map.isInside(r) && overlap == false){
+					grid_map::Polygon polr;
+					double botLeftX= rx-0.30, botRightX= rx+0.30;
+					double botLeftY= ry-0.30, botRightY= ry-0.30;
+					double topLeftX= rx-0.30, topRightX= rx+0.30;
+					double topLeftY= ry+0.30, topRightY= ry+0.30;
+					polr.addVertex(Position(botLeftX, botLeftY));
+					polr.addVertex(Position(topLeftX, topLeftY));
+					polr.addVertex(Position(topRightX,topRightY));
+					polr.addVertex(Position(botRightX,botRightY));
+					
+					for(grid_map::PolygonIterator iterator(map, polr); !iterator.isPastEnd(); ++iterator) {
+						if (map.at("elevation", *iterator) != WALL){
+							map.at("elevation", *iterator) = BUFFER;
+						}
+					}	
 					map.atPosition("elevation", r) = WALL;
 				}
 			}
 		}//END OF SONAR BOOLEAN
 	}//END OF FOR LOOP
+	if (firstgo == true){
+		cout << "Creating the initial FOG" << endl;
+		//CREATE FOG
+		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
+			Position position;
+			map.getPosition(*it, position);
+			map.at("elevation", *it) = FOG;
+		}//AREA AROUND MAT
+		for (float length = -1.00; length <= 1.00;){
+			for(float width = -1.00; width <= 1.00;){
+				Eigen::Vector2d mat(length,width);
+				map.atPosition("elevation", mat) = REVEALED;
+				width += CELLDIVISION;
+			}
+			length += CELLDIVISION;
+		}
+	}
+	firstgo = false;
 	//CENTER MAT being Discovered
-	//cout << "Creating the Center Mat" << endl;
 	for (float length = -0.50; length <= 0.50;){
 		for(float width = -0.50; width <= 0.50;){
 			Eigen::Vector2d mat(length,width);
@@ -344,45 +401,34 @@ int main(int argc, char **argv){
 			map.atPosition("elevation", q) = ROVER;
 		}
 	}
-*/
-	if (firstgo == true){
-		cout << "Creating the initial FOG" << endl;
-		//CREATE FOG
-		for (GridMapIterator it(map); !it.isPastEnd(); ++it) {
-			Position position;
-			map.getPosition(*it, position);
-			if (map.at("elevation", *it) != WALL){
-				map.at("elevation", *it) = REVEALED;
-			}	
-		}//END OF ITERATOR
-	}
-	firstgo = false;
-/*
 	if (noSonar == true){
 		for(int count = arrCount; count >= 0; count--){
 			float x = xpos[count];
 			float y = ypos[count];
-			cout<<count<<"("<<x<<","<<y<<")"<<endl;
+			//cout<<count<<"("<<x<<","<<y<<")"<<endl;
 			if (x > 2.00 || x < -2.00 || y > 2.00 || y < -2.00){
 				noSonar = false;
 			}
 		}
 	}
-*/
 	// Publish grid map.
 	map.setTimestamp(time.toNSec());
 	grid_map_msgs::GridMap message;
 	GridMapRosConverter::toMessage(map, message);
 	gridswarmPublisher.publish(message);
 //	ROS_INFO_THROTTLE(1.0, "Grid map (timestamp %f) published.", message.info.header.stamp.toSec());
-	
 	// Wait for next cycle.
 	ros::spinOnce();
 	rate.sleep();
   }//END OF ROS OK
 
+
+
+
+
 return 0;
 }
+
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 	std_msgs::String msg;
 	msg.data = "";
@@ -447,10 +493,14 @@ void orntnHandler(const std_msgs::Float32& message) {
 	double point;
 	orntn[0] = message.data;
 	if (o0once == true && SIMMODE == false){
-		for (point = 3.14; point >= -3.15; point -= pi/12){
-			//cout <<"0Point:"<<point<<endl;
-			if (orntn[0] <= point + pi/24 && orntn[0] >= point - pi/24){
-				break;
+		if (orntn[0] <= -3.14 + pi/24 && orntn[0] >= -3.14 - pi/24){
+			point = 3.14;
+		}else{
+			for (point = 3.14; point > -3.14; point -= pi/12){
+				//cout <<"0Point:"<<point<<endl;
+				if (orntn[0] <= point + pi/24 && orntn[0] >= point - pi/24){
+					break;
+				}
 			}
 		}
 		x0offset = -1.2 * cos(point);
@@ -462,10 +512,14 @@ void orntnHandler1(const std_msgs::Float32& message) {
 	double point;
 	orntn[1] = message.data;
 	if (o1once == true && SIMMODE == false){
-		for (point = 3.14; point >= -3.15; point -= pi/12){
-			//cout <<"1Point:"<<point<<endl;
-			if (orntn[1] <= point + pi/24 && orntn[1] >= point - pi/24){
-				break;
+		if (orntn[2] <= -3.14 + pi/24 && orntn[2] >= -3.14 - pi/24){
+			point = 3.14;
+		}else{
+			for (point = 3.14; point > -3.14; point -= pi/12){
+				//cout <<"1Point:"<<point<<endl;
+				if (orntn[1] <= point + pi/24 && orntn[1] >= point - pi/24){
+					break;
+				}
 			}
 		}
 		x1offset = -1.2 * cos(point);
@@ -477,10 +531,14 @@ void orntnHandler2(const std_msgs::Float32& message) {
 	double point;
 	orntn[2] = message.data;
 	if (o2once == true && SIMMODE == false){
-		for (point = 3.14; point >= -3.15; point -= pi/12){
-			//cout <<"2Point:"<<point<<endl;
-			if (orntn[2] <= point + pi/24 && orntn[2] >= point - pi/24){
-				break;
+		if (orntn[2] <= -3.14 + pi/24 && orntn[2] >= -3.14 - pi/24){
+			point = 3.14;
+		}else{
+			for (point = 3.14; point > -3.14; point -= pi/12){
+				//cout <<"2Point:"<<point<<endl;
+				if (orntn[2] <= point + pi/24 && orntn[2] >= point - pi/24){
+					break;
+				}
 			}
 		}
 		x2offset = -1.2 * cos(point);
@@ -524,37 +582,6 @@ void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
 	int currentMode = message->data;
 	if(currentMode == 2 || currentMode == 3) {
 		modeAuto = true;
-		cout<<"Sleep for a bit"<<endl;
-		cout<<"Wake up Man"<<endl;
 		
 	}
-}
-Polygon makebox(float size, float x, float y, float rotate) {
-		//CAMERA and ROVER cover Area
-		grid_map::Polygon polygon;
-		polygon.setFrameId("map");
-		//These points make an area of where the ROVER is
-		double botLeftX= -size, botRightX= -size;
-		double botLeftY= -size, botRightY=  size;
-		//These point create the area the CAMERA would see. Does not actually see what the camera sees, it just marks the area as seen.
-		double topLeftX =  size, topRightX= size;
-		double topLeftY = -size, topRightY= size;
-		//Do the roatation math 
-		//Bottom points
-		double rotateCamBRX = (botRightX * cos(rotate) - botRightY * sin(rotate));
-		double rotateCamBRY = (botRightX * sin(rotate) + botRightY * cos(rotate));
-		double rotateCamBLX = (botLeftX  * cos(rotate) - botLeftY  * sin(rotate));
-		double rotateCamBLY = (botLeftX  * sin(rotate) + botLeftY  * cos(rotate));
-		//Top points
-		double rotateCamTLX = (topLeftX  * cos(rotate) - topLeftY  * sin(rotate));
-		double rotateCamTLY = (topLeftX  * sin(rotate) + topLeftY  * cos(rotate));
-		double rotateCamTRX = (topRightX * cos(rotate) - topRightY * sin(rotate));
-		double rotateCamTRY = (topRightX * sin(rotate) + topRightY * cos(rotate));
-		//Add the points to a polygon
-		polygon.addVertex(Position(rotateCamBLX + x, rotateCamBLY + y));
-		polygon.addVertex(Position(rotateCamTLX + x, rotateCamTLY + y));
-		polygon.addVertex(Position(rotateCamTRX + x, rotateCamTRY + y));
-		polygon.addVertex(Position(rotateCamBRX + x, rotateCamBRY + y));
-
-	return polygon;
 }

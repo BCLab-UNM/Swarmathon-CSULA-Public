@@ -108,12 +108,12 @@ float y_component[numreadings];
     float ave = 0;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int currentMode = 0;
+bool gmapRan = false;
 const float behaviourLoopTimeStep = 0.1; 	//time between the behaviour loop calls
 const float status_publish_interval = 1;	//time between publishes
 const float heartbeat_publish_interval = 2;	//time between heartbeat publishes
 const float waypointTolerance = 0.1; 		//10 cm tolerance.
 
-// used for calling code once but not in main
 
 bool initilized = false;	//switched to true after running through state machine the first time, initializes base values
 
@@ -145,6 +145,7 @@ string publishedName;	//published hostname
 char prev_state_machine[128];
 
 
+// Publishers
 ros::Publisher stateMachinePublish;
 ros::Publisher status_publisher;
 ros::Publisher fingerAnglePublish;
@@ -350,9 +351,9 @@ void behaviourStateMachine(const ros::TimerEvent&)
 
     //ask logic controller for the next set of actuator commands
     result = logicController.DoWork();
-    
-    bool wait = false;	//a variable created to check if we are in a waiting state
-    
+
+    bool wait = false;
+
     //if a wait behaviour is thrown sit and do nothing untill logicController is ready
     if (result.type == behavior)
     {
@@ -377,9 +378,9 @@ void behaviourStateMachine(const ros::TimerEvent&)
     //normally interpret logic controllers actuator commands and deceminate them over the appropriate ROS topics
     else
     {
-      
-      sendDriveCommand(result.pd.left,result.pd.right);	//uses the results struct with data sent back from logic controller to send motor commands
-      
+
+      sendDriveCommand(result.pd.left,result.pd.right);
+
       //Alter finger and wrist angle is told to reset with last stored value if currently has -1 value
       std_msgs::Float32 angle;
       if (result.fingerAngle != -1)
@@ -497,7 +498,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 
 void modeHandler(const std_msgs::UInt8::ConstPtr& message) {
   currentMode = message->data;
-  if(currentMode == 2 || currentMode == 3) {
+  if((currentMode == 2 || currentMode == 3) && gmapRan == true) {
     //sleep(5);
     logicController.SetModeAuto();
   }
@@ -664,7 +665,7 @@ void joyCmdHandler(const sensor_msgs::Joy::ConstPtr& message) {
 
 void publishStatusTimerEventHandler(const ros::TimerEvent&) {
   std_msgs::String msg;
-  msg.data = "online";		//change this with team name
+  msg.data = "Cal State LA - Not Last!!+";		//change this with team name
   status_publisher.publish(msg);
 }
 
@@ -737,8 +738,8 @@ void transformMapCentertoOdom()
     tfListener->waitForTransform(publishedName + "/map", publishedName + "/odom", ros::Time::now(), ros::Duration(1.0));
     tfListener->transformPose(publishedName + "/odom", mapPose, odomPose);
   }
-  
-  catch(tf::TransformException& ex) {  //bad transform
+
+  catch(tf::TransformException& ex) {
     ROS_INFO("Received an exception trying to transform a point from \"map\" to \"odom\": %s", ex.what());
     x = "Exception thrown " + (string)ex.what();
     std_msgs::String msg;
@@ -805,7 +806,7 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 	GridMap map({"elevation"});
 	map.setFrameId("map");
 	map.setGeometry(Length(15.5,15.5), 0.05);
-//	cout << "ROSAdapter Map Test" << endl;
+	//cout << "ROSAdapter Map Test" << endl;
 	int row = 0;
 	for (double x = -7.70; x <= 7.75; row++){
 		int col = 0;
@@ -817,6 +818,10 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 		}
 		x += 0.05;
 	}
-  GridtoZone::Instance()->setGridMap(map);
-//    gridtozone.setGridMap(map);
+	GridtoZone::Instance()->setGridMap(map);
+	//    gridtozone.setGridMap(map);
+	if (gmapRan == false){
+		logicController.SetModeAuto();
+	}
+	gmapRan = true;
 }

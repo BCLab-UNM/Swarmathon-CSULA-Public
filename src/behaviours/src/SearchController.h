@@ -34,7 +34,6 @@ public:
   int ChooseZone();
   Point GetNewSearchPoint();
 
-
   vector<Point> findPath(Point start, Point end);
 
   //GRID POINT TYPE
@@ -46,6 +45,8 @@ public:
   const double ROVER  = 10.0;
   const double BUFFER   = 15.0;
   const double WALL   = 20.0;
+
+  // Position realtogridPosition(Point point);
 
 
 
@@ -82,19 +83,18 @@ private:
   float areasize = 3.5;
   float areamargin = 0.1;
 
-
-  float firsttravel = 0.25;
-  float sectionlength = 2.0; // <- double check if true
+  float firsttravel = 0.4;
+  float sectionlength = 1.2; // <- double check if true
 
   bool waypointsVerbose = false;
   bool gtzVerbose = false;
   bool rovercountverbose = false;
-  bool waypointsDebugVerbose = true;
+  bool waypointsDebugVerbose = false;
 
   Point centralSpiralLocation;
 
   double coverageWanted = 0.8;
-  double sectionCoverageWanted = 0.5;
+  double sectionCoverageWanted = 0.45;
 
   RandomSelector rs = RandomSelector(accuracy, areasize, areamargin);
   Spiral s;
