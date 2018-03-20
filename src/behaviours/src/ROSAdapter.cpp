@@ -118,8 +118,9 @@ float xoffset = 0.0;
 float yoffset = 0.0;
 bool orntnOnce= true;
 
-// used for calling code once but not in main
-bool initilized = false;
+
+bool initilized = false;	//switched to true after running through state machine the first time, initializes base values
+
 
 float linearVelocity = 0;	//forward speed, POSITIVE = forward, NEGATIVE = backward
 float angularVelocity = 0;	//turning speed, POSITIVE = left, NEGATIVE = right
@@ -136,14 +137,17 @@ Result result;		//result struct for passing and storing values to drive robot
 
 std_msgs::String msg;
 std_msgs::String names;
+
 std::string lastnames;
 std::string nam = "";
 std_msgs::Float32 filtered_orientation;
+
 
 geometry_msgs::Twist velocity;
 char host[128];		//rovers hostname
 string publishedName;	//published hostname
 char prev_state_machine[128];
+
 
 // Publishers
 ros::Publisher stateMachinePublish;
@@ -202,6 +206,7 @@ void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_ms
 void roverNameHandler(const std_msgs::String& message);
 void gridMapHandler(const grid_map_msgs::GridMap& message);
 
+
 // Converts the time passed as reported by ROS (which takes Gazebo simulation rate into account) into milliseconds as an integer.
 long int getROSTimeInMilliSecs();
 
@@ -224,6 +229,7 @@ int main(int argc, char **argv) {
 
   // Register the SIGINT event handler so the node can shutdown properly
   signal(SIGINT, sigintEventHandler);
+
 
   joySubscriber = mNH.subscribe((publishedName + "/joystick"), 10, joyCmdHandler);
   modeSubscriber = mNH.subscribe((publishedName + "/mode"), 1, modeHandler);
@@ -248,6 +254,7 @@ int main(int argc, char **argv) {
   waypointFeedbackPublisher = mNH.advertise<swarmie_msgs::Waypoint>((publishedName + "/waypoints"), 1, true);
   chainNamePublisher = mNH.advertise<std_msgs::String>(("/chainName"), 1, true);
   filtered_orientationPublish = mNH.advertise<std_msgs::Float32>((publishedName + "/filtered_orientation"), 10);
+
 
   //timers
   publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
@@ -397,6 +404,7 @@ void behaviourStateMachine(const ros::TimerEvent&)
 
     //publishHandeling here
     //adds a blank space between sets of debugging data to easily tell one tick from the next
+
   }
 
   // mode is NOT auto

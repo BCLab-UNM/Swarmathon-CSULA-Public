@@ -7,6 +7,7 @@
 #include "Spiral.cpp"
 #include "RandomSelector.cpp"
 #include "GridtoZone.h"
+#include "node.h"
 /**
  * This class implements the search control algorithm for the rovers. The code
  * here should be modified and enhanced to improve search performance.
@@ -33,9 +34,10 @@ public:
   int ChooseZone();
   Point GetNewSearchPoint();
 
-  Position realtogridPosition(Point point);
-//  Point gridtorealPosition(Position position);
+  
 
+
+  // Position realtogridPosition(Point point);
 
 protected:
 
@@ -48,9 +50,8 @@ private:
   Point centerLocation;
   Point searchLocation;
   int attemptCount = 0;
-double x=0;
-double y=0;
-double d=1;
+
+
   //struct for returning data to ROS adapter
   Result result;
 
@@ -85,6 +86,10 @@ double d=1;
   RandomSelector rs = RandomSelector(accuracy, areasize, areamargin);
   Spiral s;
   int c = 0;
+
+
+  Position realtogridPosition(Point point);
+
 };
 
 #endif /* SEARCH_CONTROLLER */
