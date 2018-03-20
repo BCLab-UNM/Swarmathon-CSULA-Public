@@ -39,7 +39,6 @@ public:
 	double percentOfZoneDiscovered(int zoneindex);
 	double percentOfSectionDiscovered(Position center, double length);
 
-// Ambrosio do this
 	vector<Point> shortestPath(Point start, Point end);
 
 	int ClaimZone(int zone);
@@ -47,7 +46,7 @@ public:
 
 
 	int countRoversInZone(int zone);
-	bool inZone(Position pos);
+	int inZone(Point pt);
 
 	double percentOfTest();
 	int countOfTest();
@@ -78,6 +77,9 @@ private:
 	// for a fixed number of turns
 	float spiralsize = 2.0;
 
+  	int mapLength;
+  	int mapWidth;
+
 
 	// Ask Port
 	string layer = "elevation";
@@ -88,7 +90,6 @@ private:
 	const float FOG 	= -10.00;
 	const float REVEALED 	= 0.00;
 	const float MAT 	= 1.0;
-	const float CUBES	= 2.0;
 	const float SONAR 	= 3.0;
 	const float ROVER 	= 10.0;
 	const float BUFFER 	= 15.0;
@@ -98,7 +99,19 @@ private:
 	float wallvalues[3] = {WALL, ROVER, MAT};
 	float floorvalues[3] = {REVEALED, SONAR, MAT};
 	float discorvedvalues[2] = {REVEALED, MAT};
-	float allvalues[7] = {FOG, REVEALED, MAT, CUBES, SONAR, ROVER, WALL};
+	float allvalues[7] = {FOG, REVEALED, MAT, SONAR, ROVER, WALL};
+
+	// Used for testing
+	// int astarCount=0;
+
+	int pointXToIndex(float X);
+ 	int pointYToIndex(float Y);
+ 	float indexToPointX(int i);
+  	float indexToPointY(int j);
+
+  	vector<Point> parseRoute(string route, float x, float y);
+  	string Astar( const int & xStart, const int & yStart, const int & xFinish, const int & yFinish );
+  	vector<Point> findPath(Point start, Point end);
 
 };
 #endif // GRIDTOZONE

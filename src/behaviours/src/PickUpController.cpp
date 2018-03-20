@@ -63,7 +63,7 @@ void PickUpController::SetTagData(vector<Tag> tags)
 
           if (has_control)
           {
-            cout << "PICKUP: Pickup reset return interupt free" << endl;
+            //cout << "PICKUP: Pickup reset return interupt free" << endl;
             release_control = true;
           }
 
@@ -124,7 +124,7 @@ void PickUpController::ProcessData()
 {
   if(!targetFound && !targetHeld)
   {
-    cout << "PICKUP: No Target Seen!" << endl;
+    //cout << "PICKUP: No Target Seen!" << endl;
 
     // Do nothing
     return;

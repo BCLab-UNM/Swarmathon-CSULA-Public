@@ -1,5 +1,23 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <iomanip>
+#include <queue>
+#include <string>
+#include <math.h>
+#include <time.h>
+#include <sstream>
+#include <vector>
+#include <Eigen/Dense>
+
 #include "SearchController.h"
+#include "node.h"
+#include "node.cpp"
+#include "Point.h"
+#include "GridtoZone.h"
 #include <angles/angles.h>
+
+using namespace Eigen;
 
 SearchController::SearchController() {
   rng = new random_numbers::RandomNumberGenerator();
@@ -28,6 +46,10 @@ Result SearchController::DoWork() {
       result.type = waypoint;
       first_waypoint = false;
 
+
+      zone = GridtoZone::Instance()->inZone(currentLocation);
+
+
       GridtoZone::Instance()->updatePaperMap();
       if(gtzVerbose){
         std::cout << "Testing GTZ" << std::endl;
@@ -42,6 +64,7 @@ Result SearchController::DoWork() {
 
       if(spiralTurnsCompleted == spiralTurnsGoal){
         if (waypointsVerbose){ std::cout<<  "Zone: " << zone << std::endl; }
+    
         spiralTurnsCompleted = 0;
 
         /*=============================
@@ -58,29 +81,58 @@ Result SearchController::DoWork() {
         centralSpiralLocation = GetNewSearchPoint();
         //centralSpiralLocation = rs.getRandomPointInZone(zone);
 
+
+
+ std::cout<<  "centralSpiralLocation: (" << centralSpiralLocation.x<< " , " << centralSpiralLocation.y<<") "<<std::endl; 
+
+ std::cout<<  "currentLocation: (" << currentLocation.x<< " , " << currentLocation.y<<") "<<std::endl; 
+
         Direction direction = Direction(rng->uniformInteger(0,3));
         bool clockwise = rng->uniformInteger(0,1);
 
         s.reset(centralSpiralLocation, direction , clockwise , firsttravel);
-//        zone++;
 
 
         searchLocation = centralSpiralLocation;
 
         result.wpts.waypoints.clear();
-        result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
-        return result;
 
+        bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.y, this->currentLocation.x);
+        if(pathClear)
+        {
+          result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
+        }
+        else
+        {
+          // A*
+          vector<Point> shortpathpoints= GridtoZone::Instance()->shortestPath(currentLocation, centralSpiralLocation);
+          result.wpts.waypoints.insert(result.wpts.waypoints.begin(), shortpathpoints.begin(), shortpathpoints.end());
+        }        
+        return result;
       }
+
+
     searchLocation = s.getNextPoition();
     if (waypointsVerbose){ std::cout<<  "X: " << searchLocation.x << "  Y: " << searchLocation.y << std::endl; }
     spiralTurnsCompleted++;
  
 
     result.wpts.waypoints.clear();
-    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
+        bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.y, this->currentLocation.x);
+        if(pathClear)
+        {
+          result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
+        }
+        else
+        {
+          // A*
+          vector<Point> shortpathpoints= GridtoZone::Instance()->shortestPath(currentLocation, centralSpiralLocation);
+          result.wpts.waypoints.insert(result.wpts.waypoints.begin(), shortpathpoints.begin(), shortpathpoints.end());
+        }        
+        return result;
     
     return result;
+
 }
 
 void SearchController::SetCenterLocation(Point centerLocation) {
@@ -121,6 +173,7 @@ void SearchController::SetSuccesfullPickup() {
 
 //  centralSpiralLocation = rs.getRandomPointInZone(zone);
 Point SearchController::GetNewSearchPoint(){
+  
   int zonetries = 25;
   int pointstries = 50;
   Point pt =  rs.getRandomPointInZone(zone);
@@ -157,10 +210,10 @@ Point SearchController::GetNewSearchPoint(){
     }
   }
 
-  std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
-  std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
-  std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
-  std::cout << "Find out why" << std::endl;
+  // std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
+  // std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
+  // std::cout << "It reached the last line at GetNewSearchPoint" << std::endl;
+  // std::cout << "Find out why" << std::endl;
   return pt;
 }
 
@@ -170,6 +223,7 @@ int SearchController::ChooseZone(){
   int zoneChecking = zone;
   int tries = 100;
   int prelimCheck = 50;
+
 
   for(int i = 0; i <= tries; i++){
 
@@ -189,9 +243,7 @@ int SearchController::ChooseZone(){
       std::cout << "zoneChecking: " << zoneChecking  << ", prelimCheck: " << (i <= prelimCheck) << std::endl;
       std::cout << "zonepoint: " << zonepoint.x  << ", " << zonepoint.y << std::endl;
       std::cout << "other rover : " << rovercount  << std::endl;
-      std::cout << "zone coverage : " << percentZone  << std::endl;
     }
-
 
 
     if(i <= prelimCheck){
@@ -212,13 +264,16 @@ int SearchController::ChooseZone(){
     else{
       zoneChecking++;
     }
+
+
   }
 
-  std::cout << "It reached the last line at ChooseZone" << std::endl;
-  std::cout << "It reached the last line at ChooseZone" << std::endl;
-  std::cout << "It reached the last line at ChooseZone" << std::endl;
-  std::cout << "Find out why" << std::endl;
+  // std::cout << "It reached the last line at ChooseZone" << std::endl;
+  // std::cout << "It reached the last line at ChooseZone" << std::endl;
+  // std::cout << "It reached the last line at ChooseZone" << std::endl;
+  // std::cout << "Find out why" << std::endl;
   zone = zoneChecking;
+
   return 0; // <----- because I have to return something
 }
 
