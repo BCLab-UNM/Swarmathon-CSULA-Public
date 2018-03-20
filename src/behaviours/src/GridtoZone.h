@@ -39,7 +39,6 @@ public:
 	double percentOfZoneDiscovered(int zoneindex);
 	double percentOfSectionDiscovered(Position center, double length);
 
-	// Ambrosio do this
 	vector<Point> shortestPath(Point start, Point end);
 
 	int ClaimZone(int zone);
