@@ -77,12 +77,12 @@ bool GridtoZone::otherRoverInZone(int zone, Position rover){
 	float area = a1 + a2 + a3 + a4;
 
 	bool roverInZone = comparefloats(zonearea, area, .5);
+
 	if (roverInZone){
 		count--;
 	}
 	return count >= 1;
 }
-
 
 int GridtoZone::countRoversInZone(int zone){
 	getZonePosition(zone);
@@ -90,9 +90,11 @@ int GridtoZone::countRoversInZone(int zone){
 }
 
 // forgot what this is suppose to do.
-int GridtoZone::inZone(Position pos){
+int GridtoZone::inZone(Point pt){
+	Position rover = Position(pt.x,pt.y);
+
 	for (int i = 0; i < 36; i++){
-		Position center = getZonePosition(zone);
+		Position center = getZonePosition(i);
 		double side = zonesize / 2;
 
 		//https://math.stackexchange.com/a/190403

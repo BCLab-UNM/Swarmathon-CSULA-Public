@@ -46,34 +46,9 @@ Result SearchController::DoWork() {
       result.type = waypoint;
       first_waypoint = false;
 
-      
-      // if(btmn<1){
-      //   Point start, end;
-      //   start.x= 0.0;
-      //   start.y= 0.0;
-      //   end.x= 5.0;
-      //   end.y= 5.0;  
-      //   // end.x= 5.0;
-      //   // end.y= 6.5;
 
-      //   vector<Point> waypoints;
+      zone = GridtoZone::Instance()->inZone(currentLocation);
 
-      //   // Gets "fastest" path from start to end point
-      //   // waypoints = findPath( start, end);
-      //   waypoints = GridtoZone::Instance()->shortestPath( start, end);
-
-      //   // prints waypoints
-      //   cout<<  "waypoints length: " << waypoints.size()<<endl;
-      //   for(int i=0;i<waypoints.size();i++){
-      //     cout<<  "X: " << waypoints[i].x << "  Y: " << waypoints[i].y << endl;
-      //   }
-      //   btmn++;
-
-
-      //   std::cout << "---------------------------------------------------" << std::endl;
-      //   std::cout << "---------------------------------------------------" << std::endl;
-      //   std::cout << "---------------------------------------------------" << std::endl;
-      // }
 
       GridtoZone::Instance()->updatePaperMap();
       if(gtzVerbose){
@@ -116,7 +91,6 @@ Result SearchController::DoWork() {
         bool clockwise = rng->uniformInteger(0,1);
 
         s.reset(centralSpiralLocation, direction , clockwise , firsttravel);
-//        zone++;
 
 
         searchLocation = centralSpiralLocation;
