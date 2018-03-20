@@ -40,7 +40,7 @@ using namespace Eigen;
 
 float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
-const float ROVERHALF = 0.17;
+const float ROVERHALF = 0.20;
 const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
 //GRID POINT TYPE
 const double FOG 	= -10.00;
@@ -63,11 +63,11 @@ ros::Publisher polygonPublisher;
 //Subscriber
 ros::Subscriber roverNameSubscriber;
 ros::Subscriber modeSubscriber;
-ros::Subscriber sonarLeftSubscriber	,sonarLeftSubscriber1	,sonarLeftSubscriber2	;
-ros::Subscriber sonarCenterSubscriber	,sonarCenterSubscriber1	,sonarCenterSubscriber2	;
-ros::Subscriber sonarRightSubscriber	,sonarRightSubscriber1	,sonarRightSubscriber2	;
-ros::Subscriber odometrySubscriber	,odometrySubscriber1	,odometrySubscriber2	;
-ros::Subscriber orntnSubscriber		,orntnSubscriber1	,orntnSubscriber2	;
+ros::Subscriber sonarLeftSubscriber	,sonarLeftSubscriber1	,sonarLeftSubscriber2	,sonarLeftSubscriber3	,sonarLeftSubscriber4	,sonarLeftSubscriber5	;
+ros::Subscriber sonarCenterSubscriber	,sonarCenterSubscriber1	,sonarCenterSubscriber2	,sonarCenterSubscriber3	,sonarCenterSubscriber4	,sonarCenterSubscriber5	;
+ros::Subscriber sonarRightSubscriber	,sonarRightSubscriber1	,sonarRightSubscriber2	,sonarRightSubscriber3	,sonarRightSubscriber4	,sonarRightSubscriber5	;
+ros::Subscriber odometrySubscriber	,odometrySubscriber1	,odometrySubscriber2	,odometrySubscriber3	,odometrySubscriber4	,odometrySubscriber5	;
+ros::Subscriber orntnSubscriber		,orntnSubscriber1	,orntnSubscriber2	,orntnSubscriber3	,orntnSubscriber4	,orntnSubscriber5	;
 
 //Timer
 ros::Timer publish_heartbeat_timer;
@@ -88,9 +88,9 @@ std::string publishedName;
   bool firstgo = true;
   bool modeAuto = false;
   bool noSonar = true;
-  bool o0once = true, o1once = true, o2once = true;
-  float x0offset = 0, x1offset = 0, x2offset = 0;
-  float y0offset = 0, y1offset = 0, y2offset = 0;
+  bool o0once = true, o1once = true, o2once = true, o3once = true, o4once = true, o5once = true;
+  float x0offset = 0, x1offset = 0, x2offset = 0, x3offset = 0, x4offset = 0, x5offset = 0;
+  float y0offset = 0, y1offset = 0, y2offset = 0, y3offset = 0, y4offset = 0, y5offset = 0;
 
   bool cs_testing = true;
 
@@ -119,6 +119,21 @@ void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message);
   void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft);
   void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter);
   void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight);
+void odometryHandler3(const nav_msgs::Odometry::ConstPtr& message);
+  void orntnHandler3(const std_msgs::Float32& message);
+  void sonarHandlerLeft3(const sensor_msgs::Range::ConstPtr& sonarLeft);
+  void sonarHandlerCenter3(const sensor_msgs::Range::ConstPtr& sonarCenter);
+  void sonarHandlerRight3(const sensor_msgs::Range::ConstPtr& sonarRight);
+void odometryHandler4(const nav_msgs::Odometry::ConstPtr& message);
+  void orntnHandler4(const std_msgs::Float32& message);
+  void sonarHandlerLeft4(const sensor_msgs::Range::ConstPtr& sonarLeft);
+  void sonarHandlerCenter4(const sensor_msgs::Range::ConstPtr& sonarCenter);
+  void sonarHandlerRight4(const sensor_msgs::Range::ConstPtr& sonarRight);
+void odometryHandler5(const nav_msgs::Odometry::ConstPtr& message);
+  void orntnHandler5(const std_msgs::Float32& message);
+  void sonarHandlerLeft5(const sensor_msgs::Range::ConstPtr& sonarLeft);
+  void sonarHandlerCenter5(const sensor_msgs::Range::ConstPtr& sonarCenter);
+  void sonarHandlerRight5(const sensor_msgs::Range::ConstPtr& sonarRight);
 
 int main(int argc, char **argv){
   gethostname(host, sizeof (host));
@@ -182,6 +197,24 @@ int main(int argc, char **argv){
 			sonarLeftSubscriber2 = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft2);
 			sonarCenterSubscriber2 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter2);
 			sonarRightSubscriber2 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight2);
+		}else if(i == 3){
+			odometrySubscriber3 = gNH.subscribe((publishedName + "/odom"), 10, odometryHandler3);
+			orntnSubscriber3 = gNH.subscribe((publishedName + "/filtered_orientation"), 10, orntnHandler3);
+			sonarLeftSubscriber3 = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft3);
+			sonarCenterSubscriber3 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter3);
+			sonarRightSubscriber3 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight3);
+		}else if(i == 4){
+			odometrySubscriber4 = gNH.subscribe((publishedName + "/odom"), 10, odometryHandler4);
+			orntnSubscriber4 = gNH.subscribe((publishedName + "/filtered_orientation"), 10, orntnHandler4);
+			sonarLeftSubscriber4 = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft4);
+			sonarCenterSubscriber4 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter4);
+			sonarRightSubscriber4 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight4);
+		}else if(i == 5){
+			odometrySubscriber5 = gNH.subscribe((publishedName + "/odom"), 10, odometryHandler5);
+			orntnSubscriber5 = gNH.subscribe((publishedName + "/filtered_orientation"), 10, orntnHandler5);
+			sonarLeftSubscriber5 = gNH.subscribe((publishedName + "/sonarLeft"), 10, sonarHandlerLeft5);
+			sonarCenterSubscriber5 = gNH.subscribe((publishedName + "/sonarCenter"), 10, sonarHandlerCenter5);
+			sonarRightSubscriber5 = gNH.subscribe((publishedName + "/sonarRight"), 10, sonarHandlerRight5);
 		}
 	}//END OF IF STATEMENT
   }//END OF FOR LOOP
@@ -190,7 +223,7 @@ int main(int argc, char **argv){
   // Create grid Rover Specific Map.
   GridMap map({"elevation"});
   map.setFrameId("map");
-  map.setGeometry(Length(15.5, 15.5), CELLDIVISION);
+  map.setGeometry(Length(22.5, 22.5), CELLDIVISION);
   ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));  
@@ -272,10 +305,10 @@ int main(int argc, char **argv){
 				}
 				if (map.isInside(c) && overlap == false){
 					grid_map::Polygon polc;
-					double botLeftX= cx-0.30, botRightX= cx+0.30;
-					double botLeftY= cy-0.30, botRightY= cy-0.30;
-					double topLeftX= cx-0.30, topRightX= cx+0.30;
-					double topLeftY= cy+0.30, topRightY= cy+0.30;
+					double botLeftX= cx-0.20, botRightX= cx+0.20;
+					double botLeftY= cy-0.20, botRightY= cy-0.20;
+					double topLeftX= cx-0.20, topRightX= cx+0.20;
+					double topLeftY= cy+0.20, topRightY= cy+0.20;
 					polc.addVertex(Position(botLeftX, botLeftY));
 					polc.addVertex(Position(topLeftX, topLeftY));
 					polc.addVertex(Position(topRightX,topRightY));
@@ -309,10 +342,10 @@ int main(int argc, char **argv){
 				}
 				if (map.isInside(l) && overlap == false){
 					grid_map::Polygon poll;
-					double botLeftX= lx-0.30, botRightX= lx+0.30;
-					double botLeftY= ly-0.30, botRightY= ly-0.30;
-					double topLeftX= lx-0.30, topRightX= lx+0.30;
-					double topLeftY= ly+0.30, topRightY= ly+0.30;
+					double botLeftX= lx-0.20, botRightX= lx+0.20;
+					double botLeftY= ly-0.20, botRightY= ly-0.20;
+					double topLeftX= lx-0.20, topRightX= lx+0.20;
+					double topLeftY= ly+0.20, topRightY= ly+0.20;
 					poll.addVertex(Position(botLeftX, botLeftY));
 					poll.addVertex(Position(topLeftX, topLeftY));
 					poll.addVertex(Position(topRightX,topRightY));
@@ -346,10 +379,10 @@ int main(int argc, char **argv){
 				}
 				if (map.isInside(r) && overlap == false){
 					grid_map::Polygon polr;
-					double botLeftX= rx-0.30, botRightX= rx+0.30;
-					double botLeftY= ry-0.30, botRightY= ry-0.30;
-					double topLeftX= rx-0.30, topRightX= rx+0.30;
-					double topLeftY= ry+0.30, topRightY= ry+0.30;
+					double botLeftX= rx-0.20, botRightX= rx+0.20;
+					double botLeftY= ry-0.20, botRightY= ry-0.20;
+					double topLeftX= rx-0.20, topRightX= rx+0.20;
+					double topLeftY= ry+0.20, topRightY= ry+0.20;
 					polr.addVertex(Position(botLeftX, botLeftY));
 					polr.addVertex(Position(topLeftX, topLeftY));
 					polr.addVertex(Position(topRightX,topRightY));
@@ -436,25 +469,22 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&){
 }
 
 void sonarHandlerLeft(const sensor_msgs::Range::ConstPtr& sonarLeft) {
-	float simoffsetLeft = 0;
-	if(SIMMODE == true){
-		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.7)) - (sonarLeft->range); 
-	}
-	sleft[0] = sonarLeft->range + simoffsetLeft;
+	sleft[0] = sonarLeft->range;
 }
 void sonarHandlerLeft1(const sensor_msgs::Range::ConstPtr& sonarLeft) {
-	float simoffsetLeft = 0;
-	if(SIMMODE == true){
-		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.7)) - (sonarLeft->range); 
-	}
-	sleft[1] = sonarLeft->range + simoffsetLeft;
+	sleft[1] = sonarLeft->range;
 }
 void sonarHandlerLeft2(const sensor_msgs::Range::ConstPtr& sonarLeft) {
-	float simoffsetLeft = 0;
-	if(SIMMODE == true){
-		simoffsetLeft = ((sonarLeft->range)/cos(pi/6.7)) - (sonarLeft->range); 
-	}
-	sleft[2] = sonarLeft->range + simoffsetLeft;
+	sleft[2] = sonarLeft->range;
+}
+void sonarHandlerLeft3(const sensor_msgs::Range::ConstPtr& sonarLeft) {
+	sleft[3] = sonarLeft->range;
+}
+void sonarHandlerLeft4(const sensor_msgs::Range::ConstPtr& sonarLeft) {
+	sleft[4] = sonarLeft->range;
+}
+void sonarHandlerLeft5(const sensor_msgs::Range::ConstPtr& sonarLeft) {
+	sleft[5] = sonarLeft->range;
 }
 
 void sonarHandlerCenter(const sensor_msgs::Range::ConstPtr& sonarCenter) {
@@ -466,27 +496,33 @@ void sonarHandlerCenter1(const sensor_msgs::Range::ConstPtr& sonarCenter) {
 void sonarHandlerCenter2(const sensor_msgs::Range::ConstPtr& sonarCenter) {
 	scenter[2]= sonarCenter->range;
 }
+void sonarHandlerCenter3(const sensor_msgs::Range::ConstPtr& sonarCenter) {
+	scenter[3]= sonarCenter->range;
+}
+void sonarHandlerCenter4(const sensor_msgs::Range::ConstPtr& sonarCenter) {
+	scenter[4]= sonarCenter->range;
+}
+void sonarHandlerCenter5(const sensor_msgs::Range::ConstPtr& sonarCenter) {
+	scenter[5]= sonarCenter->range;
+}
 
 void sonarHandlerRight(const sensor_msgs::Range::ConstPtr& sonarRight) {
-	float simoffsetRight = 0;
-	if(SIMMODE == true){
-		simoffsetRight = ((sonarRight->range)/cos(pi/6.7)) - (sonarRight->range); 
-	}
-	sright[0] = sonarRight->range + simoffsetRight;
+	sright[0] = sonarRight->range;
 }
 void sonarHandlerRight1(const sensor_msgs::Range::ConstPtr& sonarRight) {
-	float simoffsetRight = 0;
-	if(SIMMODE == true){
-		simoffsetRight = ((sonarRight->range)/cos(pi/6.7)) - (sonarRight->range); 
-	}
-	sright[1] = sonarRight->range + simoffsetRight;
+	sright[1] = sonarRight->range;
 }
 void sonarHandlerRight2(const sensor_msgs::Range::ConstPtr& sonarRight) {
-	float simoffsetRight = 0;
-	if(SIMMODE == true){
-		simoffsetRight = ((sonarRight->range)/cos(pi/6.7)) - (sonarRight->range); 
-	}
-	sright[2] = sonarRight->range + simoffsetRight;
+	sright[2] = sonarRight->range;
+}
+void sonarHandlerRight3(const sensor_msgs::Range::ConstPtr& sonarRight) {
+	sright[3] = sonarRight->range;
+}
+void sonarHandlerRight4(const sensor_msgs::Range::ConstPtr& sonarRight) {
+	sright[4] = sonarRight->range;
+}
+void sonarHandlerRight5(const sensor_msgs::Range::ConstPtr& sonarRight) {
+	sright[5] = sonarRight->range;
 }
 
 void orntnHandler(const std_msgs::Float32& message) {
@@ -546,6 +582,63 @@ void orntnHandler2(const std_msgs::Float32& message) {
 		o2once = false;
 	}
 }
+void orntnHandler3(const std_msgs::Float32& message) {
+	double point;
+	orntn[3] = message.data;
+	if (o3once == true && SIMMODE == false){
+		if (orntn[3] <= -3.14 + pi/24 && orntn[3] >= -3.14 - pi/24){
+			point = 3.14;
+		}else{
+			for (point = 3.14; point > -3.14; point -= pi/12){
+				//cout <<"2Point:"<<point<<endl;
+				if (orntn[3] <= point + pi/24 && orntn[3] >= point - pi/24){
+					break;
+				}
+			}
+		}
+		x3offset = -1.2 * cos(point);
+		y3offset = -1.2 * sin(point);
+		o3once = false;
+	}
+}
+void orntnHandler4(const std_msgs::Float32& message) {
+	double point;
+	orntn[4] = message.data;
+	if (o4once == true && SIMMODE == false){
+		if (orntn[4] <= -3.14 + pi/24 && orntn[4] >= -3.14 - pi/24){
+			point = 3.14;
+		}else{
+			for (point = 3.14; point > -3.14; point -= pi/12){
+				//cout <<"2Point:"<<point<<endl;
+				if (orntn[4] <= point + pi/24 && orntn[4] >= point - pi/24){
+					break;
+				}
+			}
+		}
+		x4offset = -1.2 * cos(point);
+		y4offset = -1.2 * sin(point);
+		o4once = false;
+	}
+}
+void orntnHandler5(const std_msgs::Float32& message) {
+	double point;
+	orntn[5] = message.data;
+	if (o5once == true && SIMMODE == false){
+		if (orntn[5] <= -3.14 + pi/24 && orntn[5] >= -3.14 - pi/24){
+			point = 3.14;
+		}else{
+			for (point = 3.14; point > -3.14; point -= pi/12){
+				//cout <<"2Point:"<<point<<endl;
+				if (orntn[5] <= point + pi/24 && orntn[5] >= point - pi/24){
+					break;
+				}
+			}
+		}
+		x5offset = -1.2 * cos(point);
+		y5offset = -1.2 * sin(point);
+		o5once = false;
+	}
+}
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 	xpos[0] = message->pose.pose.position.x + x0offset;
@@ -558,6 +651,18 @@ void odometryHandler1(const nav_msgs::Odometry::ConstPtr& message) {
 void odometryHandler2(const nav_msgs::Odometry::ConstPtr& message) {
 	xpos[2] = message->pose.pose.position.x + x2offset;
 	ypos[2] = message->pose.pose.position.y + y2offset;
+}
+void odometryHandler3(const nav_msgs::Odometry::ConstPtr& message) {
+	xpos[3] = message->pose.pose.position.x + x3offset;
+	ypos[3] = message->pose.pose.position.y + y3offset;
+}
+void odometryHandler4(const nav_msgs::Odometry::ConstPtr& message) {
+	xpos[4] = message->pose.pose.position.x + x4offset;
+	ypos[4] = message->pose.pose.position.y + y4offset;
+}
+void odometryHandler5(const nav_msgs::Odometry::ConstPtr& message) {
+	xpos[5] = message->pose.pose.position.x + x5offset;
+	ypos[5] = message->pose.pose.position.y + y5offset;
 }
 
 void roverNameHandler(const std_msgs::String& message){

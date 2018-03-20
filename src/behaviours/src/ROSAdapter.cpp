@@ -555,7 +555,7 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
   		point = 3.14;
   	}else{
   		for (point = 3.14; point > -3.14; point -= pi/12){
-  			//cout <<"2Point:"<<point<<endl;
+  			cout <<"2Point:"<<point<<endl;
   			if (ave <= point + pi/24 && ave >= point - pi/24){
   				break;
   			}
@@ -566,8 +566,8 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
   	orntnOnce = false;
   }
   //Get (x,y) location directly from pose
-  currentLocation.x = message->pose.pose.position.x + xoffset;
-  currentLocation.y = message->pose.pose.position.y + yoffset;
+  currentLocation.x = message->pose.pose.position.x;
+  currentLocation.y = message->pose.pose.position.y;
 
 
 
@@ -576,8 +576,8 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 
 
   Point currentLoc;
-  currentLoc.x = currentLocation.x;
-  currentLoc.y = currentLocation.y;
+  currentLoc.x = currentLocation.x + xoffset;
+  currentLoc.y = currentLocation.y + yoffset;
   currentLoc.theta = currentLocation.theta;
   logicController.SetPositionData(currentLoc);
   logicController.SetVelocityData(linearVelocity, angularVelocity);
@@ -822,14 +822,14 @@ void gridMapHandler(const grid_map_msgs::GridMap& message){
 
 	GridMap map({"elevation"});
 	map.setFrameId("map");
-	map.setGeometry(Length(15.5,15.5), 0.05);
+	map.setGeometry(Length(22.5,22.5), 0.05);
 	//cout << "ROSAdapter Map Test" << endl;
 	int row = 0;
-	for (double x = -7.70; x <= 7.75; row++){
+	for (double x = -11.20; x <= 11.25; row++){
 		int col = 0;
-		for(double y = 7.70; y >= -7.75; col++){
+		for(double y = 11.20; y >= -11.25; col++){
 			Eigen::Vector2d position(x,y);
-			double value = message.data[0].data[(row*310)+col];
+			double value = message.data[0].data[(row*450)+col];
 			map.atPosition("elevation", position) = value;
 			y -= 0.05;
 		}
