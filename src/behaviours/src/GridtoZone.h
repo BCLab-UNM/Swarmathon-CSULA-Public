@@ -46,7 +46,7 @@ public:
 
 
 	int countRoversInZone(int zone);
-	bool inZone(Position pos);
+	int inZone(Position pos);
 
 	double percentOfTest();
 	int countOfTest();
