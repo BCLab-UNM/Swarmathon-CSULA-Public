@@ -110,8 +110,8 @@ Result DropOffController::DoWork() {
     // Reset elapsed time
     timerTimeElapsed = 0;
 
-    
-        bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.y, this->currentLocation.x);
+//Need to reverse CurrentLocation points    
+        bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.x, this->currentLocation.y);
         if(pathClear)
         {
          result.wpts.waypoints.push_back(this->centerLocation);
