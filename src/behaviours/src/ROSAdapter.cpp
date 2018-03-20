@@ -316,14 +316,14 @@ void behaviourStateMachine(const ros::TimerEvent&)
       initilized = true;
       //TODO: this just sets center to 0 over and over and needs to change
       Point centerOdom;
-      centerOdom.x = 0;//1.3 * cos(currentLocation.theta);
-      centerOdom.y = 0;//1.3 * sin(currentLocation.theta);
+      centerOdom.x =1.3 * cos(currentLocation.theta);
+      centerOdom.y =1.3 * sin(currentLocation.theta);
       centerOdom.theta = centerLocation.theta;
       logicController.SetCenterLocationOdom(centerOdom);
 
       Point centerMap;
-      centerMap.x = currentLocationMap.x + 0;//(1.3 * cos(currentLocationMap.theta));
-      centerMap.y = currentLocationMap.y + 0;//(1.3 * sin(currentLocationMap.theta));
+      centerMap.x = currentLocationMap.x + (1.3 * cos(currentLocationMap.theta));
+      centerMap.y = currentLocationMap.y + (1.3 * sin(currentLocationMap.theta));
       centerMap.theta = centerLocationMap.theta;
       logicController.SetCenterLocationMap(centerMap);
 
@@ -544,8 +544,8 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
       }
     ave = atan2(y_total,x_total);
 
-  //currentLocation.theta = ave;// }///////////////////////////////updated orientation with the filtered yaw
-  currentLocation.theta = yaw;
+  currentLocation.theta = ave;// }///////////////////////////////updated orientation with the filtered yaw
+ // currentLocation.theta = yaw;
   filtered_orientation.data = ave;
 //   cout << " currentLocation.theta : " << currentLocation.theta << endl; //DEBUGGING CODE
   filtered_orientationPublish.publish(filtered_orientation);
@@ -578,8 +578,8 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 
 
   Point currentLoc;
-  currentLoc.x = currentLocation.x + xoffset;
-  currentLoc.y = currentLocation.y + yoffset;
+  currentLoc.x = currentLocation.x; // + xoffset;
+  currentLoc.y = currentLocation.y;// + yoffset;
   currentLoc.theta = currentLocation.theta;
   logicController.SetPositionData(currentLoc);
   logicController.SetVelocityData(linearVelocity, angularVelocity);
