@@ -414,7 +414,7 @@ void Diagnostics::checkGridSwarm() {
     }
     else if (gridSwarmRunning) {
         gridSwarmRunning = false;
-        publishErrorLogMessage("the gridSwarm node is not running");
+        publishErrorLogMessage("the gridSwarm node has shutdown, this intentional. Only one Rover needs this Node on.");
     }
 }
 
