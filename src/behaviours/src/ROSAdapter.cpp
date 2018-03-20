@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 
+
 // ROS libraries
 #include <angles/angles.h>
 #include <random_numbers/random_numbers.h>
@@ -564,6 +565,7 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
   	xoffset = -1.2 * cos(point);
   	yoffset = -1.2 * sin(point);
   	orntnOnce = false;
+  	cout <<"Offest("<<xoffset<<","<<yoffset<<")"<<point<<endl;
   }
   //Get (x,y) location directly from pose
   currentLocation.x = message->pose.pose.position.x;
