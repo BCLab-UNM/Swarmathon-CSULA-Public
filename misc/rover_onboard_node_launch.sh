@@ -99,7 +99,7 @@ else
 fi
 #magnetic_declination_radians:=-0.1192642 FLOARIDA
 #magnetic_declination_radians:=0.2088577 LA
-nohup > logs/$HOSTNAME"_localization_navsat_log.txt" rosrun robot_localization navsat_transform_node __name:=$HOSTNAME\_NAVSAT _world_frame:=map _frequency:=10 _magnetic_declination_radians:=0.2088577 _yaw_offset:=0 /imu/data:=/$HOSTNAME/imu /gps/fix:=/$HOSTNAME/fix /odometry/filtered:=/$HOSTNAME/odom/ekf /odometry/gps:=/$HOSTNAME/odom/navsat &
+nohup > logs/$HOSTNAME"_localization_navsat_log.txt" rosrun robot_localization navsat_transform_node __name:=$HOSTNAME\_NAVSAT _world_frame:=map _frequency:=10 _magnetic_declination_radians:=-0.1192642 _yaw_offset:=0 /imu/data:=/$HOSTNAME/imu /gps/fix:=/$HOSTNAME/fix /odometry/filtered:=/$HOSTNAME/odom/ekf /odometry/gps:=/$HOSTNAME/odom/navsat &
 
 rosparam set /$HOSTNAME\_ODOM/odom0 /$HOSTNAME/odom
 rosparam set /$HOSTNAME\_ODOM/imu0 /$HOSTNAME/imu
