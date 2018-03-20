@@ -308,14 +308,14 @@ void behaviourStateMachine(const ros::TimerEvent&)
       initilized = true;
       //TODO: this just sets center to 0 over and over and needs to change
       Point centerOdom;
-      centerOdom.x = 0;//1.3 * cos(currentLocation.theta);
-      centerOdom.y = 0;//1.3 * sin(currentLocation.theta);
+      centerOdom.x = 1.3 * cos(currentLocation.theta);
+      centerOdom.y = 1.3 * sin(currentLocation.theta);
       centerOdom.theta = centerLocation.theta;
       logicController.SetCenterLocationOdom(centerOdom);
 
       Point centerMap;
-      centerMap.x = currentLocationMap.x + 0;//(1.3 * cos(currentLocationMap.theta));
-      centerMap.y = currentLocationMap.y + 0;//(1.3 * sin(currentLocationMap.theta));
+      centerMap.x = currentLocationMap.x + (1.3 * cos(currentLocationMap.theta));
+      centerMap.y = currentLocationMap.y + (1.3 * sin(currentLocationMap.theta));
       centerMap.theta = centerLocationMap.theta;
       logicController.SetCenterLocationMap(centerMap);
 
@@ -541,6 +541,7 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
 //   cout << " currentLocation.theta : " << currentLocation.theta << endl; //DEBUGGING CODE
   filtered_orientationPublish.publish(filtered_orientation);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
   double point = 0.0;
   if (orntnOnce == true){
   	if (ave <= -3.14 + pi/24 && ave >= -3.14 - pi/24){
@@ -557,9 +558,10 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
   	yoffset = -1.2 * sin(point);
   	orntnOnce = false;
   }
+*/
   //Get (x,y) location directly from pose
-  currentLocation.x = message->pose.pose.position.x + xoffset;
-  currentLocation.y = message->pose.pose.position.y + yoffset;
+  currentLocation.x = message->pose.pose.position.x;// + xoffset;
+  currentLocation.y = message->pose.pose.position.y;// + yoffset;
 
 
 

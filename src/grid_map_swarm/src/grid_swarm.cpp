@@ -40,7 +40,7 @@ using namespace Eigen;
 
 float heartbeat_publish_interval = 2;
 const float CELLDIVISION = 0.05;
-const float ROVERHALF = 0.17;
+const float ROVERHALF = 0.20;
 const float ROVPLUSCELL = ROVERHALF + 2*CELLDIVISION;
 //GRID POINT TYPE
 const double FOG 	= -10.00;
