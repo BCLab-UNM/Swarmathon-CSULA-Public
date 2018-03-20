@@ -97,13 +97,12 @@ Result DropOffController::DoWork() {
 
   //check to see if we are driving to the center location or if we need to drive in a circle and look.
   if (distanceToCenter > collectionPointVisualDistance && !circularCenterSearching && (count == 0)) {
-    bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.y, this->currentLocation.x);
     // Sets driving mode to waypoint
     result.type = waypoint;
     // Clears all the waypoints in the vector
     result.wpts.waypoints.clear();
     // Adds the current location's point into the waypoint vector
-    result.wpts.waypoints.push_back(this->centerLocation);
+//    result.wpts.waypoints.push_back(this->centerLocation);
     // Do not start following waypoints
     startWaypoint = false;
     // Disable precision driving
@@ -111,17 +110,21 @@ Result DropOffController::DoWork() {
     // Reset elapsed time
     timerTimeElapsed = 0;
 
-    if(pathClear)
-    {
-      return result;
-    }
-    //else do A* search here
-    else
-    {
-      //insert A* here
-      return result;
-    }
     
+        bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.y, this->currentLocation.x);
+        if(pathClear)
+        {
+         result.wpts.waypoints.push_back(this->centerLocation);
+       }
+        else
+        {
+          // A*
+          vector<Point> shortpathpoints= GridtoZone::Instance()->shortestPath(currentLocation, this->centerLocation);
+          result.wpts.waypoints.insert(result.wpts.waypoints.begin(), shortpathpoints.begin(), shortpathpoints.end());
+        }        
+        return result;
+
+
 
   }
   else if (timerTimeElapsed >= 2)//spin search for center
