@@ -1,0 +1,242 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"re",
+				"remove"
+			],
+			[
+				"ed",
+				"edges_to_remove"
+			],
+			[
+				"nod",
+				"node_2"
+			],
+			[
+				"to",
+				"to_node"
+			],
+			[
+				"node",
+				"node_1"
+			],
+			[
+				"false",
+				"False"
+			],
+			[
+				"from",
+				"from_node"
+			],
+			[
+				"fr",
+				"from_node"
+			],
+			[
+				"adj",
+				"adjacency_list"
+			],
+			[
+				"ad",
+				"adjacency_list"
+			],
+			[
+				"add",
+				"add_node"
+			],
+			[
+				"s",
+				"size"
+			],
+			[
+				"w",
+				"weight"
+			],
+			[
+				"adja",
+				"adjacency_matrix"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/sahagun/SwarmBaseCode-ROS/src/behaviours/src/SearchController.h",
+		"/home/sahagun/SwarmBaseCode-ROS/src/behaviours/src/Result.h",
+		"/home/sahagun/SwarmBaseCode-ROS/src/behaviours/src/RandomSelector.cpp",
+		"/home/sahagun/SwarmBaseCode-ROS/src/behaviours/src/ROSAdapter.cpp",
+		"/home/sahagun/SwarmBaseCode-ROS/src/behaviours/src/Spiral.cpp",
+		"/home/sahagun/SwarmBaseCode-ROS/src/behaviours/src/SearchController.cpp",
+		"/home/sahagun/SwarmBaseCode-ROS/src/behaviours/src/Spiral.h",
+		"/home/sahagun/Desktop/Spiral/m.cpp",
+		"/home/sahagun/Desktop/Spiral/Spiral.h",
+		"/home/sahagun/Desktop/Spiral/RandomSelector.cpp",
+		"/home/sahagun/Desktop/Spiral/Spiral.cpp",
+		"/home/sahagun/Documents/cs4660-fall-2017/cs4660/graph/graph.py",
+		"/home/sahagun/Documents/cs4660-fall-2017/cs4660/test/test_graph_A.py",
+		"/home/sahagun/Documents/cs4660-fall-2017/cs4660/test/fixtures/graph-1.txt",
+		"/home/sahagun/Documents/cs4660-fall-2017/cs4660/test/test_graph.py",
+		"/home/sahagun/Documents/cs4660-fall-2017/cs4660/tutorial/files.py",
+		"/home/sahagun/Desktop/test/tests.py",
+		"/home/sahagun/Desktop/test/taco.py"
+	],
+	"find":
+	{
+		"height": 38.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"cout << ",
+			"Direct",
+			"\\t"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"    "
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 27.0
+	},
+	"input":
+	{
+		"height": 35.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "Controller.sublime-project",
+	"replace":
+	{
+		"height": 50.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 309.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
