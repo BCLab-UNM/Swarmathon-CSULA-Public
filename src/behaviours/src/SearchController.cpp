@@ -89,6 +89,8 @@ Result SearchController::DoWork() {
 
       if(spiralTurnsCompleted == spiralTurnsGoal){
         if (waypointsVerbose){ std::cout<<  "Zone: " << zone << std::endl; }
+        bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.y, this->currentLocation.x);
+    
         spiralTurnsCompleted = 0;
 
         /*=============================
@@ -122,8 +124,17 @@ Result SearchController::DoWork() {
 
         result.wpts.waypoints.clear();
         result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
-        return result;
 
+        if(pathClear)
+        {
+          return result;
+        }
+        //else do A* search here
+        else
+        {
+          //insert A* here
+          return result;
+        }
       }
     searchLocation = s.getNextPoition();
     if (waypointsVerbose){ std::cout<<  "X: " << searchLocation.x << "  Y: " << searchLocation.y << std::endl; }
