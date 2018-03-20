@@ -394,6 +394,9 @@ bool GridtoZone::obstaclesInZone(Position pos, float sectionlength){
 bool GridtoZone::pathClear(float x1, float y1, float x2, float y2){
 	GridtoZone::Instance()->updatePaperMap();
 	cout << "pathClear working" << endl;
+	cout << "x: " << x2 << endl;
+	cout << "y: " << y2 << endl;
+	
 	
 	grid_map::Polygon polygonPath;
 	polygonPath.setFrameId(paperMap.getFrameId());
