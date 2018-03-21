@@ -648,11 +648,11 @@ elif [ $OPTION == "-R" ]; then
 						Reboot
 						echo ""
 						Run
-						sleep 10
+						sleep 45
 						needsReboot=false
 					else
 						Run
-						sleep 10
+						sleep 45
 					fi
 	
 				#if not on the network

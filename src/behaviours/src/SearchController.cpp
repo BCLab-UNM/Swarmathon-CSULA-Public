@@ -96,8 +96,8 @@ Result SearchController::DoWork() {
         searchLocation = centralSpiralLocation;
 
         result.wpts.waypoints.clear();
-
-        bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.y, this->currentLocation.x);
+// CHECK POINT ON THIS ONE
+        bool pathClear = GridtoZone::Instance()->pathClear(searchLocation.x, searchLocation.y, this->currentLocation.x, this->currentLocation.y);
         if(pathClear)
         {
           result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
@@ -118,7 +118,8 @@ Result SearchController::DoWork() {
  
 
     result.wpts.waypoints.clear();
-        bool pathClear = GridtoZone::Instance()->pathClear(this->centerLocation.x, this->centerLocation.y, this->currentLocation.y, this->currentLocation.x);
+// CHECK POINT ON THIS ONE
+        bool pathClear = GridtoZone::Instance()->pathClear(searchLocation.x, searchLocation.y, this->currentLocation.x, this->currentLocation.y);
         if(pathClear)
         {
           result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
